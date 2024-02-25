@@ -3,6 +3,7 @@
 ## Description
 EFT DMA Radar is a radar tool designed for Escape from Tarkov that provides real-time tracking of players and items on a 2D map.
 ![image](https://github.com/HuiTeab/EFT-DMA-Radar-v2/assets/151649934/d652b193-a987-40b7-8aa2-7ddd66eaae85)
+![image](https://github.com/HuiTeab/EFT-DMA-Radar-v2/assets/151649934/8613ee59-f604-453a-bdea-626c0b5ba365)
 
 ## Project Structure
 
@@ -17,13 +18,13 @@ EFT DMA Radar is a radar tool designed for Escape from Tarkov that provides real
     - **Player.cs**: Manages player-related functionalities. (Work in Progress)
     - **RegisteredPlayers.cs**: Manages registered players.
     - **TarkovDevAPIManager.cs**: Manages Tarkov market-related operations.
-    - **QuestManager.cs**: Manages extraction points.
+    - **QuestManager.cs**: Quest stuff (Work in Progress)
   - **Misc**: Directory for miscellaneous files.
     - **Extensions.cs**: Contains extension methods.
     - **Misc.cs**: Contains miscellaneous functionalities.
     - **Offsets.cs**: Contains memory offsets.
     - **SKPaints.cs**: Contains SKPaint configurations.
-    - **Quests.cs**: Quest stuff (Work in Progress)
+    - **Quests.cs**: Quest stuff (OLD?)
 
 ## Usage
 
