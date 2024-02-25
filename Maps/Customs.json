@@ -1,0 +1,12 @@
+{
+	"mapID": ["bigmap"],
+	"x": 2255,
+	"y": 1916,
+	"scale": 3.731,
+	"mapLayers": [
+		{
+			"minHeight": -100,
+			"filename": "Maps\\Customs.png"
+		}
+	]
+}
