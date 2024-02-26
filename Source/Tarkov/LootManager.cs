@@ -104,7 +104,7 @@ namespace eft_dma_radar {
                         var objectClass = Memory.ReadPtr(gameObject + Offsets.GameObject.ObjectClass);
                         var transformInternal = Memory.ReadPtrChain(objectClass, Offsets.LootGameObjectClass.To_TransformInternal);
                         var pos = new Transform(transformInternal).GetPosition();
-                        var containerIDPtr = Memory.ReadPtr(interactiveClass + 0x118); //[118] Template : String
+                        var containerIDPtr = Memory.ReadPtr(interactiveClass + 0x128); //[118] Template : String
                         var containerID = Memory.ReadUnityString(containerIDPtr);
                         TarkovDevAPIManager.AllLootContainers.TryGetValue(containerID, out var container);
                         if (container != null)
