@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Text;
 using System.Windows.Forms.VisualStyles;
+using eft_dma_radar.Source.Tarkov;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 
@@ -1450,38 +1451,39 @@ namespace eft_dma_radar
         /// </summary>
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (keyData == (Keys.F1))
+            switch (keyData)
             {
-                ZoomIn(5);
-                return true;
+                case Keys.F1:
+                    ZoomIn(5);
+                    return true;
+                case Keys.F2:
+                    ZoomOut(5);
+                    return true;
+                case Keys.F3:
+                    this.checkBox_Loot.Checked = !this.checkBox_Loot.Checked; // Toggle loot
+                    return true;
+                case Keys.F4:
+                    this.checkBox_Aimview.Checked = !this.checkBox_Aimview.Checked; // Toggle aimview
+                    return true;
+                case Keys.F5:
+                    ToggleMap(); // Toggle to next map
+                    return true;
+                case Keys.F6:
+                    checkBox_HideNames.Checked = !checkBox_HideNames.Checked; // Toggle Hide Names
+                    return true;
+                // Night Vision Ctrl + N
+                case Keys.Control | Keys.N:
+                    NightVisionSCheckBox.Checked = !NightVisionSCheckBox.Checked;
+                    return true;
+                // Thermal Vision Ctrl + T
+                case Keys.Control | Keys.T:
+                    ThermalVisionSCheckBox.Checked = !ThermalVisionSCheckBox.Checked;
+                    return true;
+                default:
+                    return base.ProcessCmdKey(ref msg, keyData);
             }
-            else if (keyData == (Keys.F2))
-            {
-                ZoomOut(5);
-                return true;
-            }
-            else if (keyData == (Keys.F3))
-            {
-                this.checkBox_Loot.Checked = !this.checkBox_Loot.Checked; // Toggle loot
-                return true;
-            }
-            else if (keyData == (Keys.F4))
-            {
-                this.checkBox_Aimview.Checked = !this.checkBox_Aimview.Checked; // Toggle aimview
-                return true;
-            }
-            else if (keyData == (Keys.F5))
-            {
-                ToggleMap(); // Toggle to next map
-                return true;
-            }
-            else if (keyData == (Keys.F6))
-            {
-                checkBox_HideNames.Checked = !checkBox_HideNames.Checked; // Toggle Hide Names
-                return true;
-            }
-            return base.ProcessCmdKey(ref msg, keyData);
         }
+
 
         /// <summary>
         /// Process mousewheel events.
@@ -1525,11 +1527,11 @@ namespace eft_dma_radar
         {
             if (NightVisionCheckBox.Checked)
             {
-                Game.NightVision(true);
+                Memory.CameraManager.NightVision(true);
             }
             else
             {
-                Game.NightVision(false);
+                Memory.CameraManager.NightVision(false);
             }
         }
 
@@ -1537,11 +1539,11 @@ namespace eft_dma_radar
         {
             if (thermalVisionCheckBox.Checked)
             {
-                Game.ThermalVision(true);
+                Memory.CameraManager.ThermalVision(true);
             }
             else
             {
-                Game.ThermalVision(false);
+                Memory.CameraManager.ThermalVision(false);
             }
         }
 
@@ -1549,12 +1551,76 @@ namespace eft_dma_radar
         {
             if (OpticThermalBox.Checked)
             {
-                Game.ThermalVisionOptic(true);
+                Memory.CameraManager.OpticThermalVision(true);
             }
             else
             {
-                Game.ThermalVisionOptic(false);
+                Memory.CameraManager.OpticThermalVision(false);
             }
+        }
+
+        private void NoVisorCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (NoVisorCheckBox.Checked)
+            {
+                Memory.CameraManager.VisorEffect(true);
+            }
+            else
+            {
+                Memory.CameraManager.VisorEffect(false);
+            }
+
+        }
+
+        private void NightVisionSCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (NightVisionSCheckBox.Checked)
+            {
+                Memory.CameraManager.NightVision(true);
+            }
+            else
+            {
+                Memory.CameraManager.NightVision(false);
+            }
+
+        }
+
+        private void ThermalVisionSCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ThermalVisionSCheckBox.Checked)
+            {
+                Memory.CameraManager.ThermalVision(true);
+            }
+            else
+            {
+                Memory.CameraManager.ThermalVision(false);
+            }
+        }
+
+        private void OpticThermalSCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (OpticThermalSCheckBox.Checked)
+            {
+                Memory.CameraManager.OpticThermalVision(true);
+            }
+            else
+            {
+                Memory.CameraManager.OpticThermalVision(false);
+            }
+
+        }
+
+        private void NoVisorSCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (NoVisorSCheckBox.Checked)
+            {
+                Memory.CameraManager.VisorEffect(true);
+            }
+            else
+            {
+                Memory.CameraManager.VisorEffect(false);
+            }
+
         }
     }
     #endregion

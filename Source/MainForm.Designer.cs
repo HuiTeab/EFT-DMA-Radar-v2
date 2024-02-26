@@ -31,10 +31,11 @@ namespace eft_dma_radar
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
+            NoVisorCheckBox = new CheckBox();
             OpticThermalBox = new CheckBox();
             NightVisionCheckBox = new CheckBox();
             thermalVisionCheckBox = new CheckBox();
@@ -65,6 +66,10 @@ namespace eft_dma_radar
             label_Pos = new Label();
             tabPage2 = new TabPage();
             groupBox2 = new GroupBox();
+            NoVisorSCheckBox = new CheckBox();
+            OpticThermalSCheckBox = new CheckBox();
+            NightVisionSCheckBox = new CheckBox();
+            ThermalVisionSCheckBox = new CheckBox();
             groupBox1 = new GroupBox();
             checkBox_HidePlayerPanel = new CheckBox();
             label_UIScale = new Label();
@@ -96,6 +101,7 @@ namespace eft_dma_radar
             groupBox_Loot.SuspendLayout();
             groupBox_MapSetup.SuspendLayout();
             tabPage2.SuspendLayout();
+            groupBox2.SuspendLayout();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)trackBar_UIScale).BeginInit();
             ((System.ComponentModel.ISupportInitialize)trackBar_Zoom).BeginInit();
@@ -120,6 +126,7 @@ namespace eft_dma_radar
             // 
             // tabPage1
             // 
+            tabPage1.Controls.Add(NoVisorCheckBox);
             tabPage1.Controls.Add(OpticThermalBox);
             tabPage1.Controls.Add(NightVisionCheckBox);
             tabPage1.Controls.Add(thermalVisionCheckBox);
@@ -133,6 +140,18 @@ namespace eft_dma_radar
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Radar";
             tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // NoVisorCheckBox
+            // 
+            NoVisorCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            NoVisorCheckBox.AutoSize = true;
+            NoVisorCheckBox.Location = new Point(1226, 81);
+            NoVisorCheckBox.Name = "NoVisorCheckBox";
+            NoVisorCheckBox.Size = new Size(71, 19);
+            NoVisorCheckBox.TabIndex = 17;
+            NoVisorCheckBox.Text = "No Visor";
+            NoVisorCheckBox.UseVisualStyleBackColor = true;
+            NoVisorCheckBox.CheckedChanged += NoVisorCheckBox_CheckedChanged;
             // 
             // OpticThermalBox
             // 
@@ -173,25 +192,25 @@ namespace eft_dma_radar
             // dataGridView1
             // 
             dataGridView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = Color.Black;
-            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            dataGridViewCellStyle1.ForeColor = Color.White;
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = Color.Black;
+            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle3.ForeColor = Color.White;
+            dataGridViewCellStyle3.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.True;
+            dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridView1.Columns.AddRange(new DataGridViewColumn[] { dataGridViewTextBoxColumn1, dataGridViewTextBoxColumn3, dataGridViewTextBoxColumn4, dataGridViewTextBoxColumn5 });
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.Black;
-            dataGridViewCellStyle2.Font = new Font("Arial", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            dataGridViewCellStyle2.ForeColor = Color.White;
-            dataGridViewCellStyle2.Padding = new Padding(3);
-            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-            dataGridView1.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = Color.Black;
+            dataGridViewCellStyle4.Font = new Font("Arial", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle4.ForeColor = Color.White;
+            dataGridViewCellStyle4.Padding = new Padding(3);
+            dataGridViewCellStyle4.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = DataGridViewTriState.False;
+            dataGridView1.DefaultCellStyle = dataGridViewCellStyle4;
             dataGridView1.EnableHeadersVisualStyles = false;
             dataGridView1.GridColor = Color.DarkGray;
             dataGridView1.Location = new Point(877, 6);
@@ -441,12 +460,64 @@ namespace eft_dma_radar
             // 
             // groupBox2
             // 
+            groupBox2.Controls.Add(NoVisorSCheckBox);
+            groupBox2.Controls.Add(OpticThermalSCheckBox);
+            groupBox2.Controls.Add(NightVisionSCheckBox);
+            groupBox2.Controls.Add(ThermalVisionSCheckBox);
             groupBox2.Location = new Point(487, 3);
             groupBox2.Name = "groupBox2";
             groupBox2.Size = new Size(335, 629);
             groupBox2.TabIndex = 9;
             groupBox2.TabStop = false;
             groupBox2.Text = "Memory Writing";
+            // 
+            // NoVisorSCheckBox
+            // 
+            NoVisorSCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            NoVisorSCheckBox.AutoSize = true;
+            NoVisorSCheckBox.Location = new Point(166, 47);
+            NoVisorSCheckBox.Name = "NoVisorSCheckBox";
+            NoVisorSCheckBox.Size = new Size(71, 19);
+            NoVisorSCheckBox.TabIndex = 21;
+            NoVisorSCheckBox.Text = "No Visor";
+            NoVisorSCheckBox.UseVisualStyleBackColor = true;
+            NoVisorSCheckBox.CheckedChanged += NoVisorSCheckBox_CheckedChanged;
+            // 
+            // OpticThermalSCheckBox
+            // 
+            OpticThermalSCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            OpticThermalSCheckBox.AutoSize = true;
+            OpticThermalSCheckBox.Location = new Point(166, 22);
+            OpticThermalSCheckBox.Name = "OpticThermalSCheckBox";
+            OpticThermalSCheckBox.Size = new Size(101, 19);
+            OpticThermalSCheckBox.TabIndex = 20;
+            OpticThermalSCheckBox.Text = "Optic Thermal";
+            OpticThermalSCheckBox.UseVisualStyleBackColor = true;
+            OpticThermalSCheckBox.CheckedChanged += OpticThermalSCheckBox_CheckedChanged;
+            // 
+            // NightVisionSCheckBox
+            // 
+            NightVisionSCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            NightVisionSCheckBox.AutoSize = true;
+            NightVisionSCheckBox.Location = new Point(6, 22);
+            NightVisionSCheckBox.Name = "NightVisionSCheckBox";
+            NightVisionSCheckBox.Size = new Size(144, 19);
+            NightVisionSCheckBox.TabIndex = 18;
+            NightVisionSCheckBox.Text = "Night Vision (Ctrl + N)";
+            NightVisionSCheckBox.UseVisualStyleBackColor = true;
+            NightVisionSCheckBox.CheckedChanged += NightVisionSCheckBox_CheckedChanged;
+            // 
+            // ThermalVisionSCheckBox
+            // 
+            ThermalVisionSCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            ThermalVisionSCheckBox.AutoSize = true;
+            ThermalVisionSCheckBox.Location = new Point(6, 47);
+            ThermalVisionSCheckBox.Name = "ThermalVisionSCheckBox";
+            ThermalVisionSCheckBox.Size = new Size(154, 19);
+            ThermalVisionSCheckBox.TabIndex = 19;
+            ThermalVisionSCheckBox.Text = "Thermal Vision (Ctrl + T)";
+            ThermalVisionSCheckBox.UseVisualStyleBackColor = true;
+            ThermalVisionSCheckBox.CheckedChanged += ThermalVisionSCheckBox_CheckedChanged;
             // 
             // groupBox1
             // 
@@ -470,7 +541,7 @@ namespace eft_dma_radar
             groupBox1.Margin = new Padding(4, 3, 4, 3);
             groupBox1.Name = "groupBox1";
             groupBox1.Padding = new Padding(4, 3, 4, 3);
-            groupBox1.Size = new Size(477, 632);
+            groupBox1.Size = new Size(483, 632);
             groupBox1.TabIndex = 8;
             groupBox1.TabStop = false;
             groupBox1.Text = "Radar Config";
@@ -491,7 +562,7 @@ namespace eft_dma_radar
             // label_UIScale
             // 
             label_UIScale.AutoSize = true;
-            label_UIScale.Location = new Point(383, 247);
+            label_UIScale.Location = new Point(83, 350);
             label_UIScale.Name = "label_UIScale";
             label_UIScale.Size = new Size(66, 15);
             label_UIScale.TabIndex = 28;
@@ -501,12 +572,11 @@ namespace eft_dma_radar
             // trackBar_UIScale
             // 
             trackBar_UIScale.LargeChange = 10;
-            trackBar_UIScale.Location = new Point(395, 265);
+            trackBar_UIScale.Location = new Point(192, 334);
             trackBar_UIScale.Maximum = 200;
             trackBar_UIScale.Minimum = 50;
             trackBar_UIScale.Name = "trackBar_UIScale";
-            trackBar_UIScale.Orientation = Orientation.Vertical;
-            trackBar_UIScale.Size = new Size(45, 403);
+            trackBar_UIScale.Size = new Size(277, 45);
             trackBar_UIScale.TabIndex = 27;
             trackBar_UIScale.Value = 100;
             // 
@@ -583,7 +653,7 @@ namespace eft_dma_radar
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(193, 217);
+            label1.Location = new Point(44, 273);
             label1.Margin = new Padding(4, 0, 4, 0);
             label1.Name = "label1";
             label1.Size = new Size(136, 45);
@@ -594,19 +664,18 @@ namespace eft_dma_radar
             // trackBar_Zoom
             // 
             trackBar_Zoom.LargeChange = 1;
-            trackBar_Zoom.Location = new Point(237, 265);
+            trackBar_Zoom.Location = new Point(192, 273);
             trackBar_Zoom.Maximum = 200;
             trackBar_Zoom.Minimum = 1;
             trackBar_Zoom.Name = "trackBar_Zoom";
-            trackBar_Zoom.Orientation = Orientation.Vertical;
-            trackBar_Zoom.Size = new Size(45, 403);
+            trackBar_Zoom.Size = new Size(277, 45);
             trackBar_Zoom.TabIndex = 15;
             trackBar_Zoom.Value = 100;
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(77, 232);
+            label2.Location = new Point(63, 214);
             label2.Margin = new Padding(4, 0, 4, 0);
             label2.Name = "label2";
             label2.Size = new Size(99, 30);
@@ -617,13 +686,12 @@ namespace eft_dma_radar
             // trackBar_AimLength
             // 
             trackBar_AimLength.LargeChange = 50;
-            trackBar_AimLength.Location = new Point(104, 265);
+            trackBar_AimLength.Location = new Point(193, 214);
             trackBar_AimLength.Margin = new Padding(4, 3, 4, 3);
             trackBar_AimLength.Maximum = 1000;
             trackBar_AimLength.Minimum = 10;
             trackBar_AimLength.Name = "trackBar_AimLength";
-            trackBar_AimLength.Orientation = Orientation.Vertical;
-            trackBar_AimLength.Size = new Size(45, 403);
+            trackBar_AimLength.Size = new Size(276, 45);
             trackBar_AimLength.SmallChange = 5;
             trackBar_AimLength.TabIndex = 11;
             trackBar_AimLength.Value = 500;
@@ -724,6 +792,8 @@ namespace eft_dma_radar
             groupBox_MapSetup.ResumeLayout(false);
             groupBox_MapSetup.PerformLayout();
             tabPage2.ResumeLayout(false);
+            groupBox2.ResumeLayout(false);
+            groupBox2.PerformLayout();
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)trackBar_UIScale).EndInit();
@@ -794,6 +864,11 @@ namespace eft_dma_radar
         private CheckBox thermalVisionCheckBox;
         private CheckBox NightVisionCheckBox;
         private CheckBox OpticThermalBox;
+        private CheckBox NoVisorCheckBox;
+        private CheckBox NoVisorSCheckBox;
+        private CheckBox OpticThermalSCheckBox;
+        private CheckBox NightVisionSCheckBox;
+        private CheckBox ThermalVisionSCheckBox;
     }
 }
 

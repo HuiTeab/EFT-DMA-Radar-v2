@@ -383,7 +383,7 @@ namespace eft_dma_radar
                             IsPmc = true;
                             try { _gearManager = new GearManager(playerBase, true, true); } catch { }
                             GroupID = GetGroupID();
-
+                            
                         }
                     }catch {}
                     

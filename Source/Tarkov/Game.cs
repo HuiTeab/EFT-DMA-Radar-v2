@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using eft_dma_radar.Source.Tarkov;
 
 namespace eft_dma_radar
 {
@@ -24,8 +25,6 @@ namespace eft_dma_radar
         private volatile bool _refreshLoot = false;
         private volatile string _mapName = string.Empty;
         private volatile bool _isScav = false;
-        private ulong _fpscamera;
-        private ulong _opticcamera;
         private QuestManager _questManager;
         
         #region Getters
@@ -69,14 +68,6 @@ namespace eft_dma_radar
         public ReadOnlyCollection<Exfil> Exfils
         {
             get => _exfilManager?.Exfils;
-        }
-        public ulong FpsCamera
-        {
-            get => _fpscamera;
-        }
-        public ulong OpticCamera
-        {
-            get => _opticcamera;
         }
         #endregion
 
@@ -199,8 +190,6 @@ namespace eft_dma_radar
             _grenadeManager = null;
             _exfilManager = null;
             _mapName = string.Empty;
-            _fpscamera = 0;
-            _opticcamera = 0;
             _localGameWorld = 0;
             //Wait before trying to get game world again
             Thread.Sleep(5000);
@@ -282,27 +271,6 @@ namespace eft_dma_radar
             return 0;
         }
 
-        public static ulong GetComponentFromGameObject(ulong gameObject, string componentName)
-        {
-            var component = Memory.ReadPtr(gameObject + 0x30);
-            // Loop through a fixed range of potential component slots
-            for (int i = 0x8; i < 0x100; i += 0x10) 
-            {
-                var componentPtr = Memory.ReadPtr(component + (ulong)i);
-                if (componentPtr == 0) continue;
-                var fieldsPtr = Memory.ReadPtr(componentPtr + 0x28);
-                componentPtr = Memory.ReadPtr(componentPtr + 0x28);
-                var classNamePtr = Memory.ReadPtrChain(fieldsPtr, Offsets.UnityClass.Name);
-                var className = Memory.ReadString(classNamePtr, 64).Replace("\0", string.Empty);
-                //Console.WriteLine($"GetComponentFromGameObject: {className}");
-                if (className.Contains(componentName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return componentPtr;
-                }
-            }
-            return 0;
-        }
-
         /// <summary>
         /// Gets Game Object Manager structure.
         /// </summary>
@@ -321,149 +289,6 @@ namespace eft_dma_radar
                 throw new GameNotRunningException($"ERROR getting Game Object Manager, game may not be running: {ex}");
             }
         }
-
-        /// <summary>
-        /// Gets Camera Object Manager structure.
-        /// </summary>
-        private bool GetCamera()
-        {
-            try
-            {
-                var addr = Memory.ReadPtr(_unityBase + 0x0179F500);
-                for (int i = 0; i < 500; i++)
-                {
-                    var allCameras = Memory.ReadPtr(addr + 0x0);
-                    var camera = Memory.ReadPtr(allCameras + (ulong)i * 0x8);
-
-                    if (camera != 0)
-                    {
-                        var cameraObject = Memory.ReadPtr(camera + Offsets.GameObject.ObjectClass);
-                        var cameraNamePtr = Memory.ReadPtr(cameraObject + Offsets.GameObject.ObjectName);
-
-                        var cameraName = Memory.ReadString(cameraNamePtr, 64).Replace("\0", string.Empty);
-                        if (cameraName.Contains("BaseOpticCamera(Clone)", StringComparison.OrdinalIgnoreCase))
-                        {
-                            _opticcamera = cameraObject;
-                        }
-                        if (cameraName.Contains("FPS Camera", StringComparison.OrdinalIgnoreCase))
-                        {
-                            _fpscamera = cameraObject;
-                        }
-                        if (_opticcamera != 0 && _fpscamera != 0)
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
-            {
-                throw new GameNotRunningException($"ERROR getting Camera, game may not be running: {ex}");
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// public static function to turn thermalvision on and off
-        /// </summary>
-        /// 
-        public static void ThermalVision(bool on)
-        {
-            if (Memory.FpsCamera != 0)
-            {
-                var fpsThermalComponent = GetComponentFromGameObject(Memory.FpsCamera, "ThermalVision");
-
-                var thermalOn = Memory.ReadValue<bool>(fpsThermalComponent + 0xE0);
-                if (on) {
-                    if (!thermalOn)
-                    {
-                        Memory.WriteValue(fpsThermalComponent + 0xE0, true);
-                        Memory.WriteValue(fpsThermalComponent + 0xE1, false);
-                        Memory.WriteValue(fpsThermalComponent + 0xE2, false);
-                        Memory.WriteValue(fpsThermalComponent + 0xE3, false);
-                        Memory.WriteValue(fpsThermalComponent + 0xE4, false);
-                        Memory.WriteValue(fpsThermalComponent + 0xE5, false);
-                    }
-
-                }
-                else
-                {
-                    if (thermalOn)
-                    {
-                        Memory.WriteValue(fpsThermalComponent + 0xE0, false);
-                        Memory.WriteValue(fpsThermalComponent + 0xE1, true);
-                        Memory.WriteValue(fpsThermalComponent + 0xE2, true);
-                        Memory.WriteValue(fpsThermalComponent + 0xE3, true);
-                        Memory.WriteValue(fpsThermalComponent + 0xE4, true);
-                        Memory.WriteValue(fpsThermalComponent + 0xE5, true);
-                    }
-                }
-            }
-        }
-
-        public static void ThermalVisionOptic(bool on)
-        {
-            if (Memory.OpticCamera != 0)
-            {
-                ulong opticComponent = 0;
-                ulong opticThermalVision = 0;
-                var component = Memory.ReadPtr(Memory.OpticCamera + 0x30);
-                for (int i = 0x8; i < 0x100; i += 0x10) 
-                {
-                    var fields = Memory.ReadPtr(component + (ulong)i);
-                    if (fields == 0) continue;
-                    var fieldsPtr_ = Memory.ReadPtr(fields + 0x28);
-                    var classNamePtr = Memory.ReadPtrChain(fieldsPtr_, Offsets.UnityClass.Name);
-                    var className = Memory.ReadString(classNamePtr, 64).Replace("\0", string.Empty);
-                    if (className == "ThermalVision")
-                    {
-
-                        opticComponent = fields;
-                        opticThermalVision = Memory.ReadPtr(fieldsPtr_ + 0x28);
-                        break;
-                    }
-                }
-                if (on)
-                {
-                    Memory.WriteValue(opticComponent + 0x38, true);
-                    Memory.WriteValue(opticThermalVision + 0xE0, true);
-                }
-                else
-                {
-                    Memory.WriteValue(opticComponent + 0x38, false);
-                    Memory.WriteValue(opticThermalVision + 0xE0, false);
-                }
-            }
-        }
-
-        /// <summary>
-        /// public static function to turn nightvision on and off
-        /// </summary>
-        ///     
-        public static void NightVision(bool on)
-        {
-            if (Memory.FpsCamera != 0)
-            {
-                var nightVisionComponent = GetComponentFromGameObject(Memory.FpsCamera, "NightVision");
-                var nightVisionOn = Memory.ReadValue<bool>(nightVisionComponent + 0xEC);
-                if (on)
-                {
-                    if (!nightVisionOn)
-                    {
-                        Memory.WriteValue(nightVisionComponent + 0xEC, true);
-                    }
-                }
-                else
-                {
-                    if (nightVisionOn)
-                    {
-                        Memory.WriteValue(nightVisionComponent + 0xEC, false);
-                    }
-                }
-            }
-        }
-
         /// <summary>
         /// Gets Local Game World address.
         /// </summary>
@@ -606,7 +431,6 @@ namespace eft_dma_radar
                 {
                     Program.Log($"ERROR loading LootEngine: {ex}");
                 }
-                GetCamera();
                 _loadingLoot = false;
             }
             if (_mapName == string.Empty)
