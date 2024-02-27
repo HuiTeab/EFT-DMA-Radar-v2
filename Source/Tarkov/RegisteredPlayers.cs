@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.Intrinsics;
 using eft_dma_radar.Source.Misc;
-using Offsets;
 
 namespace eft_dma_radar
 {
@@ -28,20 +26,10 @@ namespace eft_dma_radar
 
         #region Getters
         public ReadOnlyDictionary<string, Player> Players { get; }
-        public int PlayerCount
-        {
-            get
-            {
-                // ask<int> GetPlayerCountAsync()
-                var players = GetPlayerCountAsync();
-                players.Wait();
-                return players.Result;
-            }
-        }
-
+        public int PlayerCount => GetPlayerCountAsync().GetAwaiter().GetResult();
         public async Task<int> GetPlayerCountAsync()
         {
-            int maxAttempts = 5;
+            const int maxAttempts = 10;
             for (int attempt = 0; attempt < maxAttempts; attempt++)
             {
                 try
@@ -49,7 +37,6 @@ namespace eft_dma_radar
                     var count = Memory.ReadValue<int>(_base + Offsets.UnityList.Count);
                     if (count < 1 || count > 1024)
                     {
-                        //clear all variables
                         _players.Clear();
                         return -1;
                     }
@@ -57,19 +44,15 @@ namespace eft_dma_radar
                 }
                 catch (DMAShutdown)
                 {
-                    throw; // Specific handling for DMAShutdown
+                    throw; // Re-throw DMAShutdown for specific handling outside
                 }
                 catch (Exception ex) when (attempt < maxAttempts - 1)
                 {
-                    await Task.Delay(1000); // Asynchronous delay
-                }
-                catch
-                {
-                    // Log exception or handle it as needed
-                    return -1; // Indicate an error condition
+                    Program.Log($"ERROR - GetPlayerCountAsync attempt {attempt + 1} failed: {ex}");
+                    await Task.Delay(1000); // Delay before retrying
                 }
             }
-            return -1; // Default error return
+            return -1; // Return error condition after all attempts fail
         }
 
 
@@ -88,89 +71,61 @@ namespace eft_dma_radar
             _healthSw.Start();
             _posSw.Start();
         }
-
-        // Example of a helper method
+        
+        /// <summary>
+        /// Get player ID from player base
+        /// </summary>
+        /// <param name="playerBase"></param>
+        /// <returns></returns>
         private (string, string) GetPlayerIdFromBase(ulong playerBase)
         {
-            // Logic to extract player ID from player base
-            // Return the player ID
-            //Debug.WriteLine($"PlayerBase: {playerBase:X}");
             var classNamePtr = Memory.ReadPtrChain(playerBase, Offsets.UnityClass.Name);
-            var classNameString = Memory.ReadString(classNamePtr, 64).Replace("\0", string.Empty);
-            //classNameString = classNameString.Replace("\0", string.Empty);
-            //Debug.WriteLine($"ClassName: {classNameString}");
+            var className = Memory.ReadString(classNamePtr, 64).Replace("\0", string.Empty);
+            string id = null;
 
-            string id;
-            string className = classNameString;
-            //ulong localPlayerProfile = 0;
-            // If classname = ClientPlayer use [Class] EFT.Player
-            // If classname = NextObservedPlayer use [Class] EFT.NextObservedPlayer.ObservedPlayerView
-
-            if (classNameString == "ClientPlayer" || classNameString == "LocalPlayer" || classNameString == "HideoutPlayer") // [Class] EFT.Player : MonoBehaviour, IPlayer, GInterface58CF, GInterface58CA, GInterface58D4, GInterface590B, GInterfaceB734, IDissonancePlayer
+            if (className == "ClientPlayer" || className == "LocalPlayer" || className == "HideoutPlayer")
             {
-                //Local player
-                var localPlayerProfile = Memory.ReadPtr(playerBase + Offsets.Player.Profile);
-                var localPlayerID = Memory.ReadPtr(localPlayerProfile + Offsets.Profile.Id);
-
-                var localPlayerIDStr = Memory.ReadUnityString(localPlayerID);
-                id = localPlayerIDStr;
-                
+                ulong localPlayerProfile = Memory.ReadPtr(playerBase + Offsets.Player.Profile);
+                ulong localPlayerID = Memory.ReadPtr(localPlayerProfile + Offsets.Profile.Id);
+                id = Memory.ReadUnityString(localPlayerID);
             }
-            //else if (classNameString == "HideoutPlayer"){
-            //    //Local player
-            //    var localPlayerProfile = Memory.ReadPtr(playerBase + Offsets.Player.Profile);
-            //    var localPlayerID = Memory.ReadPtr(localPlayerProfile + Offsets.Profile.Id);
-
-            //    var localPlayerIDStr = Memory.ReadUnityString(localPlayerID);
-            //    id = localPlayerIDStr;
-            //}
-            else if (classNameString == "ObservedPlayerView") //[Class] EFT.NextObservedPlayer.ObservedPlayerView : MonoBehaviour, IPlayer
+            else if (className == "ObservedPlayerView")
             {
-                //All other players
-                var ObservedPlayerView = playerBase;
-                var profileIDprt = Memory.ReadPtr(ObservedPlayerView + Offsets.ObservedPlayerView.ID);
-                var profileID = Memory.ReadUnityString(profileIDprt);
-                id = profileID;
-            }
-            else
-            {
-                id = null;
+                ulong profileIDPtr = Memory.ReadPtr(playerBase + Offsets.ObservedPlayerView.ID);
+                id = Memory.ReadUnityString(profileIDPtr);
             }
 
             return (id, className);
         }
 
+
+        private ulong GetPlayerProfile(string className, ulong playerBase)
+        {
+            switch (className)
+            {
+                case "ClientPlayer":
+                case "LocalPlayer":
+                case "HideoutPlayer":
+                    return Memory.ReadPtr(playerBase + Offsets.Player.Profile);
+                case "ObservedPlayerView":
+                    return Memory.ReadPtr(playerBase);
+                default:
+                    return 0;
+            }
+        }
+
         private void ProcessPlayer(int index, ScatterReadMap scatterMap, HashSet<string> registered)
         {
-            //Console.WriteLine($"UpdateList: Processing player {index + 1}.");
-
-            try
+           try
             {
                 if (!scatterMap.Results[index][0].TryGetResult<MemPointer>(out var playerBase)) return;
-                //var playerBase = (ulong)scatterMap.Results[index][0].Result;
                 var playerProfile = 0ul;
                 (string playerId, string className) = GetPlayerIdFromBase(playerBase);
-                if (playerId.Length != 24 && playerId.Length != 36) throw new ArgumentOutOfRangeException("id"); // Ensure valid ID length
-                                if (_players.TryGetValue(playerId, out var player))
+                if (playerId.Length != 24 && playerId.Length != 36 || className.Length < 0) throw new ArgumentOutOfRangeException("id"); // Ensure valid ID length
+                //Existing player
+                if (_players.TryGetValue(playerId, out var player))
                 {
-                    if (className == "ClientPlayer" || className == "LocalPlayer" || className == "HideoutPlayer")
-                    {
-                        playerProfile = Memory.ReadPtr(playerBase + Offsets.Player.Profile);
-                    }
-                    else if (className == "ObservedPlayerView")
-                    {
-                        //Console.WriteLine($"Player '{player.Name}' is observed player.");
-                        playerProfile = Memory.ReadPtr(playerBase);
-                        //var healthController = Memory.ReadPtr(playerProfile + 0x80 +0xE8);
-                    }
-                    else
-                    {
-                        //Console.WriteLine($"Player '{player.Name}' is unknown player.");
-                        //set playerProfile to 0
-                        playerProfile = 0;
-                        return;
-                    }
-                    
+                    playerProfile = GetPlayerProfile(className, playerBase);
                     if (player.ErrorCount > 100) // Erroring out a lot? Re-Alloc
                     {
                         Program.Log(
@@ -191,20 +146,10 @@ namespace eft_dma_radar
                         player.IsAlive = true;
                     }
                 }
+                //New player
                 else
                 {
-                    if (className == "ClientPlayer" || className == "LocalPlayer" || className == "HideoutPlayer") {
-                        playerProfile = Memory.ReadPtr(playerBase + Offsets.Player.Profile);
-                    }
-                    else if (className == "ObservedPlayerView")
-                    {
-                        playerProfile = Memory.ReadPtr(playerBase);
-                    }
-                    else
-                    {
-                        playerProfile = 0;
-                        return;
-                    }
+                    playerProfile = GetPlayerProfile(className, playerBase);
                     var newplayer = new Player(playerBase, playerProfile, null, className); // allocate new player object
                     if (
                         newplayer.Type is PlayerType.LocalPlayer
@@ -227,19 +172,19 @@ namespace eft_dma_radar
             {
                 Program.Log($"ERROR processing player at index {index}: {ex}");
             }
+        }
 
-            void ReallocPlayer(string id, ulong newPlayerBase, ulong newPlayerProfile)
+        private void ReallocPlayer(string id, ulong newPlayerBase, ulong newPlayerProfile)
+        {
+            try
             {
-                try
-                {
-                    var player = new Player(newPlayerBase, newPlayerProfile, _players[id].Position); // alloc
-                    _players[id] = player; // update ref to new object
-                    Program.Log($"Player '{player.Name}' Re-Allocated successfully.");
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception($"ERROR re-allocating player '{_players[id].Name}': ", ex);
-                }
+                var player = new Player(newPlayerBase, newPlayerProfile, _players[id].Position); // alloc
+                _players[id] = player; // update ref to new object
+                Program.Log($"Player '{player.Name}' Re-Allocated successfully.");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"ERROR re-allocating player '{_players[id].Name}': ", ex);
             }
         }
 
@@ -247,7 +192,6 @@ namespace eft_dma_radar
         {
             if (_regSw.ElapsedMilliseconds < 750)
             {
-                //Debug.WriteLine("UpdateList: Update skipped, less than 750ms elapsed.");
                 return true;
             }
             return false;
@@ -265,8 +209,15 @@ namespace eft_dma_radar
                 }
                 else if (!registered.Contains(player.Key))
                 {
+                    //check how many times registered contains the player key
+                    var count = registered.Count(x => x == player.Key);
+                    if (count > 1)
+                    {
+                        Program.Log($"WARNING - Player '{player.Value.Name} {player.Key}' registered {count} times.");
+                    }
                     player.Value.IsActive = false;
                 }
+
             }
         }
 
@@ -312,7 +263,7 @@ namespace eft_dma_radar
             }
             catch (RaidEnded)
             {
-                Console.WriteLine("TEEEEST");
+                throw;
             }
             catch (Exception ex)
             {
@@ -331,7 +282,6 @@ namespace eft_dma_radar
 
             if (IsAtHideout)
             {
-                Debug.WriteLine("In Hideout, not updating players.");
                 return;
             }
             try
@@ -353,8 +303,7 @@ namespace eft_dma_radar
                     }
                 }
                 //bool checkHealth = _healthSw.ElapsedMilliseconds > 250; // every 250 ms
-                bool checkPos =
-                    _posSw.ElapsedMilliseconds > 10000 && players.Any(x => x.IsHumanActive); // every 10 sec & at least 1 active human player
+                bool checkPos = _posSw.ElapsedMilliseconds > 10000 && players.Any(x => x.IsHumanActive); // every 10 sec & at least 1 active human player
                 var scatterMap = new ScatterReadMap(players.Length);
                 var round1 = scatterMap.AddRound();
                 ScatterReadRound round2 = null;
@@ -387,66 +336,6 @@ namespace eft_dma_radar
                             var verticesAddr = round2?.AddEntry<MemPointer>(i, 5, hierarchy, null, Offsets.TransformHierarchy.Vertices);
                         }
                     }
- 
-                    //{
-                    //    if (player.Type is PlayerType.LocalPlayer)
-                    //    {
-                    //        var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.MovementContext.Rotation);
-                    //        var posAddr = player.TransformScatterReadParameters;
-                    //        var indices = round1.AddEntry<List<int>>(i,1,posAddr.Item1,posAddr.Item2*4);
-                    //        var vertices = round1.AddEntry<List<Vector128<float>>>(i,2,posAddr.Item3,posAddr.Item4*16);
-                    //        if (checkPos && player.IsHumanActive)
-                    //        {
-                    //            var hierarchy = round1.AddEntry<MemPointer>(i,3,player.TransformInternal,null,Offsets.TransformInternal.Hierarchy);
-                    //            var indicesAddr = round2?.AddEntry<MemPointer>(i,4,hierarchy,null,Offsets.TransformHierarchy.Indices);
-                    //            var verticesAddr = round2?.AddEntry<MemPointer>(i,5,hierarchy,null,Offsets.TransformHierarchy.Vertices);
-                    //        }
-                    //    }
-                    //    else if (player.Type is PlayerType.AIScav) {
-                    //        //If offline - var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.MovementContext.Rotation);
-                    //        //If online - var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.ObserverdPlayerMovementContext.Rotation);
-                    //        var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.ObserverdPlayerMovementContext.Rotation);
-
-                    //        var posAddr = player.TransformScatterReadParameters;
-                    //        var indices = round1.AddEntry<List<int>>(i,1,posAddr.Item1,posAddr.Item2*4);
-                    //        var vertices = round1.AddEntry<List<Vector128<float>>>(i,2,posAddr.Item3,posAddr.Item4*16);
-                    //        if (checkPos)
-                    //        {
-                    //            var hierarchy = round1.AddEntry<MemPointer>(i,3,player.TransformInternal,null,Offsets.TransformInternal.Hierarchy);
-                    //            var indicesAddr = round2?.AddEntry<MemPointer>(i,4,hierarchy,null,Offsets.TransformHierarchy.Indices);
-                    //            var verticesAddr = round2?.AddEntry<MemPointer>(i,5,hierarchy,null,Offsets.TransformHierarchy.Vertices);
-
-                    //        }
-                    //    }
-                    //    else if (player.Type is PlayerType.AIOfflineScav)
-                    //    {
-                    //        var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.ObserverdPlayerMovementContext.Rotation);
-
-                    //        var posAddr = player.TransformScatterReadParameters;
-                    //        var indices = round1.AddEntry<List<int>>(i,1,posAddr.Item1,posAddr.Item2*4);
-                    //        var vertices = round1.AddEntry<List<Vector128<float>>>(i,2,posAddr.Item3,posAddr.Item4*16);
-                    //        if (checkPos)
-                    //        {
-                    //            var hierarchy = round1.AddEntry<MemPointer>(i,3,player.TransformInternal,null,Offsets.TransformInternal.Hierarchy);
-                    //            var indicesAddr = round2?.AddEntry<MemPointer>(i,4,hierarchy,null,Offsets.TransformHierarchy.Indices);
-                    //            var verticesAddr = round2?.AddEntry<MemPointer>(i,5,hierarchy,null,Offsets.TransformHierarchy.Vertices);
-
-                    //        }
-                    //    }
-                    //    else {
-                    //        var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.ObserverdPlayerMovementContext.Rotation);
-                    //        var posAddr = player.TransformScatterReadParameters;
-                    //        var indices = round1.AddEntry<List<int>>(i,1,posAddr.Item1,posAddr.Item2*4);
-                    //        var vertices = round1.AddEntry<List<Vector128<float>>>(i,2,posAddr.Item3,posAddr.Item4*16);
-                    //        if (checkPos)
-                    //        {
-                    //            var hierarchy = round1.AddEntry<MemPointer>(i,3,player.TransformInternal,null,Offsets.TransformInternal.Hierarchy);
-                    //            var indicesAddr = round2?.AddEntry<MemPointer>(i,4,hierarchy,null,Offsets.TransformHierarchy.Indices);
-                    //            var verticesAddr = round2?.AddEntry<MemPointer>(i,5,hierarchy,null,Offsets.TransformHierarchy.Vertices);
-
-                    //        }
-                    //    }
-                    //}
                 }
                 scatterMap.Execute();
                 for (int i = 0; i < players.Length; i++)
@@ -460,7 +349,7 @@ namespace eft_dma_radar
 
                     if (player.LastUpdate) // player may be dead/exfil'd
                     {
-                        if (player.Type is PlayerType.LocalPlayer)
+                        if (player.IsLocalPlayer)
                         {
                             if (scatterMap.Results[i][6].TryGetResult<MemPointer>(out var corpsePtr))
                             {

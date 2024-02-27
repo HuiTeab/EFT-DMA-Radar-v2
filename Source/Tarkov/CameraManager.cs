@@ -52,7 +52,7 @@ namespace eft_dma_radar.Source.Tarkov
             catch (DMAShutdown) { throw; }
             catch (Exception ex)
             {
-                throw new GameNotRunningException($"ERROR getting Camera, game may not be running: {ex}");
+                //throw new GameNotRunningException($"ERROR getting Camera, game may not be running: {ex}");
             }
             return false;
         }

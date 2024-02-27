@@ -347,7 +347,6 @@ namespace eft_dma_radar
                         // retry if player count is 0
                         if (rgtPlayers.PlayerCount == 0)
                         {
-                            Console.WriteLine("Player count is 0. Retrying...");
                             await Task.Delay(retryInterval);
                             retryCount++;
                             continue;
@@ -362,7 +361,6 @@ namespace eft_dma_radar
                         var rgtPlayers = new RegisteredPlayers(Memory.ReadPtr(_localGameWorld + Offsets.LocalGameWorld.RegisteredPlayers));
                         if (rgtPlayers.PlayerCount == 0)
                         {
-                            Console.WriteLine("Player count is 0. Retrying...");
                             await Task.Delay(retryInterval);
                             retryCount++;
                             continue;
