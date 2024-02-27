@@ -559,8 +559,6 @@ namespace eft_dma_radar
         #endregion
     }
 
-    
-
     #region Exceptions
     public class DMAException : Exception
     {

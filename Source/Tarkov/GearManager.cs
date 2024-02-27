@@ -83,6 +83,7 @@ namespace eft_dma_radar
                             }
                             var gear = new GearItem()
                             {
+                                id = id,
                                 Long = longName,
                                 Short = shortName
                             };

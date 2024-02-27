@@ -232,6 +232,7 @@ namespace eft_dma_radar {
             var loot = this.Loot; // cache ref
             if (loot is not null) {
                 var filtered = new List < DevLootItem > (loot.Count);
+
                 if (filter is null || filter.Trim() == string.Empty) // Use loot values
                 {
                     foreach(var item in loot) {
@@ -239,7 +240,8 @@ namespace eft_dma_radar {
                             Program.Log($"Item label is null {item.BsgId} - {item.Item.shortName}");
                             return;
                         }
-                        var value = Math.Max((byte)item.Item.avg24hPrice, item.Item.basePrice);
+                        var value = TarkovDevAPIManager.GetItemValue(item.Item);
+
                         if (item.AlwaysShow || value >= _config.MinLootValue) {
                             if (!filtered.Contains(item)) {
                                 filtered.Add(item);
@@ -255,9 +257,10 @@ namespace eft_dma_radar {
                         if (!filtered.Contains(item))
                             filtered.Add(item);
                     }
+
                     var names = filter.Split(','); // Get multiple items searched
                     foreach(var name in names) {
-                        var search = loot.Where(x => x.Item.name.Contains(name.Trim(), StringComparison.OrdinalIgnoreCase));
+                        var search = loot.Where(x => x.Item.shortName.Contains(name.Trim(), StringComparison.OrdinalIgnoreCase));
                         foreach(var item in search) {
                             if (!filtered.Contains(item))
                                 filtered.Add(item);

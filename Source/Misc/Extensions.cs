@@ -132,7 +132,7 @@ namespace eft_dma_radar
                 case PlayerType.AIBoss:
                     return SKPaints.TextBoss;
                 case PlayerType.PScav:
-                    return SKPaints.TextWhite;
+                    return SKPaints.TextPScav;
                 case PlayerType.SpecialPlayer:
                     return SKPaints.TextSpecial;
                 case PlayerType.AIOfflineScav:

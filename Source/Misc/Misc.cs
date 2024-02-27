@@ -353,49 +353,61 @@ namespace eft_dma_radar
             string[] lines = null;
             if (!player.IsAlive) // Get info about dead bodies ('X' markers)
             {
-                if (player.Lvl != 0 || player.GroupID != -1) lines = new string[3]
-                {
-                    "Corpse",
-                    string.Empty,
-                    string.Empty
-                };
-                else lines = new string[2]
-                {
-                    "Corpse",
-                    string.Empty
-                };
+                if (player.GroupID != -1)
+                    lines = new string[3] {
+                        "Corpse",
+                        string.Empty,
+                        string.Empty
+                    };
+                else
+                    lines = new string[2] {
+                        "Corpse",
+                        string.Empty
+                    };
+
                 lines[1] += $"{player.Type}:{player.Name}";
                 if (player.Lvl != 0) lines[2] += $"L:{player.Lvl} ";
                 if (player.GroupID != -1) lines[2] += $"G:{player.GroupID} ";
             }
-            else if (player.IsHumanHostileActive) // Enemy Human Players, display information
+            else if (player.IsHostileActive) // If enemy, display information
             {
-                if (player.GroupID != -1 || player.KDA != -1f || player.Lvl != 0) lines = new string[3]
-                {
-                    string.Empty,
-                    string.Empty,
-                    string.Empty
-                };
-                else lines = new string[2]
-                {
-                    string.Empty,
-                    string.Empty
-                };
+                if (player.GroupID != -1 || player.KDA != -1f || player.Lvl != 0)
+                    lines = new string[3] {
+                        string.Empty,
+                        string.Empty,
+                        string.Empty
+                    };
+                else
+                    lines = new string[3] {
+                        string.Empty,
+                        string.Empty,
+                        string.Empty
+                    };
+
                 lines[0] += player.Name;
+
                 if (player.Gear is not null) // Get weapon info via GearManager
                 {
                     string wep = "None";
+                    var value = player.PlayerValue;
                     GearItem gearItem = null;
+
                     if (!player.Gear.TryGetValue("FirstPrimaryWeapon", out gearItem))
                         if (!player.Gear.TryGetValue("SecondPrimaryWeapon", out gearItem))
                             player.Gear.TryGetValue("Holster", out gearItem);
+
                     if (gearItem is not null) wep = gearItem.Short; // Get 'short' weapon name/info
+
                     lines[1] += $"Wep:{wep}";
-                }
-                else lines[1] += "Wep:ERROR"; // GearManager failed
-                if (player.Lvl != 0) lines[2] += $"L:{player.Lvl} ";
-                if (player.GroupID != -1) lines[2] += $"G:{player.GroupID} ";
-                if (player.KDA != -1f) lines[2] += $"KD: {player.KDA.ToString("n1")} ";
+
+                    lines[2] += $"Value: {TarkovDevAPIManager.FormatNumber(value)}";
+                } 
+                else
+                    lines[1] += "Wep:ERROR"; // GearManager failed
+
+                //if (player.Lvl != 0) lines[2] += $"L:{player.Lvl} ";
+                //if (player.GroupID != -1) lines[2] += $"G:{player.GroupID} ";
+                //if (player.KDA != -1f) lines[2] += $"KD: {player.KDA.ToString("n1")} ";
             }
             else return; // Cancel drawing, not interested in this player object
             // Strings constructed -> Begin Drawing
@@ -428,6 +440,7 @@ namespace eft_dma_radar
     {
         public string Long { get; init; }
         public string Short { get; init; }
+        public string id { get; init; }
     }
 
     /// <summary>
@@ -995,6 +1008,10 @@ namespace eft_dma_radar
         /// Difficult AI Raider.
         /// </summary>
         AIRaider,
+        /// <summary>
+        /// Difficult AI Rouge.
+        /// </summary>
+        AIRouge,
         /// <summary>
         /// Difficult AI Boss.
         /// </summary>

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.Intrinsics;
 using eft_dma_radar.Source.Misc;
+using Offsets;
 
 namespace eft_dma_radar
 {
@@ -105,7 +106,7 @@ namespace eft_dma_radar
             // If classname = ClientPlayer use [Class] EFT.Player
             // If classname = NextObservedPlayer use [Class] EFT.NextObservedPlayer.ObservedPlayerView
 
-            if (classNameString == "ClientPlayer" || classNameString == "LocalPlayer") // [Class] EFT.Player : MonoBehaviour, IPlayer, GInterface58CF, GInterface58CA, GInterface58D4, GInterface590B, GInterfaceB734, IDissonancePlayer
+            if (classNameString == "ClientPlayer" || classNameString == "LocalPlayer" || classNameString == "HideoutPlayer") // [Class] EFT.Player : MonoBehaviour, IPlayer, GInterface58CF, GInterface58CA, GInterface58D4, GInterface590B, GInterfaceB734, IDissonancePlayer
             {
                 //Local player
                 var localPlayerProfile = Memory.ReadPtr(playerBase + Offsets.Player.Profile);
@@ -115,14 +116,14 @@ namespace eft_dma_radar
                 id = localPlayerIDStr;
                 
             }
-            else if (classNameString == "HideoutPlayer"){
-                //Local player
-                var localPlayerProfile = Memory.ReadPtr(playerBase + Offsets.Player.Profile);
-                var localPlayerID = Memory.ReadPtr(localPlayerProfile + Offsets.Profile.Id);
+            //else if (classNameString == "HideoutPlayer"){
+            //    //Local player
+            //    var localPlayerProfile = Memory.ReadPtr(playerBase + Offsets.Player.Profile);
+            //    var localPlayerID = Memory.ReadPtr(localPlayerProfile + Offsets.Profile.Id);
 
-                var localPlayerIDStr = Memory.ReadUnityString(localPlayerID);
-                id = localPlayerIDStr;
-            }
+            //    var localPlayerIDStr = Memory.ReadUnityString(localPlayerID);
+            //    id = localPlayerIDStr;
+            //}
             else if (classNameString == "ObservedPlayerView") //[Class] EFT.NextObservedPlayer.ObservedPlayerView : MonoBehaviour, IPlayer
             {
                 //All other players
@@ -138,8 +139,6 @@ namespace eft_dma_radar
 
             return (id, className);
         }
-
-
 
         private void ProcessPlayer(int index, ScatterReadMap scatterMap, HashSet<string> registered)
         {
@@ -369,76 +368,96 @@ namespace eft_dma_radar
                     var player = players[i];
                     if (player.LastUpdate) // player may be dead/exfil'd
                     {
-                        if (player.Type is PlayerType.LocalPlayer)
-                        {
+                        if (player.Type == PlayerType.LocalPlayer) {
                             var corpse = round1.AddEntry<MemPointer>(i, 6, player.CorpsePtr);
                         }
-                    }
-                    else
-                    {
-                        if (player.Type is PlayerType.LocalPlayer)
-                        {
-                            var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.MovementContext.Rotation);
-                            var posAddr = player.TransformScatterReadParameters;
-                            var indices = round1.AddEntry<List<int>>(i,1,posAddr.Item1,posAddr.Item2*4);
-                            var vertices = round1.AddEntry<List<Vector128<float>>>(i,2,posAddr.Item3,posAddr.Item4*16);
-                            if (checkPos && player.IsHumanActive)
-                            {
-                                var hierarchy = round1.AddEntry<MemPointer>(i,3,player.TransformInternal,null,Offsets.TransformInternal.Hierarchy);
-                                var indicesAddr = round2?.AddEntry<MemPointer>(i,4,hierarchy,null,Offsets.TransformHierarchy.Indices);
-                                var verticesAddr = round2?.AddEntry<MemPointer>(i,5,hierarchy,null,Offsets.TransformHierarchy.Vertices);
-                            }
-                        }
-                        else if (player.Type is PlayerType.AIScav) {
-                            //If offline - var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.MovementContext.Rotation);
-                            //If online - var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.ObserverdPlayerMovementContext.Rotation);
-                            var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.ObserverdPlayerMovementContext.Rotation);
+                    } else {
+                        var rotation = round1.AddEntry<Vector2>(i, 0,
+                            (player.Type == PlayerType.LocalPlayer || player.Type == PlayerType.AIOfflineScav) ?
+                                player.MovementContext + Offsets.MovementContext.Rotation :
+                                player.MovementContext + Offsets.ObserverdPlayerMovementContext.Rotation);
 
-                            var posAddr = player.TransformScatterReadParameters;
-                            var indices = round1.AddEntry<List<int>>(i,1,posAddr.Item1,posAddr.Item2*4);
-                            var vertices = round1.AddEntry<List<Vector128<float>>>(i,2,posAddr.Item3,posAddr.Item4*16);
-                            if (checkPos)
-                            {
-                                var hierarchy = round1.AddEntry<MemPointer>(i,3,player.TransformInternal,null,Offsets.TransformInternal.Hierarchy);
-                                var indicesAddr = round2?.AddEntry<MemPointer>(i,4,hierarchy,null,Offsets.TransformHierarchy.Indices);
-                                var verticesAddr = round2?.AddEntry<MemPointer>(i,5,hierarchy,null,Offsets.TransformHierarchy.Vertices);
-                            
-                            }
-                        }
-                        else if (player.Type is PlayerType.AIOfflineScav)
-                        {
-                            var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.MovementContext.Rotation);
+                        var posAddr = player.TransformScatterReadParameters;
+                        var indices = round1.AddEntry<List<int>>(i, 1, posAddr.Item1, posAddr.Item2 * 4);
+                        var vertices = round1.AddEntry<List<Vector128<float>>>(i, 2, posAddr.Item3, posAddr.Item4 * 16);
 
-                            var posAddr = player.TransformScatterReadParameters;
-                            var indices = round1.AddEntry<List<int>>(i,1,posAddr.Item1,posAddr.Item2*4);
-                            var vertices = round1.AddEntry<List<Vector128<float>>>(i,2,posAddr.Item3,posAddr.Item4*16);
-                            if (checkPos)
-                            {
-                                var hierarchy = round1.AddEntry<MemPointer>(i,3,player.TransformInternal,null,Offsets.TransformInternal.Hierarchy);
-                                var indicesAddr = round2?.AddEntry<MemPointer>(i,4,hierarchy,null,Offsets.TransformHierarchy.Indices);
-                                var verticesAddr = round2?.AddEntry<MemPointer>(i,5,hierarchy,null,Offsets.TransformHierarchy.Vertices);
-                            
-                            }
-                        }
-                        else {
-                            var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.ObserverdPlayerMovementContext.Rotation);
-                            var posAddr = player.TransformScatterReadParameters;
-                            var indices = round1.AddEntry<List<int>>(i,1,posAddr.Item1,posAddr.Item2*4);
-                            var vertices = round1.AddEntry<List<Vector128<float>>>(i,2,posAddr.Item3,posAddr.Item4*16);
-                            if (checkPos)
-                            {
-                                var hierarchy = round1.AddEntry<MemPointer>(i,3,player.TransformInternal,null,Offsets.TransformInternal.Hierarchy);
-                                var indicesAddr = round2?.AddEntry<MemPointer>(i,4,hierarchy,null,Offsets.TransformHierarchy.Indices);
-                                var verticesAddr = round2?.AddEntry<MemPointer>(i,5,hierarchy,null,Offsets.TransformHierarchy.Vertices);
-                            
-                            }
+                        if (checkPos) {
+                            var hierarchy = round1.AddEntry<MemPointer>(i, 3, player.TransformInternal, null, Offsets.TransformInternal.Hierarchy);
+                            var indicesAddr = round2?.AddEntry<MemPointer>(i, 4, hierarchy, null, Offsets.TransformHierarchy.Indices);
+                            var verticesAddr = round2?.AddEntry<MemPointer>(i, 5, hierarchy, null, Offsets.TransformHierarchy.Vertices);
                         }
                     }
+ 
+                    //{
+                    //    if (player.Type is PlayerType.LocalPlayer)
+                    //    {
+                    //        var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.MovementContext.Rotation);
+                    //        var posAddr = player.TransformScatterReadParameters;
+                    //        var indices = round1.AddEntry<List<int>>(i,1,posAddr.Item1,posAddr.Item2*4);
+                    //        var vertices = round1.AddEntry<List<Vector128<float>>>(i,2,posAddr.Item3,posAddr.Item4*16);
+                    //        if (checkPos && player.IsHumanActive)
+                    //        {
+                    //            var hierarchy = round1.AddEntry<MemPointer>(i,3,player.TransformInternal,null,Offsets.TransformInternal.Hierarchy);
+                    //            var indicesAddr = round2?.AddEntry<MemPointer>(i,4,hierarchy,null,Offsets.TransformHierarchy.Indices);
+                    //            var verticesAddr = round2?.AddEntry<MemPointer>(i,5,hierarchy,null,Offsets.TransformHierarchy.Vertices);
+                    //        }
+                    //    }
+                    //    else if (player.Type is PlayerType.AIScav) {
+                    //        //If offline - var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.MovementContext.Rotation);
+                    //        //If online - var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.ObserverdPlayerMovementContext.Rotation);
+                    //        var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.ObserverdPlayerMovementContext.Rotation);
+
+                    //        var posAddr = player.TransformScatterReadParameters;
+                    //        var indices = round1.AddEntry<List<int>>(i,1,posAddr.Item1,posAddr.Item2*4);
+                    //        var vertices = round1.AddEntry<List<Vector128<float>>>(i,2,posAddr.Item3,posAddr.Item4*16);
+                    //        if (checkPos)
+                    //        {
+                    //            var hierarchy = round1.AddEntry<MemPointer>(i,3,player.TransformInternal,null,Offsets.TransformInternal.Hierarchy);
+                    //            var indicesAddr = round2?.AddEntry<MemPointer>(i,4,hierarchy,null,Offsets.TransformHierarchy.Indices);
+                    //            var verticesAddr = round2?.AddEntry<MemPointer>(i,5,hierarchy,null,Offsets.TransformHierarchy.Vertices);
+
+                    //        }
+                    //    }
+                    //    else if (player.Type is PlayerType.AIOfflineScav)
+                    //    {
+                    //        var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.ObserverdPlayerMovementContext.Rotation);
+
+                    //        var posAddr = player.TransformScatterReadParameters;
+                    //        var indices = round1.AddEntry<List<int>>(i,1,posAddr.Item1,posAddr.Item2*4);
+                    //        var vertices = round1.AddEntry<List<Vector128<float>>>(i,2,posAddr.Item3,posAddr.Item4*16);
+                    //        if (checkPos)
+                    //        {
+                    //            var hierarchy = round1.AddEntry<MemPointer>(i,3,player.TransformInternal,null,Offsets.TransformInternal.Hierarchy);
+                    //            var indicesAddr = round2?.AddEntry<MemPointer>(i,4,hierarchy,null,Offsets.TransformHierarchy.Indices);
+                    //            var verticesAddr = round2?.AddEntry<MemPointer>(i,5,hierarchy,null,Offsets.TransformHierarchy.Vertices);
+
+                    //        }
+                    //    }
+                    //    else {
+                    //        var rotation = round1.AddEntry<Vector2>(i,0,player.MovementContext + Offsets.ObserverdPlayerMovementContext.Rotation);
+                    //        var posAddr = player.TransformScatterReadParameters;
+                    //        var indices = round1.AddEntry<List<int>>(i,1,posAddr.Item1,posAddr.Item2*4);
+                    //        var vertices = round1.AddEntry<List<Vector128<float>>>(i,2,posAddr.Item3,posAddr.Item4*16);
+                    //        if (checkPos)
+                    //        {
+                    //            var hierarchy = round1.AddEntry<MemPointer>(i,3,player.TransformInternal,null,Offsets.TransformInternal.Hierarchy);
+                    //            var indicesAddr = round2?.AddEntry<MemPointer>(i,4,hierarchy,null,Offsets.TransformHierarchy.Indices);
+                    //            var verticesAddr = round2?.AddEntry<MemPointer>(i,5,hierarchy,null,Offsets.TransformHierarchy.Vertices);
+
+                    //        }
+                    //    }
+                    //}
                 }
                 scatterMap.Execute();
                 for (int i = 0; i < players.Length; i++)
                 {
                     var player = players[i];
+
+                    if (_localPlayerGroup != -100 && player.GroupID != -1 && player.IsHumanHostile) { // Teammate check
+                        if (player.GroupID == _localPlayerGroup)
+                            player.Type = PlayerType.Teammate;
+                    }
+
                     if (player.LastUpdate) // player may be dead/exfil'd
                     {
                         if (player.Type is PlayerType.LocalPlayer)

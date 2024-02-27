@@ -2,7 +2,7 @@
 
 namespace eft_dma_radar
 {
-    partial class MainForm
+    partial class frmMain
     {
         /// <summary>
         /// Required designer variable.
@@ -28,111 +28,110 @@ namespace eft_dma_radar
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
-        {
+        private void InitializeComponent() {
             components = new System.ComponentModel.Container();
-            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
-            tabControl1 = new TabControl();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            tabControl = new TabControl();
             tabPage1 = new TabPage();
-            NoVisorCheckBox = new CheckBox();
-            OpticThermalBox = new CheckBox();
-            NightVisionCheckBox = new CheckBox();
-            thermalVisionCheckBox = new CheckBox();
-            dataGridView1 = new DataGridView();
+            chkNoVisorDebug = new CheckBox();
+            chkOpticThermalVisionDebug = new CheckBox();
+            chkNightVisionDebug = new CheckBox();
+            chkThermalVisionDebug = new CheckBox();
+            dgvPlayerList = new DataGridView();
             dataGridViewTextBoxColumn1 = new DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn3 = new DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn4 = new DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn5 = new DataGridViewTextBoxColumn();
-            groupBox_Loot = new GroupBox();
-            button_RefreshLoot = new Button();
-            button_LootApply = new Button();
-            label9 = new Label();
-            textBox_LootFilterByName = new TextBox();
+            grpLoot = new GroupBox();
+            btnRefreshLoot = new Button();
+            btnApplyLoot = new Button();
+            lblLootItem = new Label();
+            txtLootFilter = new TextBox();
             label8 = new Label();
             label7 = new Label();
-            textBox_LootImpValue = new TextBox();
-            textBox_LootRegValue = new TextBox();
-            label6 = new Label();
-            groupBox_MapSetup = new GroupBox();
-            button_Loot = new Button();
-            checkBox_MapFree = new CheckBox();
-            button_MapSetupApply = new Button();
-            textBox_mapScale = new TextBox();
-            label5 = new Label();
-            textBox_mapY = new TextBox();
-            label4 = new Label();
-            textBox_mapX = new TextBox();
-            label_Pos = new Label();
+            txtImportantLootValue = new TextBox();
+            txtRegularLootValue = new TextBox();
+            lblLootValue = new Label();
+            grpMapSetup = new GroupBox();
+            btnLoot = new Button();
+            chkMapFree = new CheckBox();
+            btnMapSetupApply = new Button();
+            txtMapSetupScale = new TextBox();
+            lblMapScale = new Label();
+            txtMapSetupY = new TextBox();
+            lblMapXY = new Label();
+            txtMapSetupX = new TextBox();
+            lblMapCoords = new Label();
             tabPage2 = new TabPage();
-            groupBox2 = new GroupBox();
-            NoVisorSCheckBox = new CheckBox();
-            OpticThermalSCheckBox = new CheckBox();
-            NightVisionSCheckBox = new CheckBox();
-            ThermalVisionSCheckBox = new CheckBox();
-            groupBox1 = new GroupBox();
-            checkBox_HidePlayerPanel = new CheckBox();
-            label_UIScale = new Label();
-            trackBar_UIScale = new TrackBar();
-            checkBox_HideNames = new CheckBox();
-            textBox_PrimTeamID = new TextBox();
-            label3 = new Label();
-            checkBox_Aimview = new CheckBox();
-            button_Restart = new Button();
-            checkBox_MapSetup = new CheckBox();
-            checkBox_Loot = new CheckBox();
-            label1 = new Label();
-            trackBar_Zoom = new TrackBar();
-            label2 = new Label();
-            trackBar_AimLength = new TrackBar();
-            button_Map = new Button();
+            grpMemoryWriting = new GroupBox();
+            chkNoVisor = new CheckBox();
+            chkOpticThermalVision = new CheckBox();
+            chkNightVision = new CheckBox();
+            chkThermalVision = new CheckBox();
+            grpConfig = new GroupBox();
+            chkHidePlayers = new CheckBox();
+            lblUIScale = new Label();
+            trkUIScale = new TrackBar();
+            chkHideNames = new CheckBox();
+            txtTeammateID = new TextBox();
+            lblPrimaryTeammate = new Label();
+            chkShowAimview = new CheckBox();
+            btnRestartGame = new Button();
+            chkShowMapSetup = new CheckBox();
+            chkShowLoot = new CheckBox();
+            lblZoom = new Label();
+            trkZoom = new TrackBar();
+            lblAimline = new Label();
+            trkAimLength = new TrackBar();
+            btnToggleMap = new Button();
             tabPage3 = new TabPage();
-            richTextBox_PlayersInfo = new RichTextBox();
+            rchTxtPlayerInfo = new RichTextBox();
             tabPage4 = new TabPage();
-            listView_PmcHistory = new ListView();
+            lstViewPMCHistory = new ListView();
             columnHeader_Entry = new ColumnHeader();
             columnHeader_ID = new ColumnHeader();
             dataGridViewTextBoxColumn2 = new DataGridViewTextBoxColumn();
             bindingSource1 = new BindingSource(components);
             Column1 = new DataGridViewTextBoxColumn();
-            tabControl1.SuspendLayout();
+            tabControl.SuspendLayout();
             tabPage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
-            groupBox_Loot.SuspendLayout();
-            groupBox_MapSetup.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvPlayerList).BeginInit();
+            grpLoot.SuspendLayout();
+            grpMapSetup.SuspendLayout();
             tabPage2.SuspendLayout();
-            groupBox2.SuspendLayout();
-            groupBox1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)trackBar_UIScale).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)trackBar_Zoom).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)trackBar_AimLength).BeginInit();
+            grpMemoryWriting.SuspendLayout();
+            grpConfig.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)trkUIScale).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)trkZoom).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)trkAimLength).BeginInit();
             tabPage3.SuspendLayout();
             tabPage4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)bindingSource1).BeginInit();
             SuspendLayout();
             // 
-            // tabControl1
+            // tabControl
             // 
-            tabControl1.Controls.Add(tabPage1);
-            tabControl1.Controls.Add(tabPage2);
-            tabControl1.Controls.Add(tabPage3);
-            tabControl1.Controls.Add(tabPage4);
-            tabControl1.Dock = DockStyle.Fill;
-            tabControl1.Location = new Point(0, 0);
-            tabControl1.Name = "tabControl1";
-            tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(1336, 666);
-            tabControl1.TabIndex = 8;
+            tabControl.Controls.Add(tabPage1);
+            tabControl.Controls.Add(tabPage2);
+            tabControl.Controls.Add(tabPage3);
+            tabControl.Controls.Add(tabPage4);
+            tabControl.Dock = DockStyle.Fill;
+            tabControl.Location = new Point(0, 0);
+            tabControl.Name = "tabControl";
+            tabControl.SelectedIndex = 0;
+            tabControl.Size = new Size(1336, 666);
+            tabControl.TabIndex = 8;
             // 
             // tabPage1
             // 
-            tabPage1.Controls.Add(NoVisorCheckBox);
-            tabPage1.Controls.Add(OpticThermalBox);
-            tabPage1.Controls.Add(NightVisionCheckBox);
-            tabPage1.Controls.Add(thermalVisionCheckBox);
-            tabPage1.Controls.Add(dataGridView1);
-            tabPage1.Controls.Add(groupBox_Loot);
-            tabPage1.Controls.Add(groupBox_MapSetup);
+            tabPage1.Controls.Add(chkNoVisorDebug);
+            tabPage1.Controls.Add(chkOpticThermalVisionDebug);
+            tabPage1.Controls.Add(chkNightVisionDebug);
+            tabPage1.Controls.Add(chkThermalVisionDebug);
+            tabPage1.Controls.Add(dgvPlayerList);
+            tabPage1.Controls.Add(grpLoot);
+            tabPage1.Controls.Add(grpMapSetup);
             tabPage1.Location = new Point(4, 24);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
@@ -141,84 +140,84 @@ namespace eft_dma_radar
             tabPage1.Text = "Radar";
             tabPage1.UseVisualStyleBackColor = true;
             // 
-            // NoVisorCheckBox
+            // chkNoVisorDebug
             // 
-            NoVisorCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            NoVisorCheckBox.AutoSize = true;
-            NoVisorCheckBox.Location = new Point(1226, 81);
-            NoVisorCheckBox.Name = "NoVisorCheckBox";
-            NoVisorCheckBox.Size = new Size(71, 19);
-            NoVisorCheckBox.TabIndex = 17;
-            NoVisorCheckBox.Text = "No Visor";
-            NoVisorCheckBox.UseVisualStyleBackColor = true;
-            NoVisorCheckBox.CheckedChanged += NoVisorCheckBox_CheckedChanged;
+            chkNoVisorDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            chkNoVisorDebug.AutoSize = true;
+            chkNoVisorDebug.Location = new Point(1226, 81);
+            chkNoVisorDebug.Name = "chkNoVisorDebug";
+            chkNoVisorDebug.Size = new Size(71, 19);
+            chkNoVisorDebug.TabIndex = 17;
+            chkNoVisorDebug.Text = "No Visor";
+            chkNoVisorDebug.UseVisualStyleBackColor = true;
+            chkNoVisorDebug.CheckedChanged += chkNoVisor_CheckedChanged;
             // 
-            // OpticThermalBox
+            // chkOpticThermalVisionDebug
             // 
-            OpticThermalBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            OpticThermalBox.AutoSize = true;
-            OpticThermalBox.Location = new Point(1226, 56);
-            OpticThermalBox.Name = "OpticThermalBox";
-            OpticThermalBox.Size = new Size(101, 19);
-            OpticThermalBox.TabIndex = 16;
-            OpticThermalBox.Text = "Optic Thermal";
-            OpticThermalBox.UseVisualStyleBackColor = true;
-            OpticThermalBox.CheckedChanged += OpticThermalBox_CheckedChanged_1;
+            chkOpticThermalVisionDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            chkOpticThermalVisionDebug.AutoSize = true;
+            chkOpticThermalVisionDebug.Location = new Point(1226, 56);
+            chkOpticThermalVisionDebug.Name = "chkOpticThermalVisionDebug";
+            chkOpticThermalVisionDebug.Size = new Size(101, 19);
+            chkOpticThermalVisionDebug.TabIndex = 16;
+            chkOpticThermalVisionDebug.Text = "Optic Thermal";
+            chkOpticThermalVisionDebug.UseVisualStyleBackColor = true;
+            chkOpticThermalVisionDebug.CheckedChanged += chkOpticThermalVision_CheckedChanged;
             // 
-            // NightVisionCheckBox
+            // chkNightVisionDebug
             // 
-            NightVisionCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            NightVisionCheckBox.AutoSize = true;
-            NightVisionCheckBox.Location = new Point(1226, 6);
-            NightVisionCheckBox.Name = "NightVisionCheckBox";
-            NightVisionCheckBox.Size = new Size(94, 19);
-            NightVisionCheckBox.TabIndex = 14;
-            NightVisionCheckBox.Text = "Night Vision ";
-            NightVisionCheckBox.UseVisualStyleBackColor = true;
-            NightVisionCheckBox.CheckedChanged += NightVisionCheckBox_CheckedChanged_1;
+            chkNightVisionDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            chkNightVisionDebug.AutoSize = true;
+            chkNightVisionDebug.Location = new Point(1226, 6);
+            chkNightVisionDebug.Name = "chkNightVisionDebug";
+            chkNightVisionDebug.Size = new Size(94, 19);
+            chkNightVisionDebug.TabIndex = 14;
+            chkNightVisionDebug.Text = "Night Vision ";
+            chkNightVisionDebug.UseVisualStyleBackColor = true;
+            chkNightVisionDebug.CheckedChanged += chkNightVision_CheckedChanged;
             // 
-            // thermalVisionCheckBox
+            // chkThermalVisionDebug
             // 
-            thermalVisionCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            thermalVisionCheckBox.AutoSize = true;
-            thermalVisionCheckBox.Location = new Point(1226, 31);
-            thermalVisionCheckBox.Name = "thermalVisionCheckBox";
-            thermalVisionCheckBox.Size = new Size(104, 19);
-            thermalVisionCheckBox.TabIndex = 15;
-            thermalVisionCheckBox.Text = "Thermal Vision";
-            thermalVisionCheckBox.UseVisualStyleBackColor = true;
-            thermalVisionCheckBox.CheckedChanged += thermalVisionCheckBox_CheckedChanged_1;
+            chkThermalVisionDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            chkThermalVisionDebug.AutoSize = true;
+            chkThermalVisionDebug.Location = new Point(1226, 31);
+            chkThermalVisionDebug.Name = "chkThermalVisionDebug";
+            chkThermalVisionDebug.Size = new Size(104, 19);
+            chkThermalVisionDebug.TabIndex = 15;
+            chkThermalVisionDebug.Text = "Thermal Vision";
+            chkThermalVisionDebug.UseVisualStyleBackColor = true;
+            chkThermalVisionDebug.CheckedChanged += chkThermalVision_CheckedChanged;
             // 
-            // dataGridView1
+            // dgvPlayerList
             // 
-            dataGridView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
-            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = Color.Black;
-            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            dataGridViewCellStyle3.ForeColor = Color.White;
-            dataGridViewCellStyle3.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.True;
-            dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
-            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Columns.AddRange(new DataGridViewColumn[] { dataGridViewTextBoxColumn1, dataGridViewTextBoxColumn3, dataGridViewTextBoxColumn4, dataGridViewTextBoxColumn5 });
-            dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = Color.Black;
-            dataGridViewCellStyle4.Font = new Font("Arial", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            dataGridViewCellStyle4.ForeColor = Color.White;
-            dataGridViewCellStyle4.Padding = new Padding(3);
-            dataGridViewCellStyle4.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = DataGridViewTriState.False;
-            dataGridView1.DefaultCellStyle = dataGridViewCellStyle4;
-            dataGridView1.EnableHeadersVisualStyles = false;
-            dataGridView1.GridColor = Color.DarkGray;
-            dataGridView1.Location = new Point(877, 6);
-            dataGridView1.Name = "dataGridView1";
-            dataGridView1.RowTemplate.Height = 25;
-            dataGridView1.Size = new Size(443, 202);
-            dataGridView1.TabIndex = 13;
-            dataGridView1.Visible = false;
+            dgvPlayerList.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = Color.Black;
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle1.ForeColor = Color.White;
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            dgvPlayerList.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dgvPlayerList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvPlayerList.Columns.AddRange(new DataGridViewColumn[] { dataGridViewTextBoxColumn1, dataGridViewTextBoxColumn3, dataGridViewTextBoxColumn4, dataGridViewTextBoxColumn5 });
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = Color.Black;
+            dataGridViewCellStyle2.Font = new Font("Arial", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle2.ForeColor = Color.White;
+            dataGridViewCellStyle2.Padding = new Padding(3);
+            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            dgvPlayerList.DefaultCellStyle = dataGridViewCellStyle2;
+            dgvPlayerList.EnableHeadersVisualStyles = false;
+            dgvPlayerList.GridColor = Color.DarkGray;
+            dgvPlayerList.Location = new Point(877, 6);
+            dgvPlayerList.Name = "dgvPlayerList";
+            dgvPlayerList.RowTemplate.Height = 25;
+            dgvPlayerList.Size = new Size(443, 202);
+            dgvPlayerList.TabIndex = 13;
+            dgvPlayerList.Visible = false;
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -240,63 +239,63 @@ namespace eft_dma_radar
             dataGridViewTextBoxColumn5.HeaderText = "Dist";
             dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
             // 
-            // groupBox_Loot
+            // grpLoot
             // 
-            groupBox_Loot.Controls.Add(button_RefreshLoot);
-            groupBox_Loot.Controls.Add(button_LootApply);
-            groupBox_Loot.Controls.Add(label9);
-            groupBox_Loot.Controls.Add(textBox_LootFilterByName);
-            groupBox_Loot.Controls.Add(label8);
-            groupBox_Loot.Controls.Add(label7);
-            groupBox_Loot.Controls.Add(textBox_LootImpValue);
-            groupBox_Loot.Controls.Add(textBox_LootRegValue);
-            groupBox_Loot.Controls.Add(label6);
-            groupBox_Loot.Location = new Point(8, 6);
-            groupBox_Loot.Name = "groupBox_Loot";
-            groupBox_Loot.Size = new Size(256, 202);
-            groupBox_Loot.TabIndex = 12;
-            groupBox_Loot.TabStop = false;
-            groupBox_Loot.Text = "Loot";
-            groupBox_Loot.Visible = false;
+            grpLoot.Controls.Add(btnRefreshLoot);
+            grpLoot.Controls.Add(btnApplyLoot);
+            grpLoot.Controls.Add(lblLootItem);
+            grpLoot.Controls.Add(txtLootFilter);
+            grpLoot.Controls.Add(label8);
+            grpLoot.Controls.Add(label7);
+            grpLoot.Controls.Add(txtImportantLootValue);
+            grpLoot.Controls.Add(txtRegularLootValue);
+            grpLoot.Controls.Add(lblLootValue);
+            grpLoot.Location = new Point(3, 11);
+            grpLoot.Name = "grpLoot";
+            grpLoot.Size = new Size(256, 202);
+            grpLoot.TabIndex = 12;
+            grpLoot.TabStop = false;
+            grpLoot.Text = "Loot";
+            grpLoot.Visible = false;
             // 
-            // button_RefreshLoot
+            // btnRefreshLoot
             // 
-            button_RefreshLoot.Location = new Point(178, 34);
-            button_RefreshLoot.Name = "button_RefreshLoot";
-            button_RefreshLoot.Size = new Size(55, 49);
-            button_RefreshLoot.TabIndex = 21;
-            button_RefreshLoot.Text = "Refresh Loot";
-            button_RefreshLoot.UseVisualStyleBackColor = true;
-            button_RefreshLoot.Click += button_RefreshLoot_Click;
+            btnRefreshLoot.Location = new Point(178, 34);
+            btnRefreshLoot.Name = "btnRefreshLoot";
+            btnRefreshLoot.Size = new Size(55, 49);
+            btnRefreshLoot.TabIndex = 21;
+            btnRefreshLoot.Text = "Refresh Loot";
+            btnRefreshLoot.UseVisualStyleBackColor = true;
+            btnRefreshLoot.Click += btnRefreshLoot_Click;
             // 
-            // button_LootApply
+            // btnApplyLoot
             // 
-            button_LootApply.Enabled = false;
-            button_LootApply.Location = new Point(82, 147);
-            button_LootApply.Name = "button_LootApply";
-            button_LootApply.Size = new Size(61, 46);
-            button_LootApply.TabIndex = 7;
-            button_LootApply.Text = "Apply";
-            button_LootApply.UseVisualStyleBackColor = true;
-            button_LootApply.Click += button_LootApply_Click;
+            btnApplyLoot.Enabled = false;
+            btnApplyLoot.Location = new Point(82, 147);
+            btnApplyLoot.Name = "btnApplyLoot";
+            btnApplyLoot.Size = new Size(61, 46);
+            btnApplyLoot.TabIndex = 7;
+            btnApplyLoot.Text = "Apply";
+            btnApplyLoot.UseVisualStyleBackColor = true;
+            btnApplyLoot.Click += btnApplyLoot_Click;
             // 
-            // label9
+            // lblLootItem
             // 
-            label9.AutoSize = true;
-            label9.Location = new Point(6, 100);
-            label9.Name = "label9";
-            label9.Size = new Size(210, 15);
-            label9.TabIndex = 6;
-            label9.Text = "Find Item(s) by Name (sep by comma)";
+            lblLootItem.AutoSize = true;
+            lblLootItem.Location = new Point(6, 100);
+            lblLootItem.Name = "lblLootItem";
+            lblLootItem.Size = new Size(210, 15);
+            lblLootItem.TabIndex = 6;
+            lblLootItem.Text = "Find Item(s) by Name (sep by comma)";
             // 
-            // textBox_LootFilterByName
+            // txtLootFilter
             // 
-            textBox_LootFilterByName.Location = new Point(6, 118);
-            textBox_LootFilterByName.MaxLength = 512;
-            textBox_LootFilterByName.Name = "textBox_LootFilterByName";
-            textBox_LootFilterByName.Size = new Size(227, 23);
-            textBox_LootFilterByName.TabIndex = 5;
-            textBox_LootFilterByName.TextChanged += textBox_LootFilterByName_TextChanged;
+            txtLootFilter.Location = new Point(6, 118);
+            txtLootFilter.MaxLength = 512;
+            txtLootFilter.Name = "txtLootFilter";
+            txtLootFilter.Size = new Size(227, 23);
+            txtLootFilter.TabIndex = 5;
+            txtLootFilter.TextChanged += txtLootFilter_TextChanged;
             // 
             // label8
             // 
@@ -316,140 +315,140 @@ namespace eft_dma_radar
             label7.TabIndex = 3;
             label7.Text = "Regular";
             // 
-            // textBox_LootImpValue
+            // txtImportantLootValue
             // 
-            textBox_LootImpValue.Location = new Point(86, 52);
-            textBox_LootImpValue.MaxLength = 7;
-            textBox_LootImpValue.Name = "textBox_LootImpValue";
-            textBox_LootImpValue.Size = new Size(57, 23);
-            textBox_LootImpValue.TabIndex = 2;
-            textBox_LootImpValue.Text = "300000";
-            textBox_LootImpValue.TextChanged += textBox_LootImpValue_TextChanged;
+            txtImportantLootValue.Location = new Point(86, 52);
+            txtImportantLootValue.MaxLength = 7;
+            txtImportantLootValue.Name = "txtImportantLootValue";
+            txtImportantLootValue.Size = new Size(57, 23);
+            txtImportantLootValue.TabIndex = 2;
+            txtImportantLootValue.Text = "300000";
+            txtImportantLootValue.TextChanged += txtImportantLootValue_TextChanged;
             // 
-            // textBox_LootRegValue
+            // txtRegularLootValue
             // 
-            textBox_LootRegValue.Location = new Point(21, 52);
-            textBox_LootRegValue.MaxLength = 6;
-            textBox_LootRegValue.Name = "textBox_LootRegValue";
-            textBox_LootRegValue.Size = new Size(50, 23);
-            textBox_LootRegValue.TabIndex = 1;
-            textBox_LootRegValue.Text = "70000";
-            textBox_LootRegValue.TextChanged += textBox_LootRegValue_TextChanged;
+            txtRegularLootValue.Location = new Point(21, 52);
+            txtRegularLootValue.MaxLength = 6;
+            txtRegularLootValue.Name = "txtRegularLootValue";
+            txtRegularLootValue.Size = new Size(50, 23);
+            txtRegularLootValue.TabIndex = 1;
+            txtRegularLootValue.Text = "70000";
+            txtRegularLootValue.TextChanged += txtRegularLootValue_TextChanged;
             // 
-            // label6
+            // lblLootValue
             // 
-            label6.AutoSize = true;
-            label6.Location = new Point(6, 19);
-            label6.Name = "label6";
-            label6.Size = new Size(137, 15);
-            label6.TabIndex = 0;
-            label6.Text = "Minimum Value to Show";
+            lblLootValue.AutoSize = true;
+            lblLootValue.Location = new Point(6, 19);
+            lblLootValue.Name = "lblLootValue";
+            lblLootValue.Size = new Size(137, 15);
+            lblLootValue.TabIndex = 0;
+            lblLootValue.Text = "Minimum Value to Show";
             // 
-            // groupBox_MapSetup
+            // grpMapSetup
             // 
-            groupBox_MapSetup.Controls.Add(button_Loot);
-            groupBox_MapSetup.Controls.Add(checkBox_MapFree);
-            groupBox_MapSetup.Controls.Add(button_MapSetupApply);
-            groupBox_MapSetup.Controls.Add(textBox_mapScale);
-            groupBox_MapSetup.Controls.Add(label5);
-            groupBox_MapSetup.Controls.Add(textBox_mapY);
-            groupBox_MapSetup.Controls.Add(label4);
-            groupBox_MapSetup.Controls.Add(textBox_mapX);
-            groupBox_MapSetup.Controls.Add(label_Pos);
-            groupBox_MapSetup.Location = new Point(8, 6);
-            groupBox_MapSetup.Name = "groupBox_MapSetup";
-            groupBox_MapSetup.Size = new Size(327, 175);
-            groupBox_MapSetup.TabIndex = 11;
-            groupBox_MapSetup.TabStop = false;
-            groupBox_MapSetup.Text = "Map Setup";
-            groupBox_MapSetup.Visible = false;
+            grpMapSetup.Controls.Add(btnLoot);
+            grpMapSetup.Controls.Add(chkMapFree);
+            grpMapSetup.Controls.Add(btnMapSetupApply);
+            grpMapSetup.Controls.Add(txtMapSetupScale);
+            grpMapSetup.Controls.Add(lblMapScale);
+            grpMapSetup.Controls.Add(txtMapSetupY);
+            grpMapSetup.Controls.Add(lblMapXY);
+            grpMapSetup.Controls.Add(txtMapSetupX);
+            grpMapSetup.Controls.Add(lblMapCoords);
+            grpMapSetup.Location = new Point(8, 11);
+            grpMapSetup.Name = "grpMapSetup";
+            grpMapSetup.Size = new Size(327, 175);
+            grpMapSetup.TabIndex = 11;
+            grpMapSetup.TabStop = false;
+            grpMapSetup.Text = "Map Setup";
+            grpMapSetup.Visible = false;
             // 
-            // button_Loot
+            // btnLoot
             // 
-            button_Loot.Location = new Point(85, 0);
-            button_Loot.Name = "button_Loot";
-            button_Loot.Size = new Size(44, 25);
-            button_Loot.TabIndex = 12;
-            button_Loot.Text = "Loot";
-            button_Loot.UseVisualStyleBackColor = true;
-            button_Loot.Visible = false;
-            button_Loot.Click += button_LootFilter_Click;
+            btnLoot.Location = new Point(85, 0);
+            btnLoot.Name = "btnLoot";
+            btnLoot.Size = new Size(44, 25);
+            btnLoot.TabIndex = 12;
+            btnLoot.Text = "Loot";
+            btnLoot.UseVisualStyleBackColor = true;
+            btnLoot.Visible = false;
+            btnLoot.Click += btnLoot_Click;
             // 
-            // checkBox_MapFree
+            // chkMapFree
             // 
-            checkBox_MapFree.Appearance = Appearance.Button;
-            checkBox_MapFree.AutoSize = true;
-            checkBox_MapFree.Location = new Point(0, 0);
-            checkBox_MapFree.Name = "checkBox_MapFree";
-            checkBox_MapFree.Size = new Size(66, 25);
-            checkBox_MapFree.TabIndex = 17;
-            checkBox_MapFree.Text = "Map Free";
-            checkBox_MapFree.UseVisualStyleBackColor = true;
-            checkBox_MapFree.CheckedChanged += checkBox_MapFree_CheckedChanged;
+            chkMapFree.Appearance = Appearance.Button;
+            chkMapFree.AutoSize = true;
+            chkMapFree.Location = new Point(0, 0);
+            chkMapFree.Name = "chkMapFree";
+            chkMapFree.Size = new Size(66, 25);
+            chkMapFree.TabIndex = 17;
+            chkMapFree.Text = "Map Free";
+            chkMapFree.UseVisualStyleBackColor = true;
+            chkMapFree.CheckedChanged += chkMapFree_CheckedChanged;
             // 
-            // button_MapSetupApply
+            // btnMapSetupApply
             // 
-            button_MapSetupApply.Location = new Point(6, 143);
-            button_MapSetupApply.Name = "button_MapSetupApply";
-            button_MapSetupApply.Size = new Size(75, 23);
-            button_MapSetupApply.TabIndex = 16;
-            button_MapSetupApply.Text = "Apply";
-            button_MapSetupApply.UseVisualStyleBackColor = true;
-            button_MapSetupApply.Click += button_MapSetupApply_Click;
+            btnMapSetupApply.Location = new Point(6, 143);
+            btnMapSetupApply.Name = "btnMapSetupApply";
+            btnMapSetupApply.Size = new Size(75, 23);
+            btnMapSetupApply.TabIndex = 16;
+            btnMapSetupApply.Text = "Apply";
+            btnMapSetupApply.UseVisualStyleBackColor = true;
+            btnMapSetupApply.Click += btnMapSetupApply_Click;
             // 
-            // textBox_mapScale
+            // txtMapSetupScale
             // 
-            textBox_mapScale.Location = new Point(46, 101);
-            textBox_mapScale.Name = "textBox_mapScale";
-            textBox_mapScale.Size = new Size(50, 23);
-            textBox_mapScale.TabIndex = 15;
+            txtMapSetupScale.Location = new Point(46, 101);
+            txtMapSetupScale.Name = "txtMapSetupScale";
+            txtMapSetupScale.Size = new Size(50, 23);
+            txtMapSetupScale.TabIndex = 15;
             // 
-            // label5
+            // lblMapScale
             // 
-            label5.AutoSize = true;
-            label5.Location = new Point(6, 104);
-            label5.Name = "label5";
-            label5.Size = new Size(34, 15);
-            label5.TabIndex = 14;
-            label5.Text = "Scale";
+            lblMapScale.AutoSize = true;
+            lblMapScale.Location = new Point(6, 104);
+            lblMapScale.Name = "lblMapScale";
+            lblMapScale.Size = new Size(34, 15);
+            lblMapScale.TabIndex = 14;
+            lblMapScale.Text = "Scale";
             // 
-            // textBox_mapY
+            // txtMapSetupY
             // 
-            textBox_mapY.Location = new Point(102, 67);
-            textBox_mapY.Name = "textBox_mapY";
-            textBox_mapY.Size = new Size(50, 23);
-            textBox_mapY.TabIndex = 13;
+            txtMapSetupY.Location = new Point(102, 67);
+            txtMapSetupY.Name = "txtMapSetupY";
+            txtMapSetupY.Size = new Size(50, 23);
+            txtMapSetupY.TabIndex = 13;
             // 
-            // label4
+            // lblMapXY
             // 
-            label4.AutoSize = true;
-            label4.Location = new Point(6, 70);
-            label4.Name = "label4";
-            label4.Size = new Size(24, 15);
-            label4.TabIndex = 12;
-            label4.Text = "X,Y";
+            lblMapXY.AutoSize = true;
+            lblMapXY.Location = new Point(6, 70);
+            lblMapXY.Name = "lblMapXY";
+            lblMapXY.Size = new Size(24, 15);
+            lblMapXY.TabIndex = 12;
+            lblMapXY.Text = "X,Y";
             // 
-            // textBox_mapX
+            // txtMapSetupX
             // 
-            textBox_mapX.Location = new Point(46, 67);
-            textBox_mapX.Name = "textBox_mapX";
-            textBox_mapX.Size = new Size(50, 23);
-            textBox_mapX.TabIndex = 11;
+            txtMapSetupX.Location = new Point(46, 67);
+            txtMapSetupX.Name = "txtMapSetupX";
+            txtMapSetupX.Size = new Size(50, 23);
+            txtMapSetupX.TabIndex = 11;
             // 
-            // label_Pos
+            // lblMapCoords
             // 
-            label_Pos.AutoSize = true;
-            label_Pos.Location = new Point(7, 19);
-            label_Pos.Margin = new Padding(4, 0, 4, 0);
-            label_Pos.Name = "label_Pos";
-            label_Pos.Size = new Size(43, 15);
-            label_Pos.TabIndex = 10;
-            label_Pos.Text = "coords";
+            lblMapCoords.AutoSize = true;
+            lblMapCoords.Location = new Point(7, 19);
+            lblMapCoords.Margin = new Padding(4, 0, 4, 0);
+            lblMapCoords.Name = "lblMapCoords";
+            lblMapCoords.Size = new Size(43, 15);
+            lblMapCoords.TabIndex = 10;
+            lblMapCoords.Text = "coords";
             // 
             // tabPage2
             // 
-            tabPage2.Controls.Add(groupBox2);
-            tabPage2.Controls.Add(groupBox1);
+            tabPage2.Controls.Add(grpMemoryWriting);
+            tabPage2.Controls.Add(grpConfig);
             tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
@@ -458,258 +457,257 @@ namespace eft_dma_radar
             tabPage2.Text = "Settings";
             tabPage2.UseVisualStyleBackColor = true;
             // 
-            // groupBox2
+            // grpMemoryWriting
             // 
-            groupBox2.Controls.Add(NoVisorSCheckBox);
-            groupBox2.Controls.Add(OpticThermalSCheckBox);
-            groupBox2.Controls.Add(NightVisionSCheckBox);
-            groupBox2.Controls.Add(ThermalVisionSCheckBox);
-            groupBox2.Location = new Point(487, 3);
-            groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(335, 629);
-            groupBox2.TabIndex = 9;
-            groupBox2.TabStop = false;
-            groupBox2.Text = "Memory Writing";
+            grpMemoryWriting.Controls.Add(chkNoVisor);
+            grpMemoryWriting.Controls.Add(chkOpticThermalVision);
+            grpMemoryWriting.Controls.Add(chkNightVision);
+            grpMemoryWriting.Controls.Add(chkThermalVision);
+            grpMemoryWriting.Location = new Point(487, 3);
+            grpMemoryWriting.Name = "grpMemoryWriting";
+            grpMemoryWriting.Size = new Size(335, 629);
+            grpMemoryWriting.TabIndex = 9;
+            grpMemoryWriting.TabStop = false;
+            grpMemoryWriting.Text = "Memory Writing";
             // 
-            // NoVisorSCheckBox
+            // chkNoVisor
             // 
-            NoVisorSCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            NoVisorSCheckBox.AutoSize = true;
-            NoVisorSCheckBox.Location = new Point(166, 47);
-            NoVisorSCheckBox.Name = "NoVisorSCheckBox";
-            NoVisorSCheckBox.Size = new Size(71, 19);
-            NoVisorSCheckBox.TabIndex = 21;
-            NoVisorSCheckBox.Text = "No Visor";
-            NoVisorSCheckBox.UseVisualStyleBackColor = true;
-            NoVisorSCheckBox.CheckedChanged += NoVisorSCheckBox_CheckedChanged;
+            chkNoVisor.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            chkNoVisor.AutoSize = true;
+            chkNoVisor.Location = new Point(166, 47);
+            chkNoVisor.Name = "chkNoVisor";
+            chkNoVisor.Size = new Size(71, 19);
+            chkNoVisor.TabIndex = 21;
+            chkNoVisor.Text = "No Visor";
+            chkNoVisor.UseVisualStyleBackColor = true;
+            chkNoVisor.CheckedChanged += chkNoVisor_CheckedChanged;
             // 
-            // OpticThermalSCheckBox
+            // chkOpticThermalVision
             // 
-            OpticThermalSCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            OpticThermalSCheckBox.AutoSize = true;
-            OpticThermalSCheckBox.Location = new Point(166, 22);
-            OpticThermalSCheckBox.Name = "OpticThermalSCheckBox";
-            OpticThermalSCheckBox.Size = new Size(101, 19);
-            OpticThermalSCheckBox.TabIndex = 20;
-            OpticThermalSCheckBox.Text = "Optic Thermal";
-            OpticThermalSCheckBox.UseVisualStyleBackColor = true;
-            OpticThermalSCheckBox.CheckedChanged += OpticThermalSCheckBox_CheckedChanged;
+            chkOpticThermalVision.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            chkOpticThermalVision.AutoSize = true;
+            chkOpticThermalVision.Location = new Point(166, 22);
+            chkOpticThermalVision.Name = "chkOpticThermalVision";
+            chkOpticThermalVision.Size = new Size(101, 19);
+            chkOpticThermalVision.TabIndex = 20;
+            chkOpticThermalVision.Text = "Optic Thermal";
+            chkOpticThermalVision.UseVisualStyleBackColor = true;
+            chkOpticThermalVision.CheckedChanged += chkOpticThermalVision_CheckedChanged;
             // 
-            // NightVisionSCheckBox
+            // chkNightVision
             // 
-            NightVisionSCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            NightVisionSCheckBox.AutoSize = true;
-            NightVisionSCheckBox.Location = new Point(6, 22);
-            NightVisionSCheckBox.Name = "NightVisionSCheckBox";
-            NightVisionSCheckBox.Size = new Size(144, 19);
-            NightVisionSCheckBox.TabIndex = 18;
-            NightVisionSCheckBox.Text = "Night Vision (Ctrl + N)";
-            NightVisionSCheckBox.UseVisualStyleBackColor = true;
-            NightVisionSCheckBox.CheckedChanged += NightVisionSCheckBox_CheckedChanged;
+            chkNightVision.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            chkNightVision.AutoSize = true;
+            chkNightVision.Location = new Point(6, 22);
+            chkNightVision.Name = "chkNightVision";
+            chkNightVision.Size = new Size(144, 19);
+            chkNightVision.TabIndex = 18;
+            chkNightVision.Text = "Night Vision (Ctrl + N)";
+            chkNightVision.UseVisualStyleBackColor = true;
+            chkNightVision.CheckedChanged += chkNightVision_CheckedChanged;
             // 
-            // ThermalVisionSCheckBox
+            // chkThermalVision
             // 
-            ThermalVisionSCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            ThermalVisionSCheckBox.AutoSize = true;
-            ThermalVisionSCheckBox.Location = new Point(6, 47);
-            ThermalVisionSCheckBox.Name = "ThermalVisionSCheckBox";
-            ThermalVisionSCheckBox.Size = new Size(154, 19);
-            ThermalVisionSCheckBox.TabIndex = 19;
-            ThermalVisionSCheckBox.Text = "Thermal Vision (Ctrl + T)";
-            ThermalVisionSCheckBox.UseVisualStyleBackColor = true;
-            ThermalVisionSCheckBox.CheckedChanged += ThermalVisionSCheckBox_CheckedChanged;
+            chkThermalVision.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            chkThermalVision.AutoSize = true;
+            chkThermalVision.Location = new Point(6, 47);
+            chkThermalVision.Name = "chkThermalVision";
+            chkThermalVision.Size = new Size(154, 19);
+            chkThermalVision.TabIndex = 19;
+            chkThermalVision.Text = "Thermal Vision (Ctrl + T)";
+            chkThermalVision.UseVisualStyleBackColor = true;
+            chkThermalVision.CheckedChanged += chkThermalVision_CheckedChanged;
             // 
-            // groupBox1
+            // grpConfig
             // 
-            groupBox1.Controls.Add(checkBox_HidePlayerPanel);
-            groupBox1.Controls.Add(label_UIScale);
-            groupBox1.Controls.Add(trackBar_UIScale);
-            groupBox1.Controls.Add(checkBox_HideNames);
-            groupBox1.Controls.Add(textBox_PrimTeamID);
-            groupBox1.Controls.Add(label3);
-            groupBox1.Controls.Add(checkBox_Aimview);
-            groupBox1.Controls.Add(button_Restart);
-            groupBox1.Controls.Add(checkBox_MapSetup);
-            groupBox1.Controls.Add(checkBox_Loot);
-            groupBox1.Controls.Add(label1);
-            groupBox1.Controls.Add(trackBar_Zoom);
-            groupBox1.Controls.Add(label2);
-            groupBox1.Controls.Add(trackBar_AimLength);
-            groupBox1.Controls.Add(button_Map);
-            groupBox1.Dock = DockStyle.Left;
-            groupBox1.Location = new Point(3, 3);
-            groupBox1.Margin = new Padding(4, 3, 4, 3);
-            groupBox1.Name = "groupBox1";
-            groupBox1.Padding = new Padding(4, 3, 4, 3);
-            groupBox1.Size = new Size(483, 632);
-            groupBox1.TabIndex = 8;
-            groupBox1.TabStop = false;
-            groupBox1.Text = "Radar Config";
+            grpConfig.Controls.Add(chkHidePlayers);
+            grpConfig.Controls.Add(lblUIScale);
+            grpConfig.Controls.Add(trkUIScale);
+            grpConfig.Controls.Add(chkHideNames);
+            grpConfig.Controls.Add(txtTeammateID);
+            grpConfig.Controls.Add(lblPrimaryTeammate);
+            grpConfig.Controls.Add(chkShowAimview);
+            grpConfig.Controls.Add(btnRestartGame);
+            grpConfig.Controls.Add(chkShowMapSetup);
+            grpConfig.Controls.Add(chkShowLoot);
+            grpConfig.Controls.Add(lblZoom);
+            grpConfig.Controls.Add(trkZoom);
+            grpConfig.Controls.Add(lblAimline);
+            grpConfig.Controls.Add(trkAimLength);
+            grpConfig.Controls.Add(btnToggleMap);
+            grpConfig.Dock = DockStyle.Left;
+            grpConfig.Location = new Point(3, 3);
+            grpConfig.Margin = new Padding(4, 3, 4, 3);
+            grpConfig.Name = "grpConfig";
+            grpConfig.Padding = new Padding(4, 3, 4, 3);
+            grpConfig.Size = new Size(483, 632);
+            grpConfig.TabIndex = 8;
+            grpConfig.TabStop = false;
+            grpConfig.Text = "Radar Config";
             // 
-            // checkBox_HidePlayerPanel
+            // chkHidePlayers
             // 
-            checkBox_HidePlayerPanel.AutoSize = true;
-            checkBox_HidePlayerPanel.Checked = true;
-            checkBox_HidePlayerPanel.CheckState = CheckState.Checked;
-            checkBox_HidePlayerPanel.Location = new Point(193, 176);
-            checkBox_HidePlayerPanel.Name = "checkBox_HidePlayerPanel";
-            checkBox_HidePlayerPanel.Size = new Size(110, 19);
-            checkBox_HidePlayerPanel.TabIndex = 29;
-            checkBox_HidePlayerPanel.Text = "Hide Player Info";
-            checkBox_HidePlayerPanel.UseVisualStyleBackColor = true;
-            checkBox_HidePlayerPanel.CheckedChanged += checkBox_HidePlayerPanel_CheckedChanged;
+            chkHidePlayers.AutoSize = true;
+            chkHidePlayers.Checked = true;
+            chkHidePlayers.CheckState = CheckState.Checked;
+            chkHidePlayers.Location = new Point(193, 176);
+            chkHidePlayers.Name = "chkHidePlayers";
+            chkHidePlayers.Size = new Size(110, 19);
+            chkHidePlayers.TabIndex = 29;
+            chkHidePlayers.Text = "Hide Player Info";
+            chkHidePlayers.UseVisualStyleBackColor = true;
+            chkHidePlayers.CheckedChanged += chkHidePlayers_CheckedChanged;
             // 
-            // label_UIScale
+            // lblUIScale
             // 
-            label_UIScale.AutoSize = true;
-            label_UIScale.Location = new Point(83, 350);
-            label_UIScale.Name = "label_UIScale";
-            label_UIScale.Size = new Size(66, 15);
-            label_UIScale.TabIndex = 28;
-            label_UIScale.Text = "UI Scale 1.0";
-            label_UIScale.TextAlign = ContentAlignment.MiddleCenter;
+            lblUIScale.AutoSize = true;
+            lblUIScale.Location = new Point(83, 350);
+            lblUIScale.Name = "lblUIScale";
+            lblUIScale.Size = new Size(66, 15);
+            lblUIScale.TabIndex = 28;
+            lblUIScale.Text = "UI Scale 1.0";
+            lblUIScale.TextAlign = ContentAlignment.MiddleCenter;
             // 
-            // trackBar_UIScale
+            // trkUIScale
             // 
-            trackBar_UIScale.LargeChange = 10;
-            trackBar_UIScale.Location = new Point(192, 334);
-            trackBar_UIScale.Maximum = 200;
-            trackBar_UIScale.Minimum = 50;
-            trackBar_UIScale.Name = "trackBar_UIScale";
-            trackBar_UIScale.Size = new Size(277, 45);
-            trackBar_UIScale.TabIndex = 27;
-            trackBar_UIScale.Value = 100;
+            trkUIScale.LargeChange = 10;
+            trkUIScale.Location = new Point(192, 334);
+            trkUIScale.Maximum = 200;
+            trkUIScale.Minimum = 50;
+            trkUIScale.Name = "trkUIScale";
+            trkUIScale.Size = new Size(277, 45);
+            trkUIScale.TabIndex = 27;
+            trkUIScale.Value = 100;
             // 
-            // checkBox_HideNames
+            // chkHideNames
             // 
-            checkBox_HideNames.AutoSize = true;
-            checkBox_HideNames.Location = new Point(326, 151);
-            checkBox_HideNames.Name = "checkBox_HideNames";
-            checkBox_HideNames.Size = new Size(114, 19);
-            checkBox_HideNames.TabIndex = 26;
-            checkBox_HideNames.Text = "Hide Names (F6)";
-            checkBox_HideNames.UseVisualStyleBackColor = true;
+            chkHideNames.AutoSize = true;
+            chkHideNames.Location = new Point(326, 151);
+            chkHideNames.Name = "chkHideNames";
+            chkHideNames.Size = new Size(114, 19);
+            chkHideNames.TabIndex = 26;
+            chkHideNames.Text = "Hide Names (F6)";
+            chkHideNames.UseVisualStyleBackColor = true;
             // 
-            // textBox_PrimTeamID
+            // txtTeammateID
             // 
-            textBox_PrimTeamID.Location = new Point(44, 97);
-            textBox_PrimTeamID.MaxLength = 12;
-            textBox_PrimTeamID.Name = "textBox_PrimTeamID";
-            textBox_PrimTeamID.Size = new Size(147, 23);
-            textBox_PrimTeamID.TabIndex = 25;
+            txtTeammateID.Location = new Point(44, 97);
+            txtTeammateID.MaxLength = 12;
+            txtTeammateID.Name = "txtTeammateID";
+            txtTeammateID.Size = new Size(147, 23);
+            txtTeammateID.TabIndex = 25;
             // 
-            // label3
+            // lblPrimaryTeammate
             // 
-            label3.AutoSize = true;
-            label3.Location = new Point(44, 79);
-            label3.Name = "label3";
-            label3.Size = new Size(147, 15);
-            label3.TabIndex = 22;
-            label3.Text = "Primary Teammate Acct ID";
+            lblPrimaryTeammate.AutoSize = true;
+            lblPrimaryTeammate.Location = new Point(44, 79);
+            lblPrimaryTeammate.Name = "lblPrimaryTeammate";
+            lblPrimaryTeammate.Size = new Size(147, 15);
+            lblPrimaryTeammate.TabIndex = 22;
+            lblPrimaryTeammate.Text = "Primary Teammate Acct ID";
             // 
-            // checkBox_Aimview
+            // chkShowAimview
             // 
-            checkBox_Aimview.AutoSize = true;
-            checkBox_Aimview.Location = new Point(193, 151);
-            checkBox_Aimview.Name = "checkBox_Aimview";
-            checkBox_Aimview.Size = new Size(127, 19);
-            checkBox_Aimview.TabIndex = 19;
-            checkBox_Aimview.Text = "Show Aimview (F4)";
-            checkBox_Aimview.UseVisualStyleBackColor = true;
+            chkShowAimview.AutoSize = true;
+            chkShowAimview.Location = new Point(193, 151);
+            chkShowAimview.Name = "chkShowAimview";
+            chkShowAimview.Size = new Size(127, 19);
+            chkShowAimview.TabIndex = 19;
+            chkShowAimview.Text = "Show Aimview (F4)";
+            chkShowAimview.UseVisualStyleBackColor = true;
             // 
-            // button_Restart
+            // btnRestartGame
             // 
-            button_Restart.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
-            button_Restart.Location = new Point(359, 33);
-            button_Restart.Name = "button_Restart";
-            button_Restart.Size = new Size(81, 61);
-            button_Restart.TabIndex = 18;
-            button_Restart.Text = "Restart Game";
-            button_Restart.UseVisualStyleBackColor = true;
-            button_Restart.Click += button_Restart_Click;
+            btnRestartGame.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            btnRestartGame.Location = new Point(359, 33);
+            btnRestartGame.Name = "btnRestartGame";
+            btnRestartGame.Size = new Size(81, 61);
+            btnRestartGame.TabIndex = 18;
+            btnRestartGame.Text = "Restart Game";
+            btnRestartGame.UseVisualStyleBackColor = true;
+            btnRestartGame.Click += btnRestartGame_Click;
             // 
-            // checkBox_MapSetup
+            // chkShowMapSetup
             // 
-            checkBox_MapSetup.AutoSize = true;
-            checkBox_MapSetup.Location = new Point(44, 176);
-            checkBox_MapSetup.Name = "checkBox_MapSetup";
-            checkBox_MapSetup.Size = new Size(153, 19);
-            checkBox_MapSetup.TabIndex = 9;
-            checkBox_MapSetup.Text = "Show Map Setup Helper";
-            checkBox_MapSetup.UseVisualStyleBackColor = true;
-            checkBox_MapSetup.CheckedChanged += checkBox_MapSetup_CheckedChanged;
+            chkShowMapSetup.AutoSize = true;
+            chkShowMapSetup.Location = new Point(44, 176);
+            chkShowMapSetup.Name = "chkShowMapSetup";
+            chkShowMapSetup.Size = new Size(153, 19);
+            chkShowMapSetup.TabIndex = 9;
+            chkShowMapSetup.Text = "Show Map Setup Helper";
+            chkShowMapSetup.UseVisualStyleBackColor = true;
+            chkShowMapSetup.CheckedChanged += chkShowMapSetup_CheckedChanged;
             // 
-            // checkBox_Loot
+            // chkShowLoot
             // 
-            checkBox_Loot.AutoSize = true;
-            checkBox_Loot.Location = new Point(44, 151);
-            checkBox_Loot.Name = "checkBox_Loot";
-            checkBox_Loot.Size = new Size(105, 19);
-            checkBox_Loot.TabIndex = 17;
-            checkBox_Loot.Text = "Show Loot (F3)";
-            checkBox_Loot.UseVisualStyleBackColor = true;
-            checkBox_Loot.CheckedChanged += checkBox_Loot_CheckedChanged;
+            chkShowLoot.AutoSize = true;
+            chkShowLoot.Location = new Point(44, 151);
+            chkShowLoot.Name = "chkShowLoot";
+            chkShowLoot.Size = new Size(105, 19);
+            chkShowLoot.TabIndex = 17;
+            chkShowLoot.Text = "Show Loot (F3)";
+            chkShowLoot.UseVisualStyleBackColor = true;
+            chkShowLoot.CheckedChanged += chkShowLoot_CheckedChanged;
             // 
-            // label1
+            // lblZoom
             // 
-            label1.AutoSize = true;
-            label1.Location = new Point(44, 273);
-            label1.Margin = new Padding(4, 0, 4, 0);
-            label1.Name = "label1";
-            label1.Size = new Size(136, 45);
-            label1.TabIndex = 16;
-            label1.Text = "Zoom\r\nF1/Mouse Whl Up = In\r\nF2/Mouse Whl Dn = Out";
-            label1.TextAlign = ContentAlignment.MiddleCenter;
+            lblZoom.AutoSize = true;
+            lblZoom.Location = new Point(44, 273);
+            lblZoom.Margin = new Padding(4, 0, 4, 0);
+            lblZoom.Name = "lblZoom";
+            lblZoom.Size = new Size(136, 45);
+            lblZoom.TabIndex = 16;
+            lblZoom.Text = "Zoom\r\nF1/Mouse Whl Up = In\r\nF2/Mouse Whl Dn = Out";
+            lblZoom.TextAlign = ContentAlignment.MiddleCenter;
             // 
-            // trackBar_Zoom
+            // trkZoom
             // 
-            trackBar_Zoom.LargeChange = 1;
-            trackBar_Zoom.Location = new Point(192, 273);
-            trackBar_Zoom.Maximum = 200;
-            trackBar_Zoom.Minimum = 1;
-            trackBar_Zoom.Name = "trackBar_Zoom";
-            trackBar_Zoom.Size = new Size(277, 45);
-            trackBar_Zoom.TabIndex = 15;
-            trackBar_Zoom.Value = 100;
+            trkZoom.LargeChange = 1;
+            trkZoom.Location = new Point(192, 273);
+            trkZoom.Maximum = 200;
+            trkZoom.Name = "trkZoom";
+            trkZoom.Size = new Size(277, 45);
+            trkZoom.TabIndex = 15;
+            trkZoom.Value = 100;
             // 
-            // label2
+            // lblAimline
             // 
-            label2.AutoSize = true;
-            label2.Location = new Point(63, 214);
-            label2.Margin = new Padding(4, 0, 4, 0);
-            label2.Name = "label2";
-            label2.Size = new Size(99, 30);
-            label2.TabIndex = 13;
-            label2.Text = "Player/Teammate\r\nAimline";
-            label2.TextAlign = ContentAlignment.MiddleCenter;
+            lblAimline.AutoSize = true;
+            lblAimline.Location = new Point(63, 214);
+            lblAimline.Margin = new Padding(4, 0, 4, 0);
+            lblAimline.Name = "lblAimline";
+            lblAimline.Size = new Size(99, 30);
+            lblAimline.TabIndex = 13;
+            lblAimline.Text = "Player/Teammate\r\nAimline";
+            lblAimline.TextAlign = ContentAlignment.MiddleCenter;
             // 
-            // trackBar_AimLength
+            // trkAimLength
             // 
-            trackBar_AimLength.LargeChange = 50;
-            trackBar_AimLength.Location = new Point(193, 214);
-            trackBar_AimLength.Margin = new Padding(4, 3, 4, 3);
-            trackBar_AimLength.Maximum = 1000;
-            trackBar_AimLength.Minimum = 10;
-            trackBar_AimLength.Name = "trackBar_AimLength";
-            trackBar_AimLength.Size = new Size(276, 45);
-            trackBar_AimLength.SmallChange = 5;
-            trackBar_AimLength.TabIndex = 11;
-            trackBar_AimLength.Value = 500;
+            trkAimLength.LargeChange = 50;
+            trkAimLength.Location = new Point(193, 214);
+            trkAimLength.Margin = new Padding(4, 3, 4, 3);
+            trkAimLength.Maximum = 1000;
+            trkAimLength.Minimum = 10;
+            trkAimLength.Name = "trkAimLength";
+            trkAimLength.Size = new Size(276, 45);
+            trkAimLength.SmallChange = 5;
+            trkAimLength.TabIndex = 11;
+            trkAimLength.Value = 500;
             // 
-            // button_Map
+            // btnToggleMap
             // 
-            button_Map.Location = new Point(44, 33);
-            button_Map.Margin = new Padding(4, 3, 4, 3);
-            button_Map.Name = "button_Map";
-            button_Map.Size = new Size(107, 27);
-            button_Map.TabIndex = 7;
-            button_Map.Text = "Toggle Map (F5)";
-            button_Map.UseVisualStyleBackColor = true;
-            button_Map.Click += button_Map_Click;
+            btnToggleMap.Location = new Point(44, 33);
+            btnToggleMap.Margin = new Padding(4, 3, 4, 3);
+            btnToggleMap.Name = "btnToggleMap";
+            btnToggleMap.Size = new Size(107, 27);
+            btnToggleMap.TabIndex = 7;
+            btnToggleMap.Text = "Toggle Map (F5)";
+            btnToggleMap.UseVisualStyleBackColor = true;
+            btnToggleMap.Click += btnToggleMap_Click;
             // 
             // tabPage3
             // 
-            tabPage3.Controls.Add(richTextBox_PlayersInfo);
+            tabPage3.Controls.Add(rchTxtPlayerInfo);
             tabPage3.Location = new Point(4, 24);
             tabPage3.Name = "tabPage3";
             tabPage3.Size = new Size(1328, 638);
@@ -717,20 +715,20 @@ namespace eft_dma_radar
             tabPage3.Text = "Player Loadouts";
             tabPage3.UseVisualStyleBackColor = true;
             // 
-            // richTextBox_PlayersInfo
+            // rchTxtPlayerInfo
             // 
-            richTextBox_PlayersInfo.Dock = DockStyle.Fill;
-            richTextBox_PlayersInfo.Font = new Font("Arial", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            richTextBox_PlayersInfo.Location = new Point(0, 0);
-            richTextBox_PlayersInfo.Name = "richTextBox_PlayersInfo";
-            richTextBox_PlayersInfo.ReadOnly = true;
-            richTextBox_PlayersInfo.Size = new Size(1328, 638);
-            richTextBox_PlayersInfo.TabIndex = 0;
-            richTextBox_PlayersInfo.Text = "";
+            rchTxtPlayerInfo.Dock = DockStyle.Fill;
+            rchTxtPlayerInfo.Font = new Font("Arial", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            rchTxtPlayerInfo.Location = new Point(0, 0);
+            rchTxtPlayerInfo.Name = "rchTxtPlayerInfo";
+            rchTxtPlayerInfo.ReadOnly = true;
+            rchTxtPlayerInfo.Size = new Size(1328, 638);
+            rchTxtPlayerInfo.TabIndex = 0;
+            rchTxtPlayerInfo.Text = "";
             // 
             // tabPage4
             // 
-            tabPage4.Controls.Add(listView_PmcHistory);
+            tabPage4.Controls.Add(lstViewPMCHistory);
             tabPage4.Location = new Point(4, 24);
             tabPage4.Name = "tabPage4";
             tabPage4.Size = new Size(1328, 638);
@@ -738,22 +736,22 @@ namespace eft_dma_radar
             tabPage4.Text = "Player History";
             tabPage4.UseVisualStyleBackColor = true;
             // 
-            // listView_PmcHistory
+            // lstViewPMCHistory
             // 
-            listView_PmcHistory.AutoArrange = false;
-            listView_PmcHistory.Columns.AddRange(new ColumnHeader[] { columnHeader_Entry, columnHeader_ID });
-            listView_PmcHistory.Dock = DockStyle.Fill;
-            listView_PmcHistory.Font = new Font("Arial", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            listView_PmcHistory.FullRowSelect = true;
-            listView_PmcHistory.GridLines = true;
-            listView_PmcHistory.HeaderStyle = ColumnHeaderStyle.Nonclickable;
-            listView_PmcHistory.Location = new Point(0, 0);
-            listView_PmcHistory.MultiSelect = false;
-            listView_PmcHistory.Name = "listView_PmcHistory";
-            listView_PmcHistory.Size = new Size(1328, 638);
-            listView_PmcHistory.TabIndex = 0;
-            listView_PmcHistory.UseCompatibleStateImageBehavior = false;
-            listView_PmcHistory.View = View.Details;
+            lstViewPMCHistory.AutoArrange = false;
+            lstViewPMCHistory.Columns.AddRange(new ColumnHeader[] { columnHeader_Entry, columnHeader_ID });
+            lstViewPMCHistory.Dock = DockStyle.Fill;
+            lstViewPMCHistory.Font = new Font("Arial", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            lstViewPMCHistory.FullRowSelect = true;
+            lstViewPMCHistory.GridLines = true;
+            lstViewPMCHistory.HeaderStyle = ColumnHeaderStyle.Nonclickable;
+            lstViewPMCHistory.Location = new Point(0, 0);
+            lstViewPMCHistory.MultiSelect = false;
+            lstViewPMCHistory.Name = "lstViewPMCHistory";
+            lstViewPMCHistory.Size = new Size(1328, 638);
+            lstViewPMCHistory.TabIndex = 0;
+            lstViewPMCHistory.UseCompatibleStateImageBehavior = false;
+            lstViewPMCHistory.View = View.Details;
             // 
             // columnHeader_Entry
             // 
@@ -774,31 +772,31 @@ namespace eft_dma_radar
             Column1.HeaderText = "Column1";
             Column1.Name = "Column1";
             // 
-            // MainForm
+            // frmMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1336, 666);
-            Controls.Add(tabControl1);
+            Controls.Add(tabControl);
             Margin = new Padding(4, 3, 4, 3);
-            Name = "MainForm";
+            Name = "frmMain";
             Text = "EFT Radar";
-            tabControl1.ResumeLayout(false);
+            tabControl.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             tabPage1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
-            groupBox_Loot.ResumeLayout(false);
-            groupBox_Loot.PerformLayout();
-            groupBox_MapSetup.ResumeLayout(false);
-            groupBox_MapSetup.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvPlayerList).EndInit();
+            grpLoot.ResumeLayout(false);
+            grpLoot.PerformLayout();
+            grpMapSetup.ResumeLayout(false);
+            grpMapSetup.PerformLayout();
             tabPage2.ResumeLayout(false);
-            groupBox2.ResumeLayout(false);
-            groupBox2.PerformLayout();
-            groupBox1.ResumeLayout(false);
-            groupBox1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)trackBar_UIScale).EndInit();
-            ((System.ComponentModel.ISupportInitialize)trackBar_Zoom).EndInit();
-            ((System.ComponentModel.ISupportInitialize)trackBar_AimLength).EndInit();
+            grpMemoryWriting.ResumeLayout(false);
+            grpMemoryWriting.PerformLayout();
+            grpConfig.ResumeLayout(false);
+            grpConfig.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)trkUIScale).EndInit();
+            ((System.ComponentModel.ISupportInitialize)trkZoom).EndInit();
+            ((System.ComponentModel.ISupportInitialize)trkAimLength).EndInit();
             tabPage3.ResumeLayout(false);
             tabPage4.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)bindingSource1).EndInit();
@@ -807,68 +805,68 @@ namespace eft_dma_radar
 
         #endregion
 
-        private TabControl tabControl1;
+        private TabControl tabControl;
         private TabPage tabPage1;
         private TabPage tabPage2;
-        private GroupBox groupBox1;
-        private Label label2;
-        private TrackBar trackBar_AimLength;
-        private Button button_Map;
-        private Label label_Pos;
-        private Label label1;
-        private TrackBar trackBar_Zoom;
-        private CheckBox checkBox_Loot;
-        private CheckBox checkBox_MapSetup;
-        private Button button_Restart;
-        private GroupBox groupBox_MapSetup;
-        private Button button_MapSetupApply;
-        private TextBox textBox_mapScale;
-        private Label label5;
-        private TextBox textBox_mapY;
-        private Label label4;
-        private TextBox textBox_mapX;
+        private GroupBox grpConfig;
+        private Label lblAimline;
+        private TrackBar trkAimLength;
+        private Button btnToggleMap;
+        private Label lblMapCoords;
+        private Label lblZoom;
+        private TrackBar trkZoom;
+        private CheckBox chkShowLoot;
+        private CheckBox chkShowMapSetup;
+        private Button btnRestartGame;
+        private GroupBox grpMapSetup;
+        private Button btnMapSetupApply;
+        private TextBox txtMapSetupScale;
+        private Label lblMapScale;
+        private TextBox txtMapSetupY;
+        private Label lblMapXY;
+        private TextBox txtMapSetupX;
         private BindingSource bindingSource1;
-        private CheckBox checkBox_Aimview;
-        private CheckBox checkBox_MapFree;
+        private CheckBox chkShowAimview;
+        private CheckBox chkMapFree;
         private TabPage tabPage3;
-        private RichTextBox richTextBox_PlayersInfo;
+        private RichTextBox rchTxtPlayerInfo;
         private TabPage tabPage4;
-        private ListView listView_PmcHistory;
+        private ListView lstViewPMCHistory;
         private ColumnHeader columnHeader_Entry;
         private ColumnHeader columnHeader_ID;
-        private Label label3;
-        private TextBox textBox_PrimTeamID;
-        private CheckBox checkBox_HideNames;
-        private GroupBox groupBox_Loot;
-        private Button button_LootApply;
-        private Label label9;
-        private TextBox textBox_LootFilterByName;
+        private Label lblPrimaryTeammate;
+        private TextBox txtTeammateID;
+        private CheckBox chkHideNames;
+        private GroupBox grpLoot;
+        private Button btnApplyLoot;
+        private Label lblLootItem;
+        private TextBox txtLootFilter;
         private Label label8;
         private Label label7;
-        private TextBox textBox_LootImpValue;
-        private TextBox textBox_LootRegValue;
-        private Label label6;
-        private Button button_Loot;
-        private Button button_RefreshLoot;
-        private Label label_UIScale;
-        private TrackBar trackBar_UIScale;
-        private DataGridView dataGridView1;
+        private TextBox txtImportantLootValue;
+        private TextBox txtRegularLootValue;
+        private Label lblLootValue;
+        private Button btnLoot;
+        private Button btnRefreshLoot;
+        private Label lblUIScale;
+        private TrackBar trkUIScale;
+        private DataGridView dgvPlayerList;
         private DataGridViewTextBoxColumn Column1;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
-        private CheckBox checkBox_HidePlayerPanel;
-        private GroupBox groupBox2;
-        private CheckBox thermalVisionCheckBox;
-        private CheckBox NightVisionCheckBox;
-        private CheckBox OpticThermalBox;
-        private CheckBox NoVisorCheckBox;
-        private CheckBox NoVisorSCheckBox;
-        private CheckBox OpticThermalSCheckBox;
-        private CheckBox NightVisionSCheckBox;
-        private CheckBox ThermalVisionSCheckBox;
+        private CheckBox chkHidePlayers;
+        private GroupBox grpMemoryWriting;
+        private CheckBox chkThermalVisionDebug;
+        private CheckBox chkNightVisionDebug;
+        private CheckBox chkOpticThermalVisionDebug;
+        private CheckBox chkNoVisorDebug;
+        private CheckBox chkNoVisor;
+        private CheckBox chkOpticThermalVision;
+        private CheckBox chkNightVision;
+        private CheckBox chkThermalVision;
     }
 }
 

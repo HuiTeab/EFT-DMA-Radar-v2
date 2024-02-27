@@ -144,6 +144,7 @@ namespace eft_dma_radar
                 _mapName = string.Empty;
                 return;
             }
+
             var classNamePtr = Memory.ReadPtrChain(_localGameWorld, Offsets.UnityClass.Name);
             var classNameString = Memory.ReadString(classNamePtr, 64).Replace("\0", string.Empty);
             if (classNameString == "ClientLocalGameWorld") {
@@ -323,15 +324,8 @@ namespace eft_dma_radar
                     }
                     var localPlayer = Memory.ReadPtr(_localGameWorld + Offsets.LocalGameWorld.MainPlayer);
                     var localPlayerInfo = Memory.ReadPtrChain(localPlayer, new uint[] {Offsets.Player.Profile, Offsets.Profile.PlayerInfo});
-                    var localPlayeSide = Memory.ReadValue<int>(localPlayerInfo + Offsets.PlayerInfo.PlayerSide);
-                    if (localPlayeSide == 4)
-                    {
-                        _isScav = true;
-                    }
-                    else
-                    {
-                        _isScav = false;
-                    }
+                    var localPlayerSide = Memory.ReadValue<int>(localPlayerInfo + Offsets.PlayerInfo.PlayerSide);
+                    _isScav = (localPlayerSide == 4);
                     var localGameWorldClassnamePtr = Memory.ReadPtrChain(_localGameWorld, Offsets.UnityClass.Name);
                     var localGameWorldClassName = Memory.ReadString(localGameWorldClassnamePtr, 64).Replace("\0", string.Empty);
                     var localPlayerClassnamePtr = Memory.ReadPtrChain(localPlayer, Offsets.UnityClass.Name);

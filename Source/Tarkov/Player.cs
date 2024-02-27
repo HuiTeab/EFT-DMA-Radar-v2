@@ -196,6 +196,25 @@ namespace eft_dma_radar
                     && IsActive && IsAlive;
         }
         /// <summary>
+        /// Player is AI/human-controlled and Active/Alive.
+        /// </summary>
+        public bool IsHostileActive
+        {
+            get => (
+                Type is PlayerType.PMC ||
+                Type is PlayerType.BEAR ||
+                Type is PlayerType.USEC ||
+                Type is PlayerType.SpecialPlayer ||
+                Type is PlayerType.PScav ||
+                Type is PlayerType.AIScav ||
+                Type is PlayerType.AIRaider ||
+                Type is PlayerType.AIBossFollower ||
+                Type is PlayerType.AIBossGuard ||
+                Type is PlayerType.AIRouge ||
+                Type is PlayerType.AIOfflineScav ||
+                Type is PlayerType.AIBoss) && IsActive && IsAlive;
+        }
+        /// <summary>
         /// Player is friendly to LocalPlayer (including LocalPlayer) and Active/Alive.
         /// </summary>
         public bool IsFriendlyActive
@@ -210,6 +229,29 @@ namespace eft_dma_radar
         {
             get => !IsActive && IsAlive;
         }
+
+        /// <summary>
+        /// Gets value of player.
+        /// </summary>
+        /// 
+        public int PlayerValue {
+            get {
+                var total = 0;
+
+                if (this.Gear != null) {
+                    foreach (var gearItem in this.Gear) {
+                        var id = gearItem.Value.id;
+                        var item = TarkovDevAPIManager.AllItems[id].Item;
+                        var price = TarkovDevAPIManager.GetItemValue(item);
+
+                        total += price;
+                    }
+                }
+
+                return total;
+            }
+        }
+
         /// <summary>
         /// EFT.Player Address
         /// </summary>
@@ -229,6 +271,7 @@ namespace eft_dma_radar
         {
             get => _transform?.VerticesAddr ?? 0x0;
         }
+
         public ulong IndicesAddr
         {
             get => _transform?.IndicesAddr ?? 0x0;
@@ -269,6 +312,424 @@ namespace eft_dma_radar
             _watchlistMonitor.Changed += new FileSystemEventHandler(watchlist_Changed);
         }
         #endregion
+        private string[] raiderGuardRougeNames = {
+            "Afraid",
+            "Andresto",
+            "Applejuice",
+            "Arizona",
+            "Auron",
+            "Badboy",
+            "Baddie",
+            "Beard",
+            "Beverly",
+            "Bison",
+            "Blackbird",
+            "Blade",
+            "Blakemore",
+            "Boatswain",
+            "Boogerman",
+            "Brockley",
+            "Browski",
+            "Bullet",
+            "Bunny",
+            "Butcher",
+            "Chester",
+            "Churchill",
+            "Cliffhanger",
+            "Condor",
+            "Cook",
+            "Cougar",
+            "Coyote",
+            "Crooked",
+            "Cross",
+            "Dakota",
+            "Dawg",
+            "Deceit",
+            "Denver",
+            "Diggi",
+            "Donutop",
+            "Duke",
+            "Dustin",
+            "Enzo",
+            "Esquilo",
+            "Father",
+            "Firion",
+            "Floridaman",
+            "Foxy",
+            "Frenzy",
+            "Garandthumb",
+            "Goat",
+            "Golden",
+            "Grandpa",
+            "Greyzone",
+            "Grim",
+            "Grommet",
+            "Gunporn",
+            "Handsome",
+            "Haunted",
+            "Hellshrimp",
+            "Honorable",
+            "Hypno",
+            "Instructor",
+            "Iowa",
+            "Ironfists",
+            "James",
+            "Jeff",
+            "Jersey",
+            "John",
+            "Juggernaut",
+            "Justkilo",
+            "Kanzas",
+            "Kentucky",
+            "Kry",
+            "Lancaster",
+            "Lee",
+            "Legia",
+            "Litton",
+            "Lost",
+            "Lunar",
+            "Madknight",
+            "Mamba",
+            "Marooner",
+            "Marquesses",
+            "Meldon",
+            "Melo",
+            "Michigan",
+            "Mike",
+            "Momma",
+            "Mortal",
+            "Mother",
+            "Nevada",
+            "Nine-hole",
+            "Noisy",
+            "Nukem",
+            "Ocean",
+            "Oklahoma",
+            "OneEye",
+            "Oskar",
+            "Panther",
+            "Philbo",
+            "Quebec",
+            "Racoon",
+            "Rage",
+            "Rambo",
+            "Rassler",
+            "Receit",
+            "Rib-eye",
+            "Riot",
+            "Rock",
+            "Rocket",
+            "Ronflex",
+            "Ronny",
+            "Rossler",
+            "RoughDog",
+            "Sektant", // Cultists
+            "Scar",
+            "Scottsdale",
+            "Seafarer",
+            "Shadow",
+            "SharkBait",
+            "Sharkkiller",
+            "Sherifu",
+            "Sherman",
+            "Shifty",
+            "Slayer",
+            "Sly",
+            "Snake",
+            "Sneaky",
+            "Sniperlife",
+            "Solem",
+            "Solidus",
+            "Spectator-6",
+            "Spyke",
+            "Stamper",
+            "Striker",
+            "Texas",
+            "Three-Teeth",
+            "Trent",
+            "Trickster",
+            "Triggerhappy",
+            "Two-Finger",
+            "Vicious",
+            "Victor",
+            "Voodoo",
+            "Voss",
+            "Wadley",
+            "Walker",
+            "Weasel",
+            "Whale-Eye",
+            "Whisky",
+            "Whitemane",
+            "Woodrow",
+            "Wrath",
+            "Zed",
+            "Zero-Zero",
+            "Aimbotkin",
+            "Baklazhan", // kaban guards
+            "Bazil",
+            "Bibop",
+            "Cheburek",
+            "Dihlofos",
+            "Docha",
+            "Flamberg",
+            "Gladius",
+            "Gromila",
+            "Kapral",
+            "Kartezhnik",
+            "Khvost",
+            "Kolt",
+            "Kompot",
+            "Kudeyar",
+            "Mauzer",
+            "Medoed",
+            "Miposhka",
+            "Mosin",
+            "Moydodyr",
+            "Supermen",
+            "Shtempel",
+            "Tihiy",
+            "Varan",
+            "Verhniy",
+            "Zevaka",
+            "Afganec",
+            "Alfons", // Glukhar guards
+            "Assa",
+            "Baks",
+            "Balu",
+            "Banschik",
+            "Barguzin",
+            "Basmach",
+            "Batar",
+            "Batya",
+            "Belyy",
+            "Bob",
+            "Borec",
+            "Byk",
+            "BZT",
+            "Calabrissa",
+            "Chelovek",
+            "Chempion",
+            "Chepushila",
+            "Dnevalnyy",
+            "Drossel",
+            "Dum",
+            "Fedya",
+            "Gepe",
+            "Gepard",
+            "Gorbatyy",
+            "Gotka",
+            "Grif",
+            "Grustnyy",
+            "Kadrovik",
+            "Karabin",
+            "Karaul",
+            "Kastet",
+            "Katok",
+            "Kocherga",
+            "Kosoy",
+            "Krot",
+            "Kuling",
+            "Kumulyativ",
+            "Kuzya",
+            "Letyoha",
+            "Lysyy",
+            "Lyutyy",
+            "Maga",
+            "Matros",
+            "Mihalych",
+            "Mysh",
+            "Nakat",
+            "Nemonas",
+            "Oficer",
+            "Omeh",
+            "Oskolochnyy",
+            "Otbityy",
+            "Patron",
+            "Pluton",
+            "Radar",
+            "Rayan",
+            "Rembo",
+            "Ryaha",
+            "Salobon",
+            "Sapog",
+            "Seryy",
+            "Shapka",
+            "Shustryy",
+            "Sibiryak",
+            "Signal",
+            "Sobr",
+            "Specnaz",
+            "Stvol",
+            "Sych",
+            "Tankist",
+            "Tihohod",
+            "Toropyga",
+            "Trubochist",
+            "Utyug",
+            "Valet",
+            "Vegan",
+            "Veteran",
+            "Vityok",
+            "Zampolit",
+            "Zarya",
+            "Zhirnyy",
+            "Zh-12",
+            "Zimniy",
+            "Anton Zavodskoy", // Reshala guards
+            "Damirka Zavodskoy",
+            "Filya Zavodskoy",
+            "Gena Zavodskoy",
+            "Grisha Zavodskoy",
+            "Kolyan Zavodskoy",
+            "Kuling Zavodskoy",
+            "Lesha Zavodskoy",
+            "Nikita Zavodskoy",
+            "Sanya Zavodskoy",
+            "Shtopor Zavodskoy",
+            "Skif Zavodskoy",
+            "Stas Zavodskoy",
+            "Toha Zavodskoy",
+            "Torpeda Zavodskoy",
+            "Vasya Zavodskoy",
+            "Vitek Zavodskoy",
+            "Zhora Zavodskoy",
+            "Dimon Svetloozerskiy", // Shturman guards
+            "Enchik Svetloozerskiy",
+            "Kachok Svetloozerskiy",
+            "Krysa Svetloozerskiy",
+            "Malchik Svetloozerskiy",
+            "Marat Svetloozerskiy",
+            "Mels Svetloozerskiy",
+            "Motlya Svetloozerskiy",
+            "Motyl Svetloozerskiy",
+            "Pashok Svetloozerskiy",
+            "Plyazhnik Svetloozerskiy",
+            "Robinzon Svetloozerskiy",
+            "Sanya Svetloozerskiy",
+            "Shmyga Svetloozerskiy",
+            "Tokha Svetloozerskiy",
+            "Ugryum Svetloozerskiy",
+            "Vovan Svetloozerskiy",
+            "Akula", // scav raiders
+            "Assa",
+            "BZT",
+            "Balu",
+            "Bankir",
+            "Barrakuda",
+            "Bars",
+            "Berkut",
+            "Bob",
+            "Dikobraz",
+            "Gadyuka",
+            "Gepard",
+            "Grif",
+            "Grizzli",
+            "Gyurza",
+            "Irbis",
+            "Jaguar",
+            "Kalan",
+            "Karakurt",
+            "Kayman",
+            "Kobra",
+            "Kondor",
+            "Krachun",
+            "Krasnyy volk",
+            "Krechet",
+            "Kuling",
+            "Leopard",
+            "Lev",
+            "Lis",
+            "Loggerhed",
+            "Lyutty",
+            "Maga",
+            "Mangust",
+            "Manul",
+            "Mantis",
+            "Medved",
+            "Nosorog",
+            "Orel",
+            "Orlan",
+            "Padalshchik",
+            "Pantera",
+            "Pchel",
+            "Piton",
+            "Piranya",
+            "Puma",
+            "Radar",
+            "Rosomaha",
+            "Rys",
+            "Sapsan",
+            "Sekach",
+            "Shakal",
+            "Signal",
+            "Skorpion",
+            "Stervyatnik",
+            "Tarantul",
+            "Taypan",
+            "Tigr",
+            "Varan",
+            "Vegan",
+            "Vepr",
+            "Veteran",
+            "Volk",
+            "Voron",
+            "Yaguar",
+            "Yastreb",
+            "Zubr",
+            "Akusher", // Sanitar guards
+            "Anesteziolog",
+            "Dermatolog",
+            "Farmacevt",
+            "Feldsher",
+            "Fiziolog",
+            "Glavvrach",
+            "Gomeopat",
+            "Hirurg",
+            "Immunolog",
+            "Kardiolog",
+            "Laborant",
+            "Lasha Ortoped",
+            "Lor",
+            "Medbrat",
+            "Medsestra",
+            "Nevrolog",
+            "Okulist",
+            "Paracetamol",
+            "Pilyulya",
+            "Proktolog",
+            "Propital",
+            "Psihiatr",
+            "Psikhiatr",
+            "Pyotr Planchik",
+            "Revmatolog",
+            "Rodion Bubesh",
+            "Scavvaf",
+            "Shpric",
+            "Stomatolog",
+            "Terapevt",
+            "Travmatolog",
+            "Trupovoz",
+            "Urolog",
+            "Vaha Geroy",
+            "Venerolog",
+            "Zaveduyuschiy",
+            "Zaveduyushchiy",
+            "Zhgut",
+            "Kozyrek Desatnik", // Kollontay guards
+            "Starley Desatnik",
+            "Starley brat",
+            "Starshiy brat",
+            "Strelok brat",
+            "Tatyanka Desatnik",
+            "Basyak",
+            "Arsenal",
+            "Furazhka",
+            "Mayor",
+            "Visyak",
+            "Dezhurka",
+            "Sluzhebka",
+            "Slonolyub",
+        };
 
         Dictionary<string, string> nameTranslations = new Dictionary<string, string>
         {
@@ -338,7 +799,6 @@ namespace eft_dma_radar
                 if (baseClassName is null)
                 {
                     return;
-                    
                 } else {
                     //Debug.WriteLine($"Base Class Name: {baseClassName}");
                 }
@@ -350,9 +810,19 @@ namespace eft_dma_radar
                     _transform = new Transform(TransformInternal, true);
                     var namePtr = Memory.ReadPtr(Info + Offsets.PlayerInfo.Nickname);
                     Name = Memory.ReadUnityString(namePtr);
+
                     try {
                         var gameVersionPtr = Memory.ReadPtr(Info + Offsets.PlayerInfo.GameVersion);
                         var gameVersion = Memory.ReadUnityString(gameVersionPtr);
+
+                        var settings = Memory.ReadPtr(Info + Offsets.PlayerInfo.Settings);
+                        var roleFlag = Memory.ReadValue<int>(settings + Offsets.PlayerSettings.Role);
+                        // roleflag switch
+                        //Console.WriteLine($"RoleFlag: {roleFlag} Name: {Name}");
+
+                        GroupID = GetGroupID();
+                        try { _gearManager = new GearManager(playerBase, true, true); } catch { }
+
                         //If empty, then it's a scav
                         if (gameVersion == "")
                         {
@@ -360,35 +830,15 @@ namespace eft_dma_radar
                             IsLocalPlayer = false;
                             IsPmc = false;
                             Name = TransliterateCyrillic(Name);
-                            var settings = Memory.ReadPtr(Info + Offsets.PlayerInfo.Settings);
-                            var roleFlag = Memory.ReadValue<int>(settings + Offsets.PlayerSettings.Role);
-                            // roleflag switch
-                            //Console.WriteLine($"RoleFlag: {roleFlag} Name: {Name}");
-                            Type = roleFlag switch
-                            {
-                                0 => PlayerType.AISniperScav,
-                                1 => PlayerType.AIOfflineScav,
-                                2 => PlayerType.AIBossGuard,
-                                17 => PlayerType.AIBoss,
-                                28 => PlayerType.AIBoss,
-                                7 => PlayerType.AIBoss,
-                                _ => PlayerType.AIOfflineScav,
-                            };
-
+                            //Type = GetPlayerType(roleFlag);
                         }
                         else
                         {
                             Type = PlayerType.LocalPlayer;
                             IsLocalPlayer = true;
                             IsPmc = true;
-                            try { _gearManager = new GearManager(playerBase, true, true); } catch { }
-                            GroupID = GetGroupID();
-                            
                         }
-                    }catch {}
-                    
-                    
-
+                    } catch {}
                 } else if (baseClassName == "ObservedPlayerView") {
                     IsLocalPlayer = false;
                     //Debug.WriteLine("Processing PMC Player.");
@@ -397,41 +847,29 @@ namespace eft_dma_radar
                     TransformInternal = Memory.ReadPtrChain(ObservedPlayerView, Offsets.ObservedPlayerView.To_TransformInternal);
                     _transform = new Transform(TransformInternal, true);
                     Name = Memory.ReadUnityString(Memory.ReadPtr(ObservedPlayerView + Offsets.ObservedPlayerView.NickName));
-                    var nameForBossCheck = Name;
                     Name = TransliterateCyrillic(Name);
                     Info = ObservedPlayerView;
                     var playerSide = GetNextObservedPlayerSide();
                     var playerIsAI = GetNextObservedPlayerIsAI();
-                    // Check corpse ptr
-                    if (nameTranslations.ContainsKey(Name))
-                    {
+
+                    if (nameTranslations.ContainsKey(Name)) {
                         Name = nameTranslations[Name];
                     }
-                    if (playerSide == 1 && playerIsAI == false) {
-                        Type = PlayerType.USEC;
+
+                    GroupID = GetGroupID();
+                    try { _gearManager = new GearManager(playerBase, true, false); } catch { }
+
+                    if ((playerSide == 1 || playerSide == 2) && !playerIsAI) {
                         IsPmc = true;
-                        try { _gearManager = new GearManager(playerBase, true, false); } catch { }
-                        GroupID = GetObservedPlayerGroupID();
-                        
-                    }
-                    else if (playerSide == 2 && playerIsAI == false)
-                    {
-                        Type = PlayerType.BEAR;
-                        IsPmc = true;
-                        try { _gearManager = new GearManager(playerBase, true, false); } catch { }
-                        GroupID = GetObservedPlayerGroupID();
-                    }
-                    else if (playerSide == 4 && playerIsAI == false) {
+                        Type = (playerSide == 1 ? PlayerType.USEC : PlayerType.BEAR);
+                    } else if (playerSide == 4 && !playerIsAI) {
                         Type = PlayerType.PScav;
-                        try { _gearManager = new GearManager(playerBase, true, false); } catch { }
-                        GroupID = GetObservedPlayerGroupID();
-                    } else if (playerSide == 4 && playerIsAI == true) {
-                        //Console.WriteLine("AI Scav");
-                        if (nameTranslations.ContainsKey(nameForBossCheck) || nameTranslations.ContainsKey(Name) || Name == "Reshala")
-                        {
+                    } else if (playerSide == 4 && playerIsAI) {
+                        if (nameTranslations.ContainsValue(Name)) {
                             Type = PlayerType.AIBoss;
-                        }
-                        else {
+                        } else if (raiderGuardRougeNames.Contains(Name)) {
+                            Type = PlayerType.AIRaider;
+                        } else {
                             Type = PlayerType.AIScav;
                         }
                     }
@@ -619,8 +1057,6 @@ namespace eft_dma_radar
             return isAI;
         }
 
-
-
         /// <summary>
         /// Get Account ID for Human-Controlled Players.
         /// </summary>
@@ -704,6 +1140,42 @@ namespace eft_dma_radar
                     }
                 }
                 Watchlist = new(watchlist); // Update ref
+            }
+        }
+
+        private PlayerType GetPlayerType(int roleFlag) {
+            switch (roleFlag) {
+                case 0: return PlayerType.AISniperScav;
+                case 1: return PlayerType.AIOfflineScav;
+                case 2: return PlayerType.AIBossGuard; // unknown
+                case 3: return PlayerType.AIBoss; // reshala
+                case 5: return PlayerType.AIBossFollower; // reshala follower
+                case 6: return PlayerType.AIBoss; // killa
+                case 7: return PlayerType.AIBoss; // shturman
+                case 8: return PlayerType.AIBossFollower; // shturman guard
+                case 9: return PlayerType.AIRaider; // raiders
+                case 11: return PlayerType.AIBoss; // glukhar
+                case 12: return PlayerType.AIBossFollower; // glukhar follower (assault)
+                case 13: return PlayerType.AIBossFollower; // glukhar follower (security)
+                case 14: return PlayerType.AIBossFollower; // glukhar follower (scout)
+                case 16: return PlayerType.AIBossFollower; // sanitar follower
+                case 17: return PlayerType.AIBoss; // sanitar
+                case 22: return PlayerType.AIBoss; // tagilla
+                case 24: return PlayerType.AIRouge; // rouges
+                case 26: return PlayerType.AIBoss; // knight
+                case 27: return PlayerType.AIBoss; // big pipe
+                case 28: return PlayerType.AIBoss; // bird eye
+                case 32: return PlayerType.AIBoss; // kaban
+                case 33: return PlayerType.AIBossFollower; // kaban follower
+                case 36: return PlayerType.AIBossFollower; // kaban follower (sniper)
+                case 41: return PlayerType.AIBossFollower; // basmach
+                case 42: return PlayerType.AIBossFollower; // gus
+                case 43: return PlayerType.AIBoss; // kollontay
+                case 44: return PlayerType.AIBossFollower; //  kollontay follower
+                case 45: return PlayerType.AIBossFollower; // kollontay follower
+
+                case 19: return PlayerType.AIScav; // unknown
+                default: return PlayerType.AIScav;
             }
         }
         #endregion

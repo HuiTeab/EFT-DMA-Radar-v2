@@ -49,7 +49,7 @@ namespace eft_dma_radar
                     RuntimeHelpers.RunClassConstructor(typeof(TarkovDevAPIManager).TypeHandle); // invoke static constructor
                     RuntimeHelpers.RunClassConstructor(typeof(Memory).TypeHandle); // invoke static constructor
                     ApplicationConfiguration.Initialize();
-					Application.Run(new MainForm());
+					Application.Run(new frmMain());
                 }
                 else
                 {

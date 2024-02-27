@@ -26,7 +26,7 @@ namespace eft_dma_radar
         };
         public static readonly SKPaint PaintLocalPlayer = new SKPaint()
         {
-            Color = SKColors.Green,
+            Color = SKColors.White,
             StrokeWidth = 3,
             Style = SKPaintStyle.Stroke,
             IsAntialias = true,
@@ -52,7 +52,7 @@ namespace eft_dma_radar
         };
         public static readonly SKPaint PaintPMC = new SKPaint()
         {
-            Color = SKColors.Red,
+            Color = SKColors.OrangeRed,
             StrokeWidth = 3,
             Style = SKPaintStyle.Stroke,
             IsAntialias = true,
@@ -60,7 +60,7 @@ namespace eft_dma_radar
         };
         public static readonly SKPaint TextPMC = new SKPaint()
         {
-            Color = SKColors.Red,
+            Color = SKColors.OrangeRed,
             IsStroke = false,
             TextSize = 12,
             TextEncoding = SKTextEncoding.Utf8,
@@ -144,7 +144,7 @@ namespace eft_dma_radar
         };
         public static readonly SKPaint PaintRaider = new SKPaint()
         {
-            Color = SKColor.Parse("ffc70f"),
+            Color = SKColors.Purple,
             StrokeWidth = 3,
             Style = SKPaintStyle.Stroke,
             IsAntialias = true,
@@ -152,7 +152,7 @@ namespace eft_dma_radar
         };
         public static readonly SKPaint TextRaider = new SKPaint()
         {
-            Color = SKColor.Parse("ffc70f"),
+            Color = SKColors.Purple,
             IsStroke = false,
             TextSize = 12,
             TextEncoding = SKTextEncoding.Utf8,
@@ -180,10 +180,20 @@ namespace eft_dma_radar
         };
         public static readonly SKPaint PaintPScav = new SKPaint()
         {
-            Color = SKColors.White,
+            Color = SKColors.Orange,
             StrokeWidth = 3,
             Style = SKPaintStyle.Stroke,
             IsAntialias = true,
+            FilterQuality = SKFilterQuality.High
+        };
+        public static readonly SKPaint TextPScav = new SKPaint() // Player Scav Text , Tooltip Text
+        {
+            Color = SKColors.Orange,
+            IsStroke = false,
+            TextSize = 12,
+            TextEncoding = SKTextEncoding.Utf8,
+            IsAntialias = true,
+            Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold),
             FilterQuality = SKFilterQuality.High
         };
         public static readonly SKPaint TextWhite = new SKPaint() // Player Scav Text , Tooltip Text
@@ -261,13 +271,13 @@ namespace eft_dma_radar
         };
         public static readonly SKPaint PaintAimviewLocalPlayer = new SKPaint()
         {
-            Color = SKColors.Green,
+            Color = SKColors.White,
             StrokeWidth = 1,
             Style = SKPaintStyle.Fill,
         };
         public static readonly SKPaint PaintAimviewPMC = new SKPaint()
         {
-            Color = SKColors.Red,
+            Color = SKColors.OrangeRed,
             StrokeWidth = 1,
             Style = SKPaintStyle.Fill,
         };
@@ -297,13 +307,13 @@ namespace eft_dma_radar
         };
         public static readonly SKPaint PaintAimviewRaider = new SKPaint()
         {
-            Color = SKColor.Parse("ffc70f"),
+            Color = SKColors.Purple,
             StrokeWidth = 1,
             Style = SKPaintStyle.Fill,
         };
         public static readonly SKPaint PaintAimviewPScav = new SKPaint()
         {
-            Color = SKColors.White,
+            Color = SKColors.Orange,
             StrokeWidth = 1,
             Style = SKPaintStyle.Fill,
         };

@@ -93,31 +93,15 @@ namespace eft_dma_radar.Source.Tarkov
             if (_fpsCamera != 0)
             {
                 var fpsThermalComponent = GetComponentFromGameObject(_fpsCamera, "ThermalVision");
-
                 var thermalOn = Memory.ReadValue<bool>(fpsThermalComponent + 0xE0);
-                if (on) {
-                    if (!thermalOn)
-                    {
-                        Memory.WriteValue(fpsThermalComponent + 0xE0, true);
-                        Memory.WriteValue(fpsThermalComponent + 0xE1, false);
-                        Memory.WriteValue(fpsThermalComponent + 0xE2, false);
-                        Memory.WriteValue(fpsThermalComponent + 0xE3, false);
-                        Memory.WriteValue(fpsThermalComponent + 0xE4, false);
-                        Memory.WriteValue(fpsThermalComponent + 0xE5, false);
-                    }
 
-                }
-                else
-                {
-                    if (thermalOn)
-                    {
-                        Memory.WriteValue(fpsThermalComponent + 0xE0, false);
-                        Memory.WriteValue(fpsThermalComponent + 0xE1, true);
-                        Memory.WriteValue(fpsThermalComponent + 0xE2, true);
-                        Memory.WriteValue(fpsThermalComponent + 0xE3, true);
-                        Memory.WriteValue(fpsThermalComponent + 0xE4, true);
-                        Memory.WriteValue(fpsThermalComponent + 0xE5, true);
-                    }
+                if (on != thermalOn) {
+                    Memory.WriteValue(fpsThermalComponent + 0xE0, !thermalOn);
+                    Memory.WriteValue(fpsThermalComponent + 0xE1, thermalOn);
+                    Memory.WriteValue(fpsThermalComponent + 0xE2, thermalOn);
+                    Memory.WriteValue(fpsThermalComponent + 0xE3, thermalOn);
+                    Memory.WriteValue(fpsThermalComponent + 0xE4, thermalOn);
+                    Memory.WriteValue(fpsThermalComponent + 0xE5, thermalOn);
                 }
             }
         }
@@ -126,26 +110,16 @@ namespace eft_dma_radar.Source.Tarkov
         /// <summary>
         /// public static function to turn nightvision on and off
         /// </summary>
-        ///     
+        ///
         public void NightVision(bool on)
         {
             if (_fpsCamera != 0)
             {
                 var nightVisionComponent = GetComponentFromGameObject(_fpsCamera, "NightVision");
                 var nightVisionOn = Memory.ReadValue<bool>(nightVisionComponent + 0xEC);
-                if (on)
-                {
-                    if (!nightVisionOn)
-                    {
-                        Memory.WriteValue(nightVisionComponent + 0xEC, true);
-                    }
-                }
-                else
-                {
-                    if (nightVisionOn)
-                    {
-                        Memory.WriteValue(nightVisionComponent + 0xEC, false);
-                    }
+
+                if (on != nightVisionOn) {
+                    Memory.WriteValue(nightVisionComponent + 0xEC, !nightVisionOn);
                 }
             }
         }
@@ -188,16 +162,9 @@ namespace eft_dma_radar.Source.Tarkov
                         break;
                     }
                 }
-                if (on)
-                {
-                    Memory.WriteValue(opticComponent + 0x38, true);
-                    Memory.WriteValue(opticThermalVision + 0xE0, true);
-                }
-                else
-                {
-                    Memory.WriteValue(opticComponent + 0x38, false);
-                    Memory.WriteValue(opticThermalVision + 0xE0, false);
-                }
+
+                Memory.WriteValue(opticComponent + 0x38, on);
+                Memory.WriteValue(opticThermalVision + 0xE0, on);
             }
         }
     }

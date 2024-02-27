@@ -195,7 +195,7 @@ namespace eft_dma_radar
         #endregion
 
         #region Private_Methods
-        private static string FormatNumber(int num)
+        public static string FormatNumber(int num)
         {
             if (num >= 1000000)
                 return (num / 1000000D).ToString("0.##") + "M";
@@ -205,10 +205,11 @@ namespace eft_dma_radar
                 return num.ToString();
         }
 
-        private static int GetItemValue(TarkovItem tarkovItem)
+        public static int GetItemValue(TarkovItem tarkovItem)
         {
             //find the best price to sell
             int bestPrice;
+
             if (tarkovItem.avg24hPrice > tarkovItem.basePrice)
             {
                 bestPrice = (int)tarkovItem.avg24hPrice;
@@ -224,6 +225,7 @@ namespace eft_dma_radar
             {
                 bestPrice = tarkovItem.basePrice;
             }
+
             return bestPrice;
         }
         #endregion
