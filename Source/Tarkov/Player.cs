@@ -73,15 +73,14 @@ namespace eft_dma_radar
         /// Player's current health (sum of all 7 body parts).
         /// </summary>
         public int Health { get; private set; } = -1;
+        
+        public ulong HealthController { get; }
+
         private Vector3 _pos = new Vector3(0, 0, 0); // backing field
         /// <summary>
         /// Player's Unity Position in Local Game World.
         /// </summary>
-        /// 
-        private LootManager Loot
-        {
-            get => Memory.Loot;
-        }
+        ///
         public Vector3 Position // 96 bits, cannot set atomically
         {
             get
@@ -388,6 +387,8 @@ namespace eft_dma_radar
                     GroupID = GetObservedPlayerGroupID();
                     if ((playerSide == 1 || playerSide == 2) && !playerIsAI) {
                         IsPmc = true;
+                        //var healthContoller = Memory.ReadPtrChain(playerBase, new uint[] { 0x80, 0xF0});
+                        HealthController = Memory.ReadPtrChain(playerBase, new uint[] { 0x80, 0xF0});;
                         Type = (playerSide == 1 ? PlayerType.USEC : PlayerType.BEAR);
                     } else if (playerSide == 4 && !playerIsAI) {
                         Type = PlayerType.PScav;
@@ -426,15 +427,27 @@ namespace eft_dma_radar
         /// <summary>
         /// Set player health.
         /// </summary>
-        public bool SetHealth(object[] obj)
+        public bool SetHealth(int ETagStatus)
         {
             try
             {
-                float totalHealth = 0;
-                for (uint i = 0; i < HealthEntries.Length; i++)
-                {
-                    float health = (float)obj[i]; // unbox
-                    totalHealth += health;
+                float totalHealth;
+                switch (ETagStatus){
+                    case 1024:
+                        totalHealth = 100;
+                        break;
+                    case 2048:
+                        totalHealth = 50;
+                        break;
+                    case 4096:
+                        totalHealth = 10;
+                        break;
+                    case 8192:
+                        totalHealth = 0;
+                        break;
+                    default:
+                        totalHealth = -1;
+                        break;
                 }
                 this.Health = (int)Math.Round(totalHealth);
                 return true;

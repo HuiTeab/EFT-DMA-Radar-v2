@@ -302,7 +302,7 @@ namespace eft_dma_radar
                         _localPlayerGroup = localPlayer.GroupID;
                     }
                 }
-                //bool checkHealth = _healthSw.ElapsedMilliseconds > 250; // every 250 ms
+                bool checkHealth = _healthSw.ElapsedMilliseconds > 250; // every 250 ms
                 bool checkPos = _posSw.ElapsedMilliseconds > 10000 && players.Any(x => x.IsHumanActive); // every 10 sec & at least 1 active human player
                 var scatterMap = new ScatterReadMap(players.Length);
                 var round1 = scatterMap.AddRound();
@@ -320,7 +320,8 @@ namespace eft_dma_radar
                         if (player.Type == PlayerType.LocalPlayer) {
                             var corpse = round1.AddEntry<MemPointer>(i, 6, player.CorpsePtr);
                         }
-                    } else {
+                    } 
+                    else {
                         var rotation = round1.AddEntry<Vector2>(i, 0,
                             (player.Type == PlayerType.LocalPlayer || player.Type == PlayerType.AIOfflineScav) ?
                                 player.MovementContext + Offsets.MovementContext.Rotation :
@@ -334,6 +335,9 @@ namespace eft_dma_radar
                             var hierarchy = round1.AddEntry<MemPointer>(i, 3, player.TransformInternal, null, Offsets.TransformInternal.Hierarchy);
                             var indicesAddr = round2?.AddEntry<MemPointer>(i, 4, hierarchy, null, Offsets.TransformHierarchy.Indices);
                             var verticesAddr = round2?.AddEntry<MemPointer>(i, 5, hierarchy, null, Offsets.TransformHierarchy.Vertices);
+                        }
+                        if (checkHealth && player.IsHostileActive) {
+                            var health = round1.AddEntry<int>(i, 7, player.HealthController + 0xD8);
                         }
                     }
                 }
@@ -414,6 +418,11 @@ namespace eft_dma_radar
 
                             var indices = scatterMap.Results[i][1].TryGetResult<List<int>>(out var ind);
                             var vertices = scatterMap.Results[i][2].TryGetResult<List<Vector128<float>>>(out var vert);
+                            if (checkHealth)
+                            {
+                                var health = scatterMap.Results[i][7].TryGetResult<int>(out var h);
+                                player.SetHealth(h);
+                            }
                             var posBufs = new object[2]
                             {
                                 ind,
@@ -432,6 +441,7 @@ namespace eft_dma_radar
                     }
                     
                 }
+                if (checkHealth)_healthSw.Restart();
                 if (checkPos)_posSw.Restart();
             }
             
