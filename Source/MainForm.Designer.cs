@@ -28,21 +28,14 @@ namespace eft_dma_radar
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent() {
-            components = new System.ComponentModel.Container();
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+        private void InitializeComponent()
+        {
             tabControl = new TabControl();
             tabPage1 = new TabPage();
             chkNoVisorDebug = new CheckBox();
             chkOpticThermalVisionDebug = new CheckBox();
             chkNightVisionDebug = new CheckBox();
             chkThermalVisionDebug = new CheckBox();
-            dgvPlayerList = new DataGridView();
-            dataGridViewTextBoxColumn1 = new DataGridViewTextBoxColumn();
-            dataGridViewTextBoxColumn3 = new DataGridViewTextBoxColumn();
-            dataGridViewTextBoxColumn4 = new DataGridViewTextBoxColumn();
-            dataGridViewTextBoxColumn5 = new DataGridViewTextBoxColumn();
             grpLoot = new GroupBox();
             btnRefreshLoot = new Button();
             btnApplyLoot = new Button();
@@ -70,7 +63,6 @@ namespace eft_dma_radar
             chkNightVision = new CheckBox();
             chkThermalVision = new CheckBox();
             grpConfig = new GroupBox();
-            chkHidePlayers = new CheckBox();
             lblUIScale = new Label();
             trkUIScale = new TrackBar();
             chkHideNames = new CheckBox();
@@ -91,12 +83,8 @@ namespace eft_dma_radar
             lstViewPMCHistory = new ListView();
             columnHeader_Entry = new ColumnHeader();
             columnHeader_ID = new ColumnHeader();
-            dataGridViewTextBoxColumn2 = new DataGridViewTextBoxColumn();
-            bindingSource1 = new BindingSource(components);
-            Column1 = new DataGridViewTextBoxColumn();
             tabControl.SuspendLayout();
             tabPage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvPlayerList).BeginInit();
             grpLoot.SuspendLayout();
             grpMapSetup.SuspendLayout();
             tabPage2.SuspendLayout();
@@ -107,7 +95,6 @@ namespace eft_dma_radar
             ((System.ComponentModel.ISupportInitialize)trkAimLength).BeginInit();
             tabPage3.SuspendLayout();
             tabPage4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)bindingSource1).BeginInit();
             SuspendLayout();
             // 
             // tabControl
@@ -120,7 +107,7 @@ namespace eft_dma_radar
             tabControl.Location = new Point(0, 0);
             tabControl.Name = "tabControl";
             tabControl.SelectedIndex = 0;
-            tabControl.Size = new Size(1336, 666);
+            tabControl.Size = new Size(1086, 666);
             tabControl.TabIndex = 8;
             // 
             // tabPage1
@@ -129,13 +116,12 @@ namespace eft_dma_radar
             tabPage1.Controls.Add(chkOpticThermalVisionDebug);
             tabPage1.Controls.Add(chkNightVisionDebug);
             tabPage1.Controls.Add(chkThermalVisionDebug);
-            tabPage1.Controls.Add(dgvPlayerList);
             tabPage1.Controls.Add(grpLoot);
             tabPage1.Controls.Add(grpMapSetup);
             tabPage1.Location = new Point(4, 24);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(1328, 638);
+            tabPage1.Size = new Size(1078, 638);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Radar";
             tabPage1.UseVisualStyleBackColor = true;
@@ -144,7 +130,7 @@ namespace eft_dma_radar
             // 
             chkNoVisorDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             chkNoVisorDebug.AutoSize = true;
-            chkNoVisorDebug.Location = new Point(1226, 81);
+            chkNoVisorDebug.Location = new Point(968, 82);
             chkNoVisorDebug.Name = "chkNoVisorDebug";
             chkNoVisorDebug.Size = new Size(71, 19);
             chkNoVisorDebug.TabIndex = 17;
@@ -156,7 +142,7 @@ namespace eft_dma_radar
             // 
             chkOpticThermalVisionDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             chkOpticThermalVisionDebug.AutoSize = true;
-            chkOpticThermalVisionDebug.Location = new Point(1226, 56);
+            chkOpticThermalVisionDebug.Location = new Point(968, 56);
             chkOpticThermalVisionDebug.Name = "chkOpticThermalVisionDebug";
             chkOpticThermalVisionDebug.Size = new Size(101, 19);
             chkOpticThermalVisionDebug.TabIndex = 16;
@@ -168,7 +154,7 @@ namespace eft_dma_radar
             // 
             chkNightVisionDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             chkNightVisionDebug.AutoSize = true;
-            chkNightVisionDebug.Location = new Point(1226, 6);
+            chkNightVisionDebug.Location = new Point(968, 6);
             chkNightVisionDebug.Name = "chkNightVisionDebug";
             chkNightVisionDebug.Size = new Size(94, 19);
             chkNightVisionDebug.TabIndex = 14;
@@ -180,64 +166,13 @@ namespace eft_dma_radar
             // 
             chkThermalVisionDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             chkThermalVisionDebug.AutoSize = true;
-            chkThermalVisionDebug.Location = new Point(1226, 31);
+            chkThermalVisionDebug.Location = new Point(968, 31);
             chkThermalVisionDebug.Name = "chkThermalVisionDebug";
             chkThermalVisionDebug.Size = new Size(104, 19);
             chkThermalVisionDebug.TabIndex = 15;
             chkThermalVisionDebug.Text = "Thermal Vision";
             chkThermalVisionDebug.UseVisualStyleBackColor = true;
             chkThermalVisionDebug.CheckedChanged += chkThermalVision_CheckedChanged;
-            // 
-            // dgvPlayerList
-            // 
-            dgvPlayerList.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = Color.Black;
-            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            dataGridViewCellStyle1.ForeColor = Color.White;
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dgvPlayerList.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            dgvPlayerList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvPlayerList.Columns.AddRange(new DataGridViewColumn[] { dataGridViewTextBoxColumn1, dataGridViewTextBoxColumn3, dataGridViewTextBoxColumn4, dataGridViewTextBoxColumn5 });
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.Black;
-            dataGridViewCellStyle2.Font = new Font("Arial", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            dataGridViewCellStyle2.ForeColor = Color.White;
-            dataGridViewCellStyle2.Padding = new Padding(3);
-            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-            dgvPlayerList.DefaultCellStyle = dataGridViewCellStyle2;
-            dgvPlayerList.EnableHeadersVisualStyles = false;
-            dgvPlayerList.GridColor = Color.DarkGray;
-            dgvPlayerList.Location = new Point(877, 6);
-            dgvPlayerList.Name = "dgvPlayerList";
-            dgvPlayerList.RowTemplate.Height = 25;
-            dgvPlayerList.Size = new Size(443, 202);
-            dgvPlayerList.TabIndex = 13;
-            dgvPlayerList.Visible = false;
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            dataGridViewTextBoxColumn1.HeaderText = "Faction / Name";
-            dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            dataGridViewTextBoxColumn3.HeaderText = "Value";
-            dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            dataGridViewTextBoxColumn4.HeaderText = "In Hands";
-            dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            // 
-            // dataGridViewTextBoxColumn5
-            // 
-            dataGridViewTextBoxColumn5.HeaderText = "Dist";
-            dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
             // 
             // grpLoot
             // 
@@ -520,7 +455,6 @@ namespace eft_dma_radar
             // 
             // grpConfig
             // 
-            grpConfig.Controls.Add(chkHidePlayers);
             grpConfig.Controls.Add(lblUIScale);
             grpConfig.Controls.Add(trkUIScale);
             grpConfig.Controls.Add(chkHideNames);
@@ -544,19 +478,6 @@ namespace eft_dma_radar
             grpConfig.TabIndex = 8;
             grpConfig.TabStop = false;
             grpConfig.Text = "Radar Config";
-            // 
-            // chkHidePlayers
-            // 
-            chkHidePlayers.AutoSize = true;
-            chkHidePlayers.Checked = true;
-            chkHidePlayers.CheckState = CheckState.Checked;
-            chkHidePlayers.Location = new Point(193, 176);
-            chkHidePlayers.Name = "chkHidePlayers";
-            chkHidePlayers.Size = new Size(110, 19);
-            chkHidePlayers.TabIndex = 29;
-            chkHidePlayers.Text = "Hide Player Info";
-            chkHidePlayers.UseVisualStyleBackColor = true;
-            chkHidePlayers.CheckedChanged += chkHidePlayers_CheckedChanged;
             // 
             // lblUIScale
             // 
@@ -753,30 +674,11 @@ namespace eft_dma_radar
             lstViewPMCHistory.UseCompatibleStateImageBehavior = false;
             lstViewPMCHistory.View = View.Details;
             // 
-            // columnHeader_Entry
-            // 
-            columnHeader_Entry.Text = "Entry";
-            columnHeader_Entry.Width = 200;
-            // 
-            // columnHeader_ID
-            // 
-            columnHeader_ID.Text = "ID";
-            columnHeader_ID.Width = 50;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            // 
-            // Column1
-            // 
-            Column1.HeaderText = "Column1";
-            Column1.Name = "Column1";
-            // 
             // frmMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1336, 666);
+            ClientSize = new Size(1086, 666);
             Controls.Add(tabControl);
             Margin = new Padding(4, 3, 4, 3);
             Name = "frmMain";
@@ -784,7 +686,6 @@ namespace eft_dma_radar
             tabControl.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             tabPage1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvPlayerList).EndInit();
             grpLoot.ResumeLayout(false);
             grpLoot.PerformLayout();
             grpMapSetup.ResumeLayout(false);
@@ -799,7 +700,6 @@ namespace eft_dma_radar
             ((System.ComponentModel.ISupportInitialize)trkAimLength).EndInit();
             tabPage3.ResumeLayout(false);
             tabPage4.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)bindingSource1).EndInit();
             ResumeLayout(false);
         }
 
@@ -825,7 +725,6 @@ namespace eft_dma_radar
         private TextBox txtMapSetupY;
         private Label lblMapXY;
         private TextBox txtMapSetupX;
-        private BindingSource bindingSource1;
         private CheckBox chkShowAimview;
         private CheckBox chkMapFree;
         private TabPage tabPage3;
@@ -850,14 +749,6 @@ namespace eft_dma_radar
         private Button btnRefreshLoot;
         private Label lblUIScale;
         private TrackBar trkUIScale;
-        private DataGridView dgvPlayerList;
-        private DataGridViewTextBoxColumn Column1;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
-        private CheckBox chkHidePlayers;
         private GroupBox grpMemoryWriting;
         private CheckBox chkThermalVisionDebug;
         private CheckBox chkNightVisionDebug;

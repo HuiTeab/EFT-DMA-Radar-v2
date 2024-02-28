@@ -27,7 +27,6 @@ namespace eft_dma_radar
         private static uint _pid;
         private static ulong _unityBase;
         private static Game _game;
-        private static CameraManager _cameraManager;
         private static int _ticksCounter = 0;
         private static volatile int _ticks = 0;
         private static readonly Stopwatch _tickSw = new();
@@ -75,10 +74,6 @@ namespace eft_dma_radar
         public static ReadOnlyCollection<Exfil> Exfils
         {
             get => _game?.Exfils;
-        }
-        public static CameraManager CameraManager
-        {
-            get => _cameraManager;
         }
         #endregion
 
@@ -219,14 +214,13 @@ namespace eft_dma_radar
                     while (true) // Game is running
                     {
                         _game = new Game(_unityBase);
-                        _cameraManager = new CameraManager(_unityBase);
+
                         Player.Reset(); // Reset static assets for a new raid/game.
                         try
                         {
                             Program.Log("Ready -- Waiting for raid...");
                             _ready = true;
                             Task.Run(async () => await _game.WaitForGameAsync()).Wait();
-                            Task.Run(async () => await _cameraManager.GetCameraAsync()).Wait();
                             while (_game.InGame || _game.InHideout)
                             {
                                 if (_tickSw.ElapsedMilliseconds >= 1000)

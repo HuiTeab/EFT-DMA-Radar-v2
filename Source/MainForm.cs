@@ -1055,36 +1055,6 @@ namespace eft_dma_radar
                                     );
                                 }
                             }
-
-                            // Fill datagrdidview1 with player info, faction/name, Grp, Value, inhands item and distance
-                            if (!chkHidePlayers.Checked) {
-                                //column 1 = faction / name
-                                //column 2 = group
-                                //column 3 = value
-                                //column 4 = item in hands
-                                //column 5 = distance
-
-                                dgvPlayerList.Rows.Clear();
-                                foreach (var player in allPlayers) {
-                                    if (player.Type is PlayerType.LocalPlayer) {
-                                        dgvPlayerList.Rows.Add("Local Player", "", "", "", "");
-                                    } else if (player.Type is PlayerType.Teammate) {
-                                        dgvPlayerList.Rows.Add("Teammate", player.GroupID, "", "", "");
-                                    } else if (player.Type is PlayerType.PScav) {
-                                        dgvPlayerList.Rows.Add("Player Scav", "", "", "", "");
-                                    } else if (player.Type is PlayerType.AIBoss) {
-                                        dgvPlayerList.Rows.Add("Boss", "", "", "", "");
-                                    } else if (player.Type is PlayerType.USEC) {
-                                        var name = "USEC: " + player.Name;
-                                        var distance = Math.Round(Vector3.Distance(localPlayerPos, player.Position), 2);
-                                        dgvPlayerList.Rows.Add(name, "", "", "", distance);
-                                    } else if (player.Type is PlayerType.BEAR) {
-                                        var name = "BEAR: " + player.Name;
-                                        var distance = Math.Round(Vector3.Distance(localPlayerPos, player.Position), 2);
-                                        dgvPlayerList.Rows.Add(name, "", "", "", distance);
-                                    }
-                                }
-                            }
                         }
 
                         if (chkShowAimview.Checked) // Aimview Drawing
@@ -1370,24 +1340,20 @@ namespace eft_dma_radar
             base.OnMouseWheel(e);
         }
 
-        private void chkHidePlayers_CheckedChanged(object sender, EventArgs e) {
-            dgvPlayerList.Visible = !chkHidePlayers.Checked;
-        }
-
         private void chkNightVision_CheckedChanged(object sender, EventArgs e) {
-            Memory.CameraManager.NightVision(chkNightVision.Checked || chkNightVisionDebug.Checked);
+            Game.CameraManager.NightVision(chkNightVision.Checked || chkNightVisionDebug.Checked);
         }
 
         private void chkThermalVision_CheckedChanged(object sender, EventArgs e) {
-            Memory.CameraManager.ThermalVision(chkThermalVision.Checked || chkThermalVisionDebug.Checked);
+            Game.CameraManager.ThermalVision(chkThermalVision.Checked || chkThermalVisionDebug.Checked);
         }
 
         private void chkOpticThermalVision_CheckedChanged(object sender, EventArgs e) {
-            Memory.CameraManager.OpticThermalVision(chkOpticThermalVision.Checked | chkOpticThermalVisionDebug.Checked);
+            Game.CameraManager.OpticThermalVision(chkOpticThermalVision.Checked | chkOpticThermalVisionDebug.Checked);
         }
 
         private void chkNoVisor_CheckedChanged(object sender, EventArgs e) {
-            Memory.CameraManager.VisorEffect(chkNoVisor.Checked || chkNoVisorDebug.Checked);
+            Game.CameraManager.VisorEffect(chkNoVisor.Checked || chkNoVisorDebug.Checked);
         }
     }
     #endregion

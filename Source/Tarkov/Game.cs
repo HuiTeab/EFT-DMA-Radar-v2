@@ -20,6 +20,7 @@ namespace eft_dma_radar
         private bool _inHideout = false;
         private GrenadeManager _grenadeManager;
         private ExfilManager _exfilManager;
+        private static CameraManager _cameraManager;
         private volatile bool _inGame = false;
         private volatile bool _loadingLoot = false;
         private volatile bool _refreshLoot = false;
@@ -68,6 +69,10 @@ namespace eft_dma_radar
         public ReadOnlyCollection<Exfil> Exfils
         {
             get => _exfilManager?.Exfils;
+        }
+        public static CameraManager CameraManager
+        {
+            get => _cameraManager;
         }
         #endregion
 
@@ -192,8 +197,11 @@ namespace eft_dma_radar
             _exfilManager = null;
             _mapName = string.Empty;
             _localGameWorld = 0;
-            //Wait before trying to get game world again
-            Thread.Sleep(5000);
+            _questManager = null;
+            _cameraManager = null;
+
+            // sleep for 20 seconds to allow for raid end screen to appear
+            Thread.Sleep(20000);
         }
 
         /// <summary>
@@ -213,13 +221,11 @@ namespace eft_dma_radar
         /// 
         public async Task WaitForGameAsync()
         {
-            //GetCamera();
-            while (!(GetGOM() && await GetLGWAsync())) //&& GetCamera()
+            while (!(GetGOM() && await GetLGWAsync()))
             {
                 _inGame = false;
-                await Task.Delay(500);
+                await Task.Delay(1000);
             }
-            //GetCamera();
             Program.Log("Raid has started!");
             _inGame = true;
         }
@@ -303,6 +309,7 @@ namespace eft_dma_radar
             {
                 try
                 {
+                    GetGOM(); // Refresh GOM
                     ulong activeNodes = Memory.ReadPtr(_gom.ActiveNodes);
                     ulong lastActiveNode = Memory.ReadPtr(_gom.LastActiveNode);
                     var gameWorld = GetObjectFromList(activeNodes, lastActiveNode, "GameWorld");
@@ -434,6 +441,18 @@ namespace eft_dma_radar
                 catch (Exception ex)
                 {
                     Program.Log($"ERROR getting map name: {ex}");
+                }
+            }
+            if (_cameraManager is null)
+            {
+                try
+                {
+                    var cameraManager = new CameraManager(_unityBase);
+                    _cameraManager = cameraManager; // update ref
+                }
+                catch (Exception ex)
+                {
+                    Program.Log($"ERROR loading CameraManager: {ex}");
                 }
             }
             if (_grenadeManager is null)

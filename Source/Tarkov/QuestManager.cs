@@ -21,12 +21,12 @@ namespace eft_dma_radar
 
             for (int i = 0; i < questDataCount; i++)
             {
-                var questEntry = Memory.ReadPtr(questDataBaseList + 0x20 + (uint)(i * 0x8)); //[Class] -.GClass3050 : Object
+                var questEntry = Memory.ReadPtr(questDataBaseList + 0x20 + (uint)(i * 0x8)); //[Class] -.GClass306A : Object
                 if (questEntry == 0)
                 {
                     continue;
                 }
-                var questTemplate = Memory.ReadPtr(questEntry + 0x28); //[Class] -.GClass3053 : Object
+                var questTemplate = Memory.ReadPtr(questEntry + 0x28); //[28] Template : -.GClass306D [Class] -.GClass306D : Object
                 if (questTemplate == 0)
                 {
                     continue;
@@ -52,7 +52,12 @@ namespace eft_dma_radar
                                     Objectives = task.Objectives
                                 }
                             );
+                            var conditions = Memory.ReadPtr(questTemplate + 0x40);
+                            var conditionsCount = Memory.ReadValue<int>(conditions + 0x40);
+                            var conditionsEntries = Memory.ReadPtr(conditions + 0x18);
                             
+                            
+
                             continue;
                         }
                         continue;
