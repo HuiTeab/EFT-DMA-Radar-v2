@@ -61,36 +61,22 @@
         public const uint MovementContext = 0x40; // to MovementContext
         public const uint Corpse = 0x390; // EFT.Interactive.Corpse
         public const uint Profile = 0x588; // to Profile
-        public const uint HealthController = 0x5C8; // to HealthController
         public const uint InventoryController = 0x5E0; // to InventoryController
-        public const uint IsLocalPlayer = 0x906; // bool
     }
     public struct Profile // EFT.Profile
     {
         public const uint Id = 0x10; // unity string
         public const uint AccountId = 0x18; // unity string
         public const uint PlayerInfo = 0x28; // to PlayerInfo
-        public const uint Stats = 0xE8; // to Stats
-    }
-    public struct Stats // -.GClass05B9
-    {
-        public const uint OverallCounters = 0x18; // to OverallCounters
-    }
-    public struct OverallCounters
-    {
-        public const uint Counters = 0x10; // to Dictionary<IntPtr, ulong>
     }
     public struct PlayerInfo // -.GClass1044
     {
         public const uint Nickname = 0x10; // unity string
-        public const uint MainProfileNickname = 0x18; // unity string
         public const uint GroupId = 0x20; // ptr to UnityString (0/null if solo or bot)
         public const uint GameVersion = 0x38; // unity string
         public const uint Settings = 0x50; // to PlayerSettings
         public const uint PlayerSide = 0x70; // int32
-        public const uint RegDate = 0x74; // int32
         public const uint MemberCategory = 0x8C; // int32 enum
-        public const uint Experience = 0x90; // int32
     }
     public struct ObservedPlayerView // [Class] EFT.NextObservedPlayer.ObservedPlayerView : MonoBehaviour
     {
@@ -105,27 +91,13 @@
 
     public struct ObservedPlayerController //[Class] -.GClass1E0D : Object, GInterface94D4, IDisposable
     {
-        public const uint InfoContainer = 0xE0; // to InfoContainer
         public const uint InventoryController = 0x118; // to InventoryController
-        public static readonly uint[] To_MovementContext = new uint[] { 0xC0, 0x10}; // to MovementContext
         
     }
 
     public struct ObserverdPlayerMovementContext
     {
         public const uint Rotation = 0x78; // to Vector2
-    }
-
-    public struct AIData
-    {
-        public static readonly uint[] To_MovementContext = new uint[] { 0x28, 0x10}; // to MovementContext
-    }
-
-    public struct InfoContainer 
-    {
-        public const uint Id = 0x10; // to Id
-        public const uint NickName = 0x18; // to NickName
-        public const uint Side = 0x20; // to Side
     }
 
     public struct PlayerSettings
@@ -138,7 +110,7 @@
     }
     public struct InventoryController // -.GClass1A98
     {
-        public const uint Inventory = 0x138; // to Inventory
+        public const uint Inventory = 0x140; // to Inventory
         public const uint ObservedPlayerInventory = 0x138; // to Inventory
     }
     public struct Inventory
@@ -153,24 +125,6 @@
     {
         public const uint Name = 0x18; // string,unity
         public const uint ContainedItem = 0x40; // to LootItemBase
-    }
-    public struct HealthController // -.GInterface7AEE
-    {
-        public static readonly uint[] To_HealthEntries = { 0x50 , 0x18}; // to HealthEntries
-    }
-    public struct HealthEntries
-    {
-        public const uint HealthEntries_Start = 0x30; // Each body part 0x18 , to HealthEntry
-    }
-    public struct HealthEntry
-    {
-        public const uint Value = 0x10; // to HealthValue
-    }
-    public struct HealthValue
-    {
-        public const uint Current = 0x0; // float
-        public const uint Maximum = 0x4; // float
-        public const uint Minimum = 0x8; // float
     }
     public struct LootListItem
     {
@@ -210,10 +164,6 @@
     public struct LootGameObjectClass
     {
         public static readonly uint[] To_TransformInternal = new uint[] { 0x8, 0x28, 0x10 };
-    }
-    public struct ContainerItemOwner
-    {
-        public const uint LootItemBase = 0xA0; // to LootItemBase
     }
     public struct Grids
     {
