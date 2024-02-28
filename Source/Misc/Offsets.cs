@@ -110,7 +110,7 @@
     }
     public struct InventoryController // -.GClass1A98
     {
-        public const uint Inventory = 0x140; // to Inventory
+        public const uint Inventory = 0x138; // to Inventory
         public const uint ObservedPlayerInventory = 0x138; // to Inventory
     }
     public struct Inventory
