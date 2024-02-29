@@ -44,3 +44,6 @@ For any inquiries or assistance, feel free to contact me on Discord: keeegi_1047
 ## Note
 
 Ensure all necessary files are properly included and referenced for the application to function correctly.
+
+## Acknowledgments
+This project builds upon the original work created by [Git link](https://github.com/6b45/eft-dma-radar-1) [UC Forum Thread](https://www.unknowncheats.me/forum/escape-from-tarkov/482418-2d-map-dma-radar-wip.html). I am not the original creator of this project; all credit for the initial concept and development goes to Lone. This version seeks to extend and enhance the original tool with updated functionalities and improvements.
