@@ -56,8 +56,6 @@ namespace eft_dma_radar
                             var conditionsCount = Memory.ReadValue<int>(conditions + 0x40);
                             var conditionsEntries = Memory.ReadPtr(conditions + 0x18);
                             
-                            
-
                             continue;
                         }
                         continue;

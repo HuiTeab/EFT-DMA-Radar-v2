@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
+﻿using System.Collections.ObjectModel;
 using eft_dma_radar.Source.Tarkov;
 
 namespace eft_dma_radar
@@ -320,7 +317,6 @@ namespace eft_dma_radar
                         retryCount++;
                         continue;
                     }
-
                     _localGameWorld = Memory.ReadPtrChain(gameWorld, Offsets.GameWorld.To_LocalGameWorld);
                     if (_localGameWorld == 0)
                     {
