@@ -237,7 +237,6 @@ namespace eft_dma_radar
                     while (true) // Game is running
                     {
                         _game = new Game(_unityBase);
-
                         Player.Reset(); // Reset static assets for a new raid/game.
                         try
                         {

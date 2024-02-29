@@ -22,14 +22,6 @@ namespace eft_dma_radar {
             get;
         }
 
-        /// <summary>
-        /// InHideout from Game.cs
-        /// </summary>
-        /// 
-        private bool IsAtHideout
-        {
-            get => Memory.InHideout;
-        }
         #region Constructor
         /// <summary>
         /// Initializes a new instance of the <see cref="LootManager"/> class.
@@ -38,12 +30,6 @@ namespace eft_dma_radar {
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         ///
         public LootManager(ulong localGameWorld) {
-            // If in hideout, don't parse loot
-            if (IsAtHideout) {
-                Program.Log("In Hideout, skipping loot parsing");
-                return;
-            }
-
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start(); // Start timing
             Program.Log("Parsing loot...");
@@ -223,7 +209,6 @@ namespace eft_dma_radar {
         #endregion
 
         #region Methods
-
         /// <summary>
         /// Applies specified loot filter.
         /// </summary>

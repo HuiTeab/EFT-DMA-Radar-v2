@@ -186,7 +186,10 @@ namespace eft_dma_radar
         private void HandleRaidEnded(RaidEnded e)
         {
             Program.Log("Raid has ended!");
+            
             _inGame = false;
+            // sleep for 60 seconds to allow for raid end
+            Thread.Sleep(60000);
             //Clear all game objects
             _lootManager = null;
             _rgtPlayers = null;
@@ -196,9 +199,6 @@ namespace eft_dma_radar
             _localGameWorld = 0;
             _questManager = null;
             _cameraManager = null;
-
-            // sleep for 20 seconds to allow for raid end screen to appear
-            Thread.Sleep(20000);
         }
 
         /// <summary>

@@ -52,9 +52,6 @@ namespace eft_dma_radar
                                     Objectives = task.Objectives
                                 }
                             );
-                            var conditions = Memory.ReadPtr(questTemplate + 0x40);
-                            var conditionsCount = Memory.ReadValue<int>(conditions + 0x40);
-                            var conditionsEntries = Memory.ReadPtr(conditions + 0x18);
                             
                             continue;
                         }

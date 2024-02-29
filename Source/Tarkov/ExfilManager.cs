@@ -50,8 +50,6 @@ namespace eft_dma_radar
                 }
             }else {
                 var localPlayer = Memory.ReadPtr(localGameWorld + Offsets.LocalGameWorld.MainPlayer);
-                var classNamePtr = Memory.ReadPtrChain(localPlayer, Offsets.UnityClass.Name);
-                var classNameString = Memory.ReadString(classNamePtr, 64).Replace("\0", string.Empty);
                 var localPlayerProfile = Memory.ReadPtr(localPlayer + Offsets.Player.Profile);
                 var localPlayerInfo = Memory.ReadPtr(localPlayerProfile + Offsets.Profile.PlayerInfo);
                 var localPlayerEntryPoint = Memory.ReadPtr(localPlayerInfo + 0x30);
