@@ -41,7 +41,7 @@ namespace eft_dma_radar
                     var body = new
                     {
                         query = @"query {
-                                    items{
+                                    items {
                                         id
                                         name
                                         shortName
@@ -50,48 +50,174 @@ namespace eft_dma_radar
                                         avg24hPrice
                                         low24hPrice
                                         high24hPrice
-                                        sellFor{
-                                            price
-                                            vendor{
-                                                normalizedName
-                                            }
+                                        sellFor {
+                                        price
+                                        vendor {
+                                            normalizedName
+                                        }
                                         }
                                         category {
-                                            id
-                                            name
-                                            normalizedName
+                                        id
+                                        name
+                                        normalizedName
                                         }
                                         weight
-                                        categories{
-                                            id
-                                            name
-                                            normalizedName
+                                        categories {
+                                        id
+                                        name
+                                        normalizedName
                                         }
                                     }
                                     tasks {
                                         id
                                         name
-                                        kappaRequired
                                         objectives {
-                                            optional
-                                            description
-                                            type
                                             id
+                                            type
+                                            description
+                                            maps {
+                                                id
+                                                name
+                                                normalizedName
+                                            }
+                                            ... on TaskObjectiveItem {
+                                                item {
+                                                id
+                                                name
+                                                shortName
+                                                }
+                                                zones {
+                                                id
+                                                map {
+                                                    id
+                                                    normalizedName
+                                                    name
+                                                }
+                                                position {
+                                                    y
+                                                    x
+                                                    z
+                                                }
+                                                }
+                                                requiredKeys {
+                                                id
+                                                name
+                                                shortName
+                                                }
+                                                count
+                                                foundInRaid
+                                            }
+                                            ... on TaskObjectiveMark {
+                                                id
+                                                description
+                                                markerItem {
+                                                id
+                                                name
+                                                shortName
+                                                }
+                                                maps {
+                                                id
+                                                normalizedName
+                                                name
+                                                }
+                                                zones {
+                                                id
+                                                map {
+                                                    id
+                                                    normalizedName
+                                                    name
+                                                }
+                                                position {
+                                                    y
+                                                    x
+                                                    z
+                                                }
+                                                }
+                                                requiredKeys {
+                                                id
+                                                name
+                                                shortName
+                                                }
+                                            }
+                                            ... on TaskObjectiveQuestItem {
+                                                id
+                                                description
+                                                requiredKeys {
+                                                id
+                                                name
+                                                shortName
+                                                }
+                                                maps {
+                                                id
+                                                normalizedName
+                                                name
+                                                }
+                                                zones {
+                                                id
+                                                map {
+                                                    id
+                                                    normalizedName
+                                                    name
+                                                }
+                                                position {
+                                                    y
+                                                    x
+                                                    z
+                                                }
+                                                }
+                                                requiredKeys {
+                                                id
+                                                name
+                                                shortName
+                                                }
+                                                count
+                                            }
+                                            ... on TaskObjectiveBasic {
+                                                id
+                                                description
+                                                requiredKeys {
+                                                id
+                                                name
+                                                shortName
+                                                }
+                                                maps {
+                                                id
+                                                normalizedName
+                                                name
+                                                }
+                                                zones {
+                                                id
+                                                map {
+                                                    id
+                                                    normalizedName
+                                                    name
+                                                }
+                                                position {
+                                                    y
+                                                    x
+                                                    z
+                                                }
+                                                }
+                                                requiredKeys {
+                                                id
+                                                name
+                                                shortName
+                                                }
+                                            }
                                         }
                                     }
-                                    questItems{
+                                    questItems {
                                         id
                                         shortName
                                         name
                                         normalizedName
                                     }
-                                    lootContainers{
+                                    lootContainers {
                                         id
                                         normalizedName
                                         name
                                     }
-                                }
-                                "
+                                }"
                     };
                     var jsonBody = JsonSerializer.Serialize(body);
                     var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
@@ -131,29 +257,45 @@ namespace eft_dma_radar
                 }
                 if (item.data?.tasks != null)
                 {
+                    // WIP //
                     foreach (var task in item.data.tasks)
                     {
-                        var taskObjectives = new List<Objective>();
-                        foreach (var objective in task.objectives)
+                        var objectiveCount = task.objectives.Count;
+                        for (var i = 0; i < objectiveCount; i++)
                         {
-                            taskObjectives.Add(new Objective
-                            {
-                                optional = objective.optional,
-                                type = objective.type,
-                                id = objective.id
-                            });
-                        }
+                            var objective = task.objectives[i];
+                            //visit
+                            //extract
+                            //mark
+                            //shoot
+                            //findQuestItem
+                            //giveQuestItem
+                            //plantItem
+                            //giveItem
+                            //experience
+                            if (objective.type == "findQuestItem"){
 
-                        allTasks.TryAdd(
-                            task.id,
-                            new Tasks()
-                            {
-                                Name = task.name,
-                                ID = task.id,
-                                KappaRequired = task.kappaRequired,
-                                Objectives = taskObjectives
                             }
-                        );
+                            if (objective.type == "visit"){
+                                if (objective.maps != null && objective.maps.Any()){
+                                    foreach (var map in objective.maps)
+                                    {
+                                        
+                                    }
+                                }
+                                if (objective.zones != null && objective.zones.Any()){
+                                    foreach (var zone in objective.zones)
+                                    {
+
+                                    }
+                                }
+
+                            }
+                            if (objective.type == "mark"){
+
+                            }
+                        }
+                        
                     }
                 }
                 if (item.data?.questItems != null)
@@ -245,9 +387,9 @@ namespace eft_dma_radar
         public int? avg24hPrice { get; set; }
         public int? low24hPrice { get; set; }
         public int? high24hPrice { get; set; }
-        public double weight { get; set; } // Assuming weight could be in decimals
+        public double weight { get; set; } 
         public List<Category> categories { get; set; } = new List<Category>();
-        public List<VendorPrice> sellFor { get; set; } = new List<VendorPrice>(); // Assuming multiple vendors
+        public List<VendorPrice> sellFor { get; set; } = new List<VendorPrice>(); 
 
         public class VendorPrice
         {
@@ -267,17 +409,50 @@ namespace eft_dma_radar
     {
         public string id { get; set; }
         public string name { get; set; }
-        public bool kappaRequired { get; set; }
         public List<Objective> objectives { get; set; } = new List<Objective>();
 
         public class Objective
         {
-            public bool optional { get; set; }
+            public string id { get; set; }
             public string description { get; set; }
             public string type { get; set; }
-            public string id { get; set; }
+            public List<ObjectiveMaps>? maps { get; set; } 
+            public List<ObjectiveZones>? zones { get; set; } 
+            public int? count { get; set; }
+            public bool? foundInRaid { get; set; }
+
         }
     }
+
+    public class ObjectiveZones
+    {
+        public string id { get; set; }
+        public Map map { get; set; } 
+        public Position position { get; set; } 
+
+        public class Map
+        {
+            public string id { get; set; }
+            public string normalizedName { get; set; }
+            public string name { get; set; }
+        }
+
+        public class Position
+        {
+            public double? y { get; set; }
+            public double? x { get; set; }
+            public double? z { get; set; }
+        }
+    }
+
+
+    public class ObjectiveMaps
+    {
+        public string id { get; set; }
+        public string name { get; set; }
+        public string normalizedName { get; set; }
+    }
+
 
     public class TarkovQuestItems
     {
@@ -287,19 +462,6 @@ namespace eft_dma_radar
         public string normalizedName { get; set; }
     }
 
-    public class TarkovDevResponse
-    {
-        public TarkovDevData data { get; set; }
-    }
-
-    public class TarkovDevData
-    {
-        public List<TarkovItem> items { get; set; }
-        public List<TarkovTasks> tasks { get; set; } // Reflects the list of tasks
-        public List<TarkovQuestItems> questItems { get; set; }
-        public List<LootContainer> lootContainers { get; set; }
-    }
-
     public class LootContainer
     {
         public string id { get; set; }
@@ -307,18 +469,7 @@ namespace eft_dma_radar
         public string name { get; set; }
     }
 
-    public class TarkovTask
-    {
-        public List<Objective> objectives { get; set; } = new List<Objective>();
-    }
-
-    public class Objective
-    {
-        public bool optional { get; set; }
-        public string type { get; set; }
-        public string id { get; set; }
-    }
-        public class QuestItems
+    public class QuestItems
     {
         public string Name { get; set; }
         public string ID { get; set; }
@@ -329,9 +480,31 @@ namespace eft_dma_radar
     public class Tasks
     {
         public string Name { get; set; }
-        public bool KappaRequired { get; set; }
         public string ID { get; set; }
         public List<Objective> Objectives { get; set; } = new List<Objective>();
+
+        public class Objective
+        {
+            public string Description { get; set; }
+            public string Type { get; set; }
+            public string ID { get; set; }
+            public List<ObjectiveMaps> Maps { get; set; } = new List<ObjectiveMaps>();
+            public List<ObjectiveZones> ObjectiveZones { get; set; } = new List<ObjectiveZones>();
+        }
+
+    }
+
+    public class TarkovDevResponse
+    {
+        public TarkovDevData data { get; set; }
+    }
+
+    public class TarkovDevData
+    {
+        public List<TarkovItem> items { get; set; }
+        public List<TarkovTasks> tasks { get; set; } 
+        public List<TarkovQuestItems> questItems { get; set; }
+        public List<LootContainer> lootContainers { get; set; }
     }
     #endregion
 }

@@ -4,15 +4,7 @@ namespace eft_dma_radar
 {
     public class QuestManager
     {
-        public static ReadOnlyDictionary<string, Tasks> RequiredTasks { get; private set; }
-
-        static QuestManager()
-        {
-            RequiredTasks = new ReadOnlyDictionary<string, Tasks>(new Dictionary<string, Tasks>());
-        }
-
         public QuestManager(ulong localGameWorld) {
-            var allRequiredTasks = new Dictionary<string, Tasks>(StringComparer.OrdinalIgnoreCase);
             var mainPlayer = Memory.ReadPtr(localGameWorld + Offsets.LocalGameWorld.MainPlayer);
             var profile = Memory.ReadPtr(mainPlayer + Offsets.Player.Profile);
             var questData = Memory.ReadPtr(profile + 0x78); 
@@ -38,29 +30,12 @@ namespace eft_dma_radar
                     //2 = started
                     if (questStatus == 2)
                     {
-                        TarkovDevAPIManager.AllTasks.TryGetValue(questID, out var task);
-                        if (task != null)
-                        {
-                            //WIP
-                            allRequiredTasks.TryAdd(
-                                questID,
-                                new Tasks()
-                                {
-                                    Name = task.Name,
-                                    ID = task.ID,
-                                    KappaRequired = task.KappaRequired,
-                                    Objectives = task.Objectives
-                                }
-                            );
-                            continue;
-                        }
                         continue;
                     }
                 } catch {
                     Console.WriteLine($"Quest: {questID} is not in the list");
                 }
             }
-            RequiredTasks = new (allRequiredTasks);
         }
     }
 }
