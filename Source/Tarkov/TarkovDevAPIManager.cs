@@ -123,7 +123,7 @@ namespace eft_dma_radar
                             tarkovItem.id,
                             new DevLootItem()
                             {
-                                Label = $"[{FormatNumber(value)}] {tarkovItem.shortName}",
+                                Label = tarkovItem.name,
                                 Item = tarkovItem
                             }
                         );

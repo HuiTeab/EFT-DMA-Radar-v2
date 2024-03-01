@@ -1,9 +1,15 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Policy;
+using System.Text;
 using eft_dma_radar.Source.Misc;
+using SkiaSharp;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace eft_dma_radar {
     public class LootManager {
@@ -11,17 +17,20 @@ namespace eft_dma_radar {
         /// <summary>
         /// Filtered loot ready for display by GUI.
         /// </summary>
-        public ReadOnlyCollection < DevLootItem > Filter {
+        public ReadOnlyCollection<DevLootItem> Filter {
             get;
             private set;
         }
         /// <summary>
         /// All tracked loot/corpses in Local Game World.
         /// </summary>
-        private ReadOnlyCollection < DevLootItem > Loot {
+        private ReadOnlyCollection<DevLootItem> Loot {
             get;
         }
-
+        /// <summary>
+        /// key,value pair of filtered item ids (key) and their filtered color (value)
+        /// </summary>
+        public Dictionary<string, LootFilter.Colors> LootFilterColors {get;private set; } 
         #region Constructor
         /// <summary>
         /// Initializes a new instance of the <see cref="LootManager"/> class.
@@ -142,12 +151,12 @@ namespace eft_dma_radar {
                                             var entry)) {
                                         loot.Add(new DevLootItem {
                                             Label = entry.Label,
-                                                AlwaysShow = entry.AlwaysShow,
-                                                Important = entry.Important,
-                                                Position = pos,
-                                                Item = entry.Item,
-                                                Container = true,
-                                                ContainerName = containerName
+                                            AlwaysShow = entry.AlwaysShow,
+                                            Important = entry.Important,
+                                            Position = pos,
+                                            Item = entry.Item,
+                                            Container = true,
+                                            ContainerName = containerName
                                         });
                                     }
                                 };
@@ -183,10 +192,10 @@ namespace eft_dma_radar {
                                             var entry)) {
                                         loot.Add(new DevLootItem {
                                             Label = entry.Label,
-                                                AlwaysShow = entry.AlwaysShow,
-                                                Important = entry.Important,
-                                                Position = pos,
-                                                Item = entry.Item
+                                            AlwaysShow = entry.AlwaysShow,
+                                            Important = entry.Important,
+                                            Position = pos,
+                                            Item = entry.Item
                                         });
                                     }
                                 }
@@ -210,51 +219,82 @@ namespace eft_dma_radar {
 
         #region Methods
         /// <summary>
-        /// Applies specified loot filter.
+        /// Applies loot filter
         /// </summary>
-        /// <param name="filter">Filter by item 'name'. Will use values instead if left null.</param>
-        public void ApplyFilter(string filter) {
-            var loot = this.Loot; // cache ref
-            if (loot is not null) {
-                var filtered = new List < DevLootItem > (loot.Count);
+        public void ApplyFilter() {
+            var loot = this.Loot;
+            var filters = _config.Filters;
+            var activeFilters = filters.Where(f => f.IsActive).ToList();
+            var alwaysShow = loot.Where(x => x.AlwaysShow || TarkovDevAPIManager.GetItemValue(x.Item) > _config.MinLootValue).ToList();
 
-                if (filter is null || filter.Trim() == string.Empty) // Use loot values
-                {
-                    foreach(var item in loot) {
-                        if (item.Label == null){
-                            Program.Log($"Item label is null {item.BsgId} - {item.Item.shortName}");
-                            return;
-                        }
-                        var value = TarkovDevAPIManager.GetItemValue(item.Item);
+            var itemsWithData = activeFilters.SelectMany(f => f.Items)
+                .Distinct()
+                .Select(item => new {
+                    ItemId = item,
+                    Filter = activeFilters
+                        .Where(f => f.Items.Contains(item))
+                        .OrderBy(f => f.Order)
+                        .First()
+            });
 
-                        if (item.AlwaysShow || value >= _config.MinLootValue) {
-                            if (!filtered.Contains(item)) {
-                                filtered.Add(item);
-                            }
-                        }
+            var orderedItems = itemsWithData
+                .OrderBy(x => x.Filter.Order)
+                .Select(x => new {
+                    x.ItemId,
+                    x.Filter.Color,
+            });
 
-                    }
-                }
-                else
-                {
-                    var alwaysShow = loot.Where(x => x.AlwaysShow); // Always show these
-                    foreach(var item in alwaysShow) {
-                        if (!filtered.Contains(item))
-                            filtered.Add(item);
-                    }
+            var filteredLoot = from l in loot
+                               join id in orderedItems on l.Item.id equals id.ItemId
+                               select l;
 
-                    var names = filter.Split(','); // Get multiple items searched
-                    foreach(var name in names) {
-                        var search = loot.Where(x => x.Item.shortName.Contains(name.Trim(), StringComparison.OrdinalIgnoreCase));
-                        foreach(var item in search) {
-                            if (!filtered.Contains(item))
-                                filtered.Add(item);
-                        }
-                    }
-                }
-                this.Filter = new(filtered); // update ref
+            foreach (var lootItem in filteredLoot) {
+                lootItem.Important = true;
             }
+
+            filteredLoot = filteredLoot.Union(alwaysShow);
+
+            if (false) { // use this to verify if any dupes exist
+                Console.WriteLine("\n=====START=====");
+
+                foreach (var item in filteredLoot.OrderBy(i => i.Item.id)) {
+                    Console.WriteLine($"{item.Item.name} => {item.Position}, {item.Important} ({item.Item.id})");
+                }
+
+                Console.WriteLine("=====END=====\n");
+            }
+
+            this.LootFilterColors = orderedItems.ToDictionary(item => item.ItemId, item => item.Color);
+            this.Filter = new ReadOnlyCollection<DevLootItem>(filteredLoot.ToList());
         }
+
+        /// <summary>
+        /// Removes an item from the loot filter list
+        /// </summary>
+        /// <param name="itemToRemove">The item to remove</param>
+        public void RemoveFilterItem(DevLootItem itemToRemove) {
+            var shortName = new StringBuilder(itemToRemove.Item.shortName);
+
+            if (shortName.ToString().StartsWith("!!")) {
+                shortName.Remove(0, 2);
+                itemToRemove.Item.shortName = shortName.ToString();
+
+                var lootList = this.Loot?.Select(x => x).Where(x => x.Item.id == itemToRemove.Item.id).ToList();
+
+                if (lootList != null && lootList.Count > 0) {
+                    foreach (DevLootItem item in lootList) {
+                        item.Important = false;
+                        item.Item.shortName = shortName.ToString();
+                    }
+                }
+            }
+
+            var filter = this.Filter.ToList();
+            filter.Remove(itemToRemove);
+
+            this.Filter = new ReadOnlyCollection<DevLootItem>(new List<DevLootItem>(filter));
+        }
+
         ///This method recursively searches grids. Grids work as follows:
         ///Take a Groundcache which holds a Blackrock which holds a pistol.
         ///The Groundcache will have 1 grid array, this method searches for whats inside that grid.
@@ -271,7 +311,7 @@ namespace eft_dma_radar {
             if (TarkovDevAPIManager.AllItems.TryGetValue(id, out
                     var entry)) {
                 loot.Add(new DevLootItem {
-                    Label = entry.Label,
+                        Label = entry.Label,
                         AlwaysShow = entry.AlwaysShow,
                         Important = entry.Important,
                         Position = pos,
@@ -390,7 +430,7 @@ namespace eft_dma_radar {
         }
         public bool Important {
             get;
-            init;
+            set;
         } = false;
         public Vector3 Position {
             get;
@@ -415,7 +455,7 @@ namespace eft_dma_radar {
         public TarkovItem Item {
             get;
             init;
-        } = new();   
+        } = new();
     }
 
     public class LootContainers {
@@ -430,6 +470,24 @@ namespace eft_dma_radar {
         public string NormalizedName {
             get;
             init;
+        }
+    }
+
+    /// <summary>
+    /// Class to help handle filter lists/profiles for the loot filter
+    /// </summary>
+    public class LootFilter {
+        public List<string>? Items { get; set; }
+        public Colors Color { get; set; }
+        public bool IsActive { get; set; }
+        public int Order { get; set; }
+        public string Name { get; set; }
+
+        public struct Colors {
+            public byte A { get; set; }
+            public byte R { get; set; }
+            public byte G { get; set; }
+            public byte B { get; set; }
         }
     }
     #endregion

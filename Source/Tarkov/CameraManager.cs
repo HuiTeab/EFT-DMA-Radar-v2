@@ -12,7 +12,7 @@ namespace eft_dma_radar.Source.Tarkov
         private ulong _opticCamera;
         private ulong _fpsCamera;
         public bool IsReady => _opticCamera != 0 && _fpsCamera != 0;
-
+        
         public CameraManager(ulong unityBase)
         {
             _unityBase = unityBase;
@@ -43,8 +43,7 @@ namespace eft_dma_radar.Source.Tarkov
                                 "BaseOpticCamera(Clone)",
                                 StringComparison.OrdinalIgnoreCase
                             )
-                        )
-                        {
+                        ){
                             _opticCamera = cameraObject;
                         }
                         if (cameraName.Contains("FPS Camera", StringComparison.OrdinalIgnoreCase))
@@ -70,12 +69,10 @@ namespace eft_dma_radar.Source.Tarkov
             return await Task.Run(() => GetCamera());
         }
 
-        private void UpdateCamera()
-        {
+        private void UpdateCamera() {
             if (_unityBase == 0)
                 return;
-            if (_opticCamera == 0 || _fpsCamera == 0)
-            {
+            if (_opticCamera == 0 || _fpsCamera == 0) {
                 GetCamera();
             }
         }
@@ -84,7 +81,7 @@ namespace eft_dma_radar.Source.Tarkov
         {
             var component = Memory.ReadPtr(gameObject + 0x30);
             // Loop through a fixed range of potential component slots
-            for (int i = 0x8; i < 0x500; i += 0x10)
+            for (int i = 0x8; i < 0x500; i += 0x10) 
             {
                 var componentPtr = Memory.ReadPtr(component + (ulong)i);
                 if (componentPtr == 0)
@@ -102,16 +99,18 @@ namespace eft_dma_radar.Source.Tarkov
             return 0;
         }
 
+
         /// <summary>
         /// public static function to turn thermalvision on and off
         /// </summary>
-        ///
+        /// 
         public void ThermalVision(bool on)
         {
             if (_fpsCamera == 0)
             {
                 UpdateCamera();
             }
+
             if (_fpsCamera != 0)
             {
                 var fpsThermalComponent = GetComponentFromGameObject(_fpsCamera, "ThermalVision");
@@ -129,16 +128,17 @@ namespace eft_dma_radar.Source.Tarkov
             }
         }
 
+
         /// <summary>
         /// public static function to turn nightvision on and off
         /// </summary>
         ///
         public void NightVision(bool on)
         {
-            if (_fpsCamera == 0)
-            {
+            if (_fpsCamera == 0) {
                 UpdateCamera();
             }
+
             if (_fpsCamera != 0)
             {
                 var nightVisionComponent = GetComponentFromGameObject(_fpsCamera, "NightVision");
@@ -154,13 +154,13 @@ namespace eft_dma_radar.Source.Tarkov
         /// <summary>
         /// public static function to turn visor on and off
         /// </summary>
-        ///
-        public void VisorEffect(bool on)
-        {
+        /// 
+        public void VisorEffect(bool on) {
             if (_fpsCamera == 0)
             {
                 UpdateCamera();
             }
+
             if (_fpsCamera != 0)
             {
                 var fpsVisorComponent = GetComponentFromGameObject(_fpsCamera, "VisorEffect");
@@ -172,19 +172,19 @@ namespace eft_dma_radar.Source.Tarkov
         /// <summary>
         /// public static function to turn optic thermalvision on and off
         /// </summary>
-        ///
+        ///    
         public void OpticThermalVision(bool on)
         {
-            if (_opticCamera == 0)
-            {
+            if (_fpsCamera == 0) {
                 UpdateCamera();
             }
+
             if (_opticCamera != 0)
             {
                 ulong opticComponent = 0;
                 ulong opticThermalVision = 0;
                 var component = Memory.ReadPtr(_opticCamera + 0x30);
-                for (int i = 0x8; i < 0x100; i += 0x10)
+                for (int i = 0x8; i < 0x100; i += 0x10) 
                 {
                     var fields = Memory.ReadPtr(component + (ulong)i);
                     if (fields == 0)
@@ -205,4 +205,5 @@ namespace eft_dma_radar.Source.Tarkov
             }
         }
     }
+
 }

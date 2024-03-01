@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
+using System.Drawing.Text;
 using System.Numerics;
 using System.Text;
 using System.Windows.Forms.VisualStyles;
+using System.Xml.Linq;
 using eft_dma_radar.Source.Tarkov;
+using OpenTK.Graphics.OpenGL;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
+using static System.Windows.Forms.AxHost;
+using static eft_dma_radar.LootFilter;
 
 namespace eft_dma_radar
 {
@@ -108,12 +114,8 @@ namespace eft_dma_radar
                 VSync = _config.Vsync // cap fps to refresh rate, reduce tearing
             };
 
-            tabPage1.Controls.Add(_mapCanvas); // place Radar Map Canvas on top of TabPage1
+            tabRadar.Controls.Add(_mapCanvas); // place Radar Map Canvas on top of TabPage1
             chkMapFree.Parent = _mapCanvas; // change parent for checkBox_MapFree 'button'
-            btnLoot.Parent = _mapCanvas; // change parent for button_LootFilter 'button'
-            txtLootFilter.KeyDown += txtLootFilter_KeyDown; // Handle enter keypress
-            txtRegularLootValue.KeyDown += txtRegularLootValue_KeyDown; // Handle enter keypress
-            txtImportantLootValue.KeyDown += txtImportantLootValue_KeyDown; // Handle enter keypress
             trkUIScale.ValueChanged += trkUIScale_ValueChanged; // Handle UI Adjustments
 
             LoadConfig();
@@ -195,16 +197,151 @@ namespace eft_dma_radar
                 lstViewPMCHistory.Items.Clear(); // Clear old view
                 lstViewPMCHistory.Items.AddRange(Player.History); // Obtain new view
                 lstViewPMCHistory.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent); // resize Player History columns automatically
+            } else if (tabControl.SelectedIndex == 4) {
+                if (_config.Filters.Count == 0) { // add a default, blank config
+                    LootFilter newFilter = new LootFilter() {
+                        Order = 1,
+                        IsActive = true,
+                        Name = "Default",
+                        Items = new List<String>(),
+                        Color = new Colors() {
+                            R = 255,
+                            G = 0,
+                            B = 0,
+                            A = 255
+                        }
+                    };
+
+                    _config.Filters.Add(newFilter);
+
+                    Config.SaveConfig(_config);
+                }
+
+                if (cboFilters.Items.Count == 0) { // add filters to the combo box
+                    UpdateLootFilterComboBoxes();
+                }
+
+                if (cboLootItems.Items.Count == 0) { // add loot items loot item combobox
+                    List<DevLootItem> lootList = TarkovDevAPIManager.AllItems.Take(25).Select(x => x.Value).ToList();
+
+                    cboLootItems.DataSource = lootList;
+                    cboLootItems.DisplayMember = "Label";
+                }
             }
         }
 
         /// <summary>
-        /// Fired when loot is toggled.
+        /// Fired when 'Is Active' checkbox for a filter is changed, saves config & then applies the lootfilter
         /// </summary>
-        private void chkShowLoot_CheckedChanged(object sender, EventArgs e) {
-            btnLoot.Visible = chkShowLoot.Checked;
-            grpLoot.Visible = false;
-            btnLoot.Enabled = true;
+        private void chkLootFilterActive_CheckedChanged(object sender, EventArgs e) {
+            LootFilter selectedFilter = (LootFilter)cboFilters.SelectedItem;
+            selectedFilter.IsActive = chkLootFilterActive.Checked;
+
+            Config.SaveConfig(_config);
+
+            UpdateEditFilterListBox();
+        }
+
+        /// <summary>
+        /// Fired when NightVision checkbox has been adjusted
+        /// </summary>
+        private void chkNightVision_CheckedChanged(object sender, EventArgs e) {
+            Game.CameraManager.NightVision(chkNightVision.Checked || chkNightVisionDebug.Checked);
+        }
+
+        /// <summary>
+        /// Fired when ThermalVision checkbox has been adjusted
+        /// </summary>
+        private void chkThermalVision_CheckedChanged(object sender, EventArgs e) {
+            Game.CameraManager.ThermalVision(chkThermalVision.Checked || chkThermalVisionDebug.Checked);
+        }
+
+        /// <summary>
+        /// Fired when OpticThermalVision checkbox has been adjusted
+        /// </summary>
+        private void chkOpticThermalVision_CheckedChanged(object sender, EventArgs e) {
+            Game.CameraManager.OpticThermalVision(chkOpticThermalVision.Checked | chkOpticThermalVisionDebug.Checked);
+        }
+
+        /// <summary>
+        /// Fired when NoVisor checkbox has been adjusted
+        /// </summary>
+        private void chkNoVisor_CheckedChanged(object sender, EventArgs e) {
+            Game.CameraManager.VisorEffect(chkNoVisor.Checked || chkNoVisorDebug.Checked);
+        }
+
+        /// <summary>
+        /// Fired when item is removed from a filter & saves config
+        /// </summary>
+        private void btnLootFilterRemoveItem_Click(object sender, EventArgs e) {
+            if (lstViewLootFilter.SelectedItems.Count > 0) {
+                LootFilter selectedFilter = (LootFilter)cboFilters.SelectedItem;
+                ListViewItem selectedItem = lstViewLootFilter.SelectedItems[0];
+
+                if (selectedItem != null) {
+                    DevLootItem lootItem = (DevLootItem)selectedItem.Tag;
+
+                    selectedItem.Remove();
+                    selectedFilter.Items.Remove(lootItem.Item.id);
+
+                    Config.SaveConfig(_config);
+                    this.Loot?.ApplyFilter();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Fired when item is added to a filter & saves config
+        /// </summary>
+        private void btnLootFilterAddItem_Click(object sender, EventArgs e) {
+            if (cboLootItems.SelectedIndex != -1) {
+                LootFilter selectedFilter = (LootFilter)cboFilters.SelectedItem;
+                DevLootItem selectedItem = (DevLootItem)cboLootItems.SelectedItem;
+
+                if (selectedFilter != null) {
+                    if (selectedFilter.Items.Contains(selectedItem.Item.id)) {
+                        return; // item already exists
+                    } else {
+                        ListViewItem listItem = new ListViewItem();
+                        listItem.Text = selectedItem.Item.id;
+                        listItem.SubItems.Add(selectedItem.Item.name);
+                        listItem.SubItems.Add(selectedItem.Item.shortName);
+                        listItem.SubItems.Add(TarkovDevAPIManager.FormatNumber(TarkovDevAPIManager.GetItemValue(selectedItem.Item)));
+                        listItem.Tag = selectedItem;
+
+                        lstViewLootFilter.Items.Add(listItem);
+                        selectedFilter.Items.Add(selectedItem.Item.id);
+
+                        Config.SaveConfig(_config);
+                        this.Loot?.ApplyFilter();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Fired when an item to search for is being typed
+        /// </summary>
+        private void txtItemFilter_KeyDown(object sender, KeyEventArgs e) {
+            if (e.KeyCode is Keys.Enter) {
+                var itemToSearch = txtItemFilter.Text;
+                List<DevLootItem> lootList = TarkovDevAPIManager.AllItems
+                    .Select(x => x.Value)
+                    .Where(x => x.Label.Contains(itemToSearch.Trim(), StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(x => x.Label)
+                    .Take(25)
+                    .ToList();
+
+                cboLootItems.DataSource = lootList;
+                cboLootItems.DisplayMember = "Label";
+            }
+        }
+
+        /// <summary>
+        /// Fired when the current filter is changed
+        /// </summary>
+        private void cboFilters_SelectedValueChanged(object sender, EventArgs e) {
+            UpdateLootFilterList();
         }
 
         /// <summary>
@@ -343,20 +480,8 @@ namespace eft_dma_radar
         /// <summary>
         /// Event fires when Restart Game button is clicked in Settings.
         /// </summary>
-        private void btnRestartGame_Click(object sender, EventArgs e) {
+        private void btnRestartRadar_Click(object sender, EventArgs e) {
             Memory.Restart();
-        }
-
-        /// <summary>
-        /// Event fires when Refresh Loot button is clicked in Settings.
-        /// </summary>
-        private void btnRefreshLoot_Click(object sender, EventArgs e) {
-            try {
-                Memory.RefreshLoot();
-            } finally {
-                btnLoot.Enabled = true;
-                grpLoot.Visible = false;
-            }
         }
 
         /// <summary>
@@ -391,12 +516,6 @@ namespace eft_dma_radar
                         Y = _mapPanPosition.Y + (e.Y - center.Y)
                     };
                 }
-            }
-
-            if (grpLoot.Visible) // Close loot window
-            {
-                grpLoot.Visible = false;
-                btnLoot.Enabled = true;
             }
         }
 
@@ -479,72 +598,261 @@ namespace eft_dma_radar
         }
 
         /// <summary>
-        /// Fired when 'Loot' button is pressed in main radar window.
+        /// Adjusts min regular loot based on slider value
         /// </summary>
-        private void btnLoot_Click(object sender, EventArgs e) {
-            btnLoot.Enabled = false;
-            grpLoot.Visible = true;
+        private void trkRegularLootValue_Scroll(object sender, EventArgs e) {
+            int value = trkRegularLootValue.Value * 1000;
+            lblRegularLootDisplay.Text = TarkovDevAPIManager.FormatNumber(value);
+            _config.MinLootValue = value;
+
+            Loot.ApplyFilter();
         }
-
+        
         /// <summary>
-        /// Fired when 'Regular' Loot Value is changed.
+        /// Adjusts min important loot based on slider value
         /// </summary>
-        private void txtRegularLootValue_TextChanged(object sender, EventArgs e) {
-            if (!int.TryParse(txtRegularLootValue.Text, out var i))
-                txtRegularLootValue.Text = "0";
+        private void trkImportantLootValue_Scroll(object sender, EventArgs e) {
+            int value = trkImportantLootValue.Value * 1000;
+            lblImportantLootDisplay.Text = TarkovDevAPIManager.FormatNumber(value);
+            _config.MinImportantLootValue = value;
 
-            btnApplyLoot.Enabled = true;
+            Loot.ApplyFilter();
         }
-
+        
         /// <summary>
-        /// Fired when 'Important' Loot Value is changed.
+        /// Refreshes the loot in the match
         /// </summary>
-        private void txtImportantLootValue_TextChanged(object sender, EventArgs e) {
-            if (!int.TryParse(txtImportantLootValue.Text, out var i))
-                txtImportantLootValue.Text = "0";
-
-            btnApplyLoot.Enabled = true;
+        private void btnRefreshLoot_Click(object sender, EventArgs e) {
+            Memory.RefreshLoot();
         }
-
+       
         /// <summary>
-        /// Fired when txtLootFilter is changed.
+        /// Handles color modification for loot filters
         /// </summary>
-        private void txtLootFilter_TextChanged(object sender, EventArgs e) {
-            btnApplyLoot.Enabled = true;
-            btnApplyLoot.Text = "Apply";
+        private void picLootFilterPreview_Click(object sender, EventArgs e) {
+            if (colDialogLootFilter.ShowDialog() == DialogResult.OK) {
+                picLootFilterEditColor.BackColor = colDialogLootFilter.Color;
+            }
         }
-
+        
         /// <summary>
-        /// Fired when 'Apply' button is pressed in Loot Filter Window.
+        /// Handles the edit/save button for modifying filters
         /// </summary>
-        private void btnApplyLoot_Click(object sender, EventArgs e) {
-            LootApply();
+        private void btnEditSaveFilter_Click(object sender, EventArgs e) {
+            string btnText = btnEditSaveFilter.Text;
+            if (btnText == "Edit") { /// show edit button
+                txtLootFilterEditName.Enabled = true;
+                picLootFilterEditColor.Enabled = true;
+                chkLootFilterEditActive.Enabled = true;
+                btnEditSaveFilter.Text = "Save";
+                btnCancelEditFilter.Visible = true;
+            } else if (btnText == "Save") { // save functionality
+                if (HasUnsavedFilterEditChanges() && MessageBox.Show("Are you sure you want to save changes?", "Are you sure?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes) {
+                    if (txtLootFilterEditName.Text.Length > 0) {
+                        btnCancelEditFilter.Visible = false;
+                        btnEditSaveFilter.Text = "Edit";
+
+                        txtLootFilterEditName.Enabled = false;
+                        picLootFilterEditColor.Enabled = false;
+                        chkLootFilterEditActive.Enabled = false;
+
+                        LootFilter selectedFilter = (LootFilter)lstEditLootFilters.SelectedItem;
+                        int index = _config.Filters.IndexOf(selectedFilter);
+
+                        Color cols = picLootFilterEditColor.BackColor;
+                        selectedFilter.Name = txtLootFilterEditName.Text;
+                        selectedFilter.IsActive = chkLootFilterEditActive.Checked;
+                        selectedFilter.Color = new Colors {
+                            R = cols.R,
+                            G = cols.G,
+                            B = cols.B,
+                            A = cols.A
+                        };
+
+                        _config.Filters.RemoveAt(index);
+                        _config.Filters.Insert(index, selectedFilter);
+
+                        Config.SaveConfig(_config);
+                        UpdateEditFilterListBox(lstEditLootFilters.SelectedIndex);
+                    } else {
+                        MessageBox.Show("Add some text to the textbox (minimum 1 character)", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
         }
-
+        
         /// <summary>
-        /// Handles enter keypress on txtLootFilter
+        /// Handles cancel button when modifying filters
         /// </summary>
-        private void txtLootFilter_KeyDown(object sender, KeyEventArgs e) {
-            if (e.KeyCode is Keys.Enter) {
-                LootApply();
+        private void btnCancelEditFilter_Click(object sender, EventArgs e) {
+            if (HasUnsavedFilterEditChanges()) {
+                if (MessageBox.Show("Are you sure you want to cancel changes?", "Are you sure?", MessageBoxButtons.YesNo) == DialogResult.Yes) {
+                    btnCancelEditFilter.Visible = false;
+                    btnEditSaveFilter.Text = "Edit";
+
+                    txtLootFilterEditName.Enabled = false;
+                    picLootFilterEditColor.Enabled = false;
+                    chkLootFilterEditActive.Enabled = false;
+
+                    UpdateEditFilterListBox(lstEditLootFilters.SelectedIndex);
+                }
+            } else {
+                btnCancelEditFilter.Visible = false;
+                btnEditSaveFilter.Text = "Edit";
+
+                txtLootFilterEditName.Enabled = false;
+                picLootFilterEditColor.Enabled = false;
+                chkLootFilterEditActive.Enabled = false;
             }
         }
 
         /// <summary>
-        /// Handles enter keypress on txtImportantLootValue
+        /// Updates the ListBox with filters & applys the loot filter if in-game
         /// </summary>
-        private void txtImportantLootValue_KeyDown(object sender, KeyEventArgs e) {
-            if (e.KeyCode is Keys.Enter) {
-                LootApply();
+        /// <param name="index">Optional argument to set the selected index manually for the ListBox containing filters</param>
+        private void UpdateEditFilterListBox(int index = 0) {
+            lstEditLootFilters.Items.Clear();
+
+            List<LootFilter> lootFilters = _config.Filters.OrderBy(lf => lf.Order).ToList();
+
+            foreach (LootFilter filter in lootFilters) {
+                lstEditLootFilters.Items.Add(filter);
+            }
+
+            if (lootFilters.Count > 0) {
+                lstEditLootFilters.SetSelected(index, true);
+                UpdateLootFilterComboBoxes();
+            }
+
+            this.Loot?.ApplyFilter();
+        }
+
+        /// <summary>
+        /// Updates the information displayed about a filter
+        /// </summary>
+        private void lstEditLootFilters_SelectedIndexChanged(object sender, EventArgs e) {
+            LootFilter selectedFilter = (LootFilter)lstEditLootFilters.SelectedItem;
+
+            if (selectedFilter != null) {
+                Colors col = selectedFilter.Color;
+
+                txtLootFilterEditName.Text = selectedFilter.Name;
+                picLootFilterEditColor.BackColor = Color.FromArgb(col.A, col.R, col.G, col.B);
+                chkLootFilterEditActive.Checked = selectedFilter.IsActive;
             }
         }
 
         /// <summary>
-        /// Handles enter keypress on txtRegularLootValue
+        /// Shifts the order (aka priority) of the filter up
         /// </summary>
-        private void txtRegularLootValue_KeyDown(object sender, KeyEventArgs e) {
-            if (e.KeyCode is Keys.Enter) {
-                LootApply();
+        private void btnFilterPriorityUp_Click(object sender, EventArgs e) {
+            LootFilter selectedFilter = (LootFilter)lstEditLootFilters.SelectedItem;
+
+            if (selectedFilter != null) {
+                if (selectedFilter.Order != 1) { // make sure we dont out of bounds ourself
+                    int tmpOrder = selectedFilter.Order;
+                    int index = selectedFilter.Order - 1;
+
+                    LootFilter swapFilter = _config.Filters.FirstOrDefault(f => f.Order == selectedFilter.Order - 1);
+
+                    selectedFilter.Order = swapFilter.Order;
+                    swapFilter.Order = tmpOrder;
+
+                    Config.SaveConfig(_config);
+                    UpdateEditFilterListBox(index - 1);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Shifts the order (aka priority) of the filter down
+        /// </summary>
+        private void btnFilterPriorityDown_Click(object sender, EventArgs e) {
+            LootFilter selectedFilter = (LootFilter)lstEditLootFilters.SelectedItem;
+
+            if (selectedFilter != null) {
+                if (selectedFilter.Order != _config.Filters.Count) { // make sure we dont out of bounds ourself
+                    int tmpOrder = selectedFilter.Order;
+                    int index = selectedFilter.Order - 1;
+
+                    LootFilter swapFilter = _config.Filters.FirstOrDefault(f => f.Order == index + 2);
+
+                    selectedFilter.Order = swapFilter.Order;
+                    swapFilter.Order = tmpOrder;
+
+                    Config.SaveConfig(_config);
+                    UpdateEditFilterListBox(index + 1);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates a new filter
+        /// </summary>
+        private void btnAddNewFilter_Click(object sender, EventArgs e) {
+            LootFilter newFilter = new LootFilter() {
+                Order = _config.Filters.Count + 1,
+                IsActive = true,
+                Name = "New Filter",
+                Items = new List<String>(),
+                Color = new Colors() {
+                    R = 255,
+                    G = 0,
+                    B = 0,
+                    A = 255
+                }
+            };
+
+            _config.Filters.Add(newFilter);
+            Config.SaveConfig(_config);
+
+            UpdateEditFilterListBox();
+        }
+
+        /// <summary>
+        /// Nukes a filter & removes it then updates the filter lists
+        /// </summary>
+        private void btnRemoveFilter_Click(object sender, EventArgs e) {
+            LootFilter selectedFilter = (LootFilter)lstEditLootFilters.SelectedItem;
+
+            if (selectedFilter != null) {
+                if (_config.Filters.Count == 1) {
+                    if (MessageBox.Show("Removing the last filter will automatically create a blank one", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error) == DialogResult.OK) {
+                        _config.Filters.RemoveAt(selectedFilter.Order - 1);
+
+                        LootFilter newFilter = new LootFilter() {
+                            Order = 1,
+                            IsActive = true,
+                            Name = "New Filter",
+                            Items = new List<String>(),
+                            Color = new Colors() {
+                                R = 255,
+                                G = 0,
+                                B = 0,
+                                A = 255
+                            }
+                        };
+
+                        _config.Filters.Add(newFilter);
+                        Config.SaveConfig(_config);
+
+                        UpdateEditFilterListBox();
+                    }
+                } else {
+                    if (MessageBox.Show("Are you sure you want to delete this filter?", "Are you sure?", MessageBoxButtons.YesNo) == DialogResult.Yes) {
+                        _config.Filters.Remove(selectedFilter);
+
+                        var lootFiltersToUpdate = _config.Filters.Select(lf => lf).Where(lf => lf.Order > selectedFilter.Order);
+
+                        foreach (LootFilter filterToUpdate in lootFiltersToUpdate) {
+                            filterToUpdate.Order -= 1;
+                        }
+
+                        Config.SaveConfig(_config);
+
+                        UpdateEditFilterListBox();
+                    }
+                }
             }
         }
         #endregion
@@ -556,13 +864,23 @@ namespace eft_dma_radar
         private void LoadConfig() {
             trkAimLength.Value = _config.PlayerAimLineLength;
             chkShowLoot.Checked = _config.LootEnabled;
-            chkShowAimview.Checked = _config.AimViewEnabled;
+            chkShowAimview.Checked = _config.AimviewEnabled;
             chkHideNames.Checked = _config.HideNames;
+            chkImportantLootOnly.Checked = _config.ImportantLootOnly;
+            chkHideLootValue.Checked = _config.HideLootValue;
+            chkHideLootContainer.Checked = _config.HideLootContainer;
             trkZoom.Value = _config.DefaultZoom;
             trkUIScale.Value = _config.UIScale;
             txtTeammateID.Text = _config.PrimaryTeammateId;
-            txtRegularLootValue.Text = _config.MinLootValue.ToString();
-            txtImportantLootValue.Text = _config.MinImportantLootValue.ToString();
+            trkRegularLootValue.Value = _config.MinLootValue / 1000;
+            trkImportantLootValue.Value = _config.MinImportantLootValue / 1000;
+
+            lblRegularLootDisplay.Text = TarkovDevAPIManager.FormatNumber(_config.MinLootValue);
+            lblImportantLootDisplay.Text = TarkovDevAPIManager.FormatNumber(_config.MinImportantLootValue);
+
+            UpdateLootFilterComboBoxes();
+            UpdateLootFilterList();
+            UpdateEditFilterListBox();
         }
 
         /// <summary>
@@ -608,7 +926,7 @@ namespace eft_dma_radar
                     }
                 }
 
-                tabPage1.Text = $"Radar ({_selectedMap.Name})";
+                tabRadar.Text = $"Radar ({_selectedMap.Name})";
             } catch (Exception ex) {
                 throw new Exception($"ERROR loading initial map: {ex}");
             }
@@ -692,17 +1010,61 @@ namespace eft_dma_radar
                 _mapSelectionIndex = 0; // Start over when end of maps reached
             else
                 _mapSelectionIndex++; // Move onto next map
-            tabPage1.Text = $"Radar ({_maps[_mapSelectionIndex].Name})";
+            tabRadar.Text = $"Radar ({_maps[_mapSelectionIndex].Name})";
             _mapChangeTimer.Restart(); // Start delay
+        }
+
+        /// <summary>
+        /// Determines the items paint color.
+        /// </summary>
+        private SKPaint GetLootPaint(DevLootItem item) {
+            int value = TarkovDevAPIManager.GetItemValue(item.Item);
+            bool isImportant = (item.Important || value >= _config.MinImportantLootValue);
+            bool isFiltered = Loot.LootFilterColors.ContainsKey(item.Item.id);
+
+            SKPaint paintToUse = SKPaints.PaintLoot;
+
+            if (isFiltered) {
+                Colors col = Loot.LootFilterColors[item.Item.id];
+                paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
+
+            } else if (isImportant) {
+                paintToUse.Color = SKColors.Turquoise;
+            } else {
+                paintToUse.Color = SKColors.WhiteSmoke;
+            }
+
+            return paintToUse;
+        }
+
+        /// <summary>
+        /// Determines the items text color.
+        /// </summary>
+        private SKPaint GetLootTextPaint(DevLootItem item) {
+            int value = TarkovDevAPIManager.GetItemValue(item.Item);
+            bool isImportant = (item.Important || value >= _config.MinImportantLootValue);
+            bool isFiltered = Loot.LootFilterColors.ContainsKey(item.Item.id);
+
+            SKPaint paintToUse = SKPaints.TextLoot;
+
+            if (isFiltered) {
+                Colors col = Loot.LootFilterColors[item.Item.id];
+                paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
+
+            } else if (isImportant) {
+                paintToUse.Color = SKColors.Turquoise;
+            } else {
+                paintToUse.Color = SKColors.WhiteSmoke;
+            }
+
+            return paintToUse;
         }
 
         /// <summary>
         /// Checks if item is important.
         /// </summary>
         private bool IsItemImportant(DevLootItem item) {
-            int avg24hrPrice = (int)(item.Item.avg24hPrice == null ? 0 : item.Item.avg24hPrice);
-            var value = Math.Max(avg24hrPrice, item.Item.basePrice);
-
+            var value = TarkovDevAPIManager.GetItemValue(item.Item);
             return (item.Important || value >= _config.MinImportantLootValue);
         }
 
@@ -710,38 +1072,73 @@ namespace eft_dma_radar
         /// Returns proper label for Item.
         /// </summary>
         private string GetItemLabel(DevLootItem item) {
-            //if (_filterEntry is null || _filterEntry.Trim() == string.Empty) {
-            //    if (item.Label is not null)
-            //        return item.Label;
-            //}
-
-           return (item.AlwaysShow || item.Label is not null) ? item.Label : "null";
+            var itemValue = (chkHideLootValue.Checked ? "" : $"[{TarkovDevAPIManager.FormatNumber(TarkovDevAPIManager.GetItemValue(item.Item))}] ");
+            return (item.AlwaysShow || item.Item.shortName is not null) ? $"{itemValue}{item.Item.shortName}" : "null";
         }
 
         /// <summary>
-        /// Runs/Updates Loot Filter.
+        /// Adds filters into the combo box for selection
         /// </summary>
-        private void LootApply() {
-            try {
-                if (btnApplyLoot.Text == "Clear") {
-                    txtLootFilter.Text = null; // Clear 'named filter'
+        private void UpdateLootFilterComboBoxes() {
+            cboFilters.DataSource = null;
+            cboFilters.Items.Clear();
+
+            List<LootFilter> lootFilters = _config.Filters.OrderBy(lf => lf.Order).ToList();
+
+            foreach (LootFilter filter in lootFilters) {
+                cboFilters.Items.Add(filter);
+            }
+
+            cboFilters.DisplayMember = "Name";
+
+            if (lootFilters.Count > 0) {
+                cboFilters.SelectedItem = lootFilters[0];
+            }
+        }
+
+        /// <summary>
+        /// Adds items from the loot filter into the list view
+        /// </summary>
+        private void UpdateLootFilterList() {
+            lstViewLootFilter.Items.Clear();
+
+            LootFilter selectedFilter = (LootFilter)cboFilters.SelectedItem;
+            List<DevLootItem> lootList = TarkovDevAPIManager.AllItems.Select(x => x.Value).ToList();
+            if (selectedFilter != null) {
+                List<DevLootItem> matchingLoot = lootList.Where(loot => selectedFilter.Items.Any(id => id == loot.Item.id)).OrderBy(l => l.Item.name).ToList();
+
+                foreach (DevLootItem item in matchingLoot) {
+                    ListViewItem listItem = new ListViewItem() {
+                        Text = item.Item.id,
+                        Tag = item
+                    };
+
+                    listItem.SubItems.Add(item.Item.name);
+                    listItem.SubItems.Add(item.Item.shortName);
+                    listItem.SubItems.Add(TarkovDevAPIManager.FormatNumber(TarkovDevAPIManager.GetItemValue(item.Item)));
+
+                    lstViewLootFilter.Items.Add(listItem);
                 }
-                    
 
-                grpLoot.Visible = false;
-                _config.MinLootValue = int.Parse(txtRegularLootValue.Text);
-                _config.MinImportantLootValue = int.Parse(txtImportantLootValue.Text);
-                txtLootFilter.Text = txtLootFilter.Text?.Trim(); // Trim spaces
-                _filterEntry = new string(txtLootFilter.Text); // deep copy string
-                this.Loot?.ApplyFilter(_filterEntry);
-            } finally {
-                btnLoot.Enabled = true;
+                chkLootFilterActive.Checked = selectedFilter.IsActive;
+            }
+        }
 
-                if (_filterEntry is null || _filterEntry == string.Empty) {
-                    btnApplyLoot.Text = "Apply";
-                    btnApplyLoot.Enabled = false;
-                } else
-                    btnApplyLoot.Text = "Clear";
+        /// <summary>
+        /// Checks if the text, IsActive or color is different
+        /// </summary>
+        /// <returns>A bool</returns>
+        private bool HasUnsavedFilterEditChanges() {
+            LootFilter selectedFilter = (LootFilter)lstEditLootFilters.SelectedItem;
+
+            if (selectedFilter != null) {
+                Colors col = selectedFilter.Color;
+
+                return txtLootFilterEditName.Text != selectedFilter.Name ||
+                        chkLootFilterEditActive.Checked != selectedFilter.IsActive ||
+                        picLootFilterEditColor.BackColor.ToArgb() != Color.FromArgb(col.A, col.R, col.G, col.B).ToArgb();
+            } else {
+                return false;
             }
         }
         #endregion
@@ -805,7 +1202,7 @@ namespace eft_dma_radar
                             }
                         }
 
-                        tabPage1.Text = $"Radar ({_selectedMap.Name})";
+                        tabRadar.Text = $"Radar ({_selectedMap.Name})";
 
                         title += $" ({_fps} fps) ({Memory.Ticks} mem/s)";
 
@@ -937,7 +1334,7 @@ namespace eft_dma_radar
                                         lines = new string[2]
                                         {
                                             string.Empty,
-                                            $"H: {(int)Math.Round(height)} D: {(int)Math.Round(dist)}"
+                                            $"{(int)Math.Round(height)}, {(int)Math.Round(dist)}"
                                         };
 
                                         string name = player.Name;
@@ -945,12 +1342,15 @@ namespace eft_dma_radar
                                         if (player.ErrorCount > 10)
                                             name = "ERROR"; // In case POS stops updating, let us know!
 
-                                        lines[0] += $"{name} ({player.Health})";
+                                        if (player.IsHuman || player.IsBossRaider)
+                                            lines[0] += $"{name} ({player.Health})";
+                                        else
+                                            lines[0] += $"{name}";
                                     } else // just height & hp (for humans)
                                       {
-                                        lines = new string[1] { $"H: {(int)Math.Round(height)}" };
+                                        lines = new string[1] { $"{(int)Math.Round(height)}" };
 
-                                        if (player.IsHuman)
+                                        if (player.IsHuman || player.IsBossRaider)
                                             lines[0] += $" ({player.Health})";
                                         if (player.ErrorCount > 10)
                                             lines[0] = "ERROR"; // In case POS stops updating, let us know!
@@ -978,48 +1378,57 @@ namespace eft_dma_radar
                                 //Debug.WriteLine($"Loot is null: {loot is null}");
                                 if (loot is not null) {
                                     if (Loot.Filter is null) {
-                                        Loot.ApplyFilter(_filterEntry);
+                                        Loot.ApplyFilter();
                                     }
 
                                     var filter = Loot.Filter; // Get ref to collection
 
                                     if (filter is not null)
                                         foreach (var item in filter) {
+                                            string name = GetItemLabel(item);
+                                            bool isImportant = IsItemImportant(item);
+                                            float position = item.Position.Z - localPlayerMapPos.Height;
+
+                                            if (chkImportantLootOnly.Checked && !isImportant) {
+                                                continue;
+                                            }
+
+                                            SKPaint lootPaintToUse = GetLootPaint(item);
+                                            SKPaint lootTextPaintToUse = GetLootTextPaint(item);
+
                                             if (item.Container) {
                                                 //If there is item already drawn at this position, then add new item value to it and draw only container name and value
                                                 var itemZoomedPos = item.Position
                                                     .ToMapPos(_selectedMap)
                                                     .ToZoomedPos(mapParams);
 
-                                                var conName = item.ContainerName;
-                                                var label = conName + GetItemLabel(item);
-
-                                                if (conName == "Corpse") {
+                                                if (item.ContainerName == "Corpse") {
                                                     itemZoomedPos.DrawLoot(
                                                         canvas,
                                                         "Corpse",
-                                                        IsItemImportant(item),
-                                                        item.Position.Z - localPlayerMapPos.Height
+                                                        lootPaintToUse,
+                                                        lootTextPaintToUse,
+                                                        position
                                                     );
                                                 }
 
                                                 itemZoomedPos.DrawLoot(
                                                     canvas,
-                                                    label,
-                                                    IsItemImportant(item),
-                                                    item.Position.Z - localPlayerMapPos.Height
+                                                    (chkHideLootContainer.Checked ? "" : $"{item.ContainerName} ") + name,
+                                                    lootPaintToUse,
+                                                    lootTextPaintToUse,
+                                                    position
                                                 );
                                             } else {
-                                                //Debug.WriteLine($"Drawing {item.Item}");
                                                 var itemZoomedPos = item.Position
                                                     .ToMapPos(_selectedMap)
                                                     .ToZoomedPos(mapParams);
-                                                //Debug.WriteLine($"Drawing {item.Item.shortName}");
                                                 itemZoomedPos.DrawLoot(
                                                     canvas,
-                                                    GetItemLabel(item),
-                                                    IsItemImportant(item),
-                                                    item.Position.Z - localPlayerMapPos.Height
+                                                    name,
+                                                    lootPaintToUse,
+                                                    lootTextPaintToUse,
+                                                    position
                                                 );
                                             }
                                         }
@@ -1272,8 +1681,11 @@ namespace eft_dma_radar
             this.Enabled = false; // Lock window
             _config.PlayerAimLineLength = trkAimLength.Value;
             _config.LootEnabled = chkShowLoot.Checked;
-            _config.AimViewEnabled = chkShowAimview.Checked;
+            _config.AimviewEnabled = chkShowAimview.Checked;
             _config.HideNames = chkHideNames.Checked;
+            _config.ImportantLootOnly = chkImportantLootOnly.Checked;
+            _config.HideLootValue = chkHideLootValue.Checked;
+            _config.HideLootContainer = chkHideLootContainer.Checked;
             _config.DefaultZoom = trkZoom.Value;
             _config.UIScale = trkUIScale.Value;
             _config.PrimaryTeammateId = txtTeammateID.Text;
@@ -1338,22 +1750,6 @@ namespace eft_dma_radar
             }
 
             base.OnMouseWheel(e);
-        }
-
-        private void chkNightVision_CheckedChanged(object sender, EventArgs e) {
-            Game.CameraManager.NightVision(chkNightVision.Checked || chkNightVisionDebug.Checked);
-        }
-
-        private void chkThermalVision_CheckedChanged(object sender, EventArgs e) {
-            Game.CameraManager.ThermalVision(chkThermalVision.Checked || chkThermalVisionDebug.Checked);
-        }
-
-        private void chkOpticThermalVision_CheckedChanged(object sender, EventArgs e) {
-            Game.CameraManager.OpticThermalVision(chkOpticThermalVision.Checked | chkOpticThermalVisionDebug.Checked);
-        }
-
-        private void chkNoVisor_CheckedChanged(object sender, EventArgs e) {
-            Game.CameraManager.VisorEffect(chkNoVisor.Checked || chkNoVisorDebug.Checked);
         }
     }
     #endregion

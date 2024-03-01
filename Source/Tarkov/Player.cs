@@ -195,6 +195,17 @@ namespace eft_dma_radar
                     && IsActive && IsAlive;
         }
         /// <summary>
+        /// Player is AI & boss, rouge, raider etc.
+        /// </summary>
+        public bool IsBossRaider {
+            get => (
+                Type is PlayerType.AIRaider ||
+                Type is PlayerType.AIBossFollower ||
+                Type is PlayerType.AIBossGuard ||
+                Type is PlayerType.AIRouge ||
+                Type is PlayerType.AIBoss);
+        }
+        /// <summary>
         /// Player is AI/human-controlled and Active/Alive.
         /// </summary>
         public bool IsHostileActive
@@ -357,7 +368,9 @@ namespace eft_dma_radar
                             IsLocalPlayer = false;
                             IsPmc = false;
                             Name =  Helpers.TransliterateCyrillic(Name); //Misc.TransliterateCyrillic(Name);
+                            HealthController = Memory.ReadPtrChain(playerBase, new uint[] { 0x80, 0xF0 });
                             //Type = GetPlayerType(roleFlag);
+
                         }
                         else
                         {
@@ -385,10 +398,11 @@ namespace eft_dma_radar
                     
                     try { _gearManager = new GearManager(playerBase, true, false); } catch { }
                     GroupID = GetObservedPlayerGroupID();
+                    HealthController = Memory.ReadPtrChain(playerBase, new uint[] { 0x80, 0xF0 });
+
                     if ((playerSide == 1 || playerSide == 2) && !playerIsAI) {
                         IsPmc = true;
                         //var healthContoller = Memory.ReadPtrChain(playerBase, new uint[] { 0x80, 0xF0});
-                        HealthController = Memory.ReadPtrChain(playerBase, new uint[] { 0x80, 0xF0});;
                         Type = (playerSide == 1 ? PlayerType.USEC : PlayerType.BEAR);
                     } else if (playerSide == 4 && !playerIsAI) {
                         Type = PlayerType.PScav;

@@ -52,11 +52,9 @@ namespace eft_dma_radar
                                     Objectives = task.Objectives
                                 }
                             );
-                            
                             continue;
                         }
                         continue;
-
                     }
                 } catch {
                     Console.WriteLine($"Quest: {questID} is not in the list");

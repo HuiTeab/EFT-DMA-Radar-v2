@@ -67,8 +67,7 @@ namespace eft_dma_radar
         {
             get => _exfilManager?.Exfils;
         }
-        public static CameraManager CameraManager
-        {
+        public static CameraManager CameraManager {
             get => _cameraManager;
         }
         #endregion
@@ -99,7 +98,7 @@ namespace eft_dma_radar
                     UpdateGameEnvironment();
                 }
                 //if registered players is -1, then we are died or exfilled
-                if (_rgtPlayers.PlayerCount == -1)
+                if (_rgtPlayers != null && _rgtPlayers.PlayerCount == -1)
                 {
                     throw new RaidEnded();
                 }
@@ -129,10 +128,12 @@ namespace eft_dma_radar
         {
             // Update the list of registered players
             //_rgtPlayers.UpdateList();
-
-            await _rgtPlayers.UpdateListAsync();
-            // Update the state of each player (e.g., location, health)
-            _rgtPlayers.UpdateAllPlayers();
+            
+            if ( _inGame && !InHideout ) {
+                await _rgtPlayers.UpdateListAsync();
+                // Update the state of each player (e.g., location, health)
+                _rgtPlayers.UpdateAllPlayers();
+            }
         }
         /// <summary>
         /// Method to get map name using local game world
@@ -183,10 +184,9 @@ namespace eft_dma_radar
         /// Handles the scenario when the raid ends.
         /// </summary>
         /// <param name="e">The RaidEnded exception instance containing details about the raid end.</param>
-        private void HandleRaidEnded(RaidEnded e)
-        {
+        private void HandleRaidEnded(RaidEnded e) {
             Program.Log("Raid has ended!");
-            
+
             _inGame = false;
             // sleep for 60 seconds to allow for raid end
             Thread.Sleep(60000);
@@ -226,7 +226,6 @@ namespace eft_dma_radar
             Program.Log("Raid has started!");
             _inGame = true;
         }
-
 
         /// <summary>
         /// Helper method to locate Game World object.
@@ -317,6 +316,7 @@ namespace eft_dma_radar
                         retryCount++;
                         continue;
                     }
+
                     _localGameWorld = Memory.ReadPtrChain(gameWorld, Offsets.GameWorld.To_LocalGameWorld);
                     if (_localGameWorld == 0)
                     {
@@ -439,15 +439,11 @@ namespace eft_dma_radar
                     Program.Log($"ERROR getting map name: {ex}");
                 }
             }
-            if (_cameraManager is null)
-            {
-                try
-                {
+            if (_cameraManager is null) {
+                try {
                     var cameraManager = new CameraManager(_unityBase);
                     _cameraManager = cameraManager; // update ref
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     Program.Log($"ERROR loading CameraManager: {ex}");
                 }
             }

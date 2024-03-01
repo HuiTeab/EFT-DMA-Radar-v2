@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using eft_dma_radar.Source.Misc;
 using System.Runtime.Intrinsics;
+using OpenTK.Graphics.OpenGL;
 
 namespace eft_dma_radar
 {
@@ -83,12 +84,27 @@ namespace eft_dma_radar
         /// Enables Aimview window in Main Window.
         /// </summary>
         [JsonPropertyName("aimviewEnabled")]
-        public bool AimViewEnabled { get; set; }
+        public bool AimviewEnabled { get; set; }
         /// <summary>
         /// Hides player names & extended player info in Radar GUI.
         /// </summary>
         [JsonPropertyName("hideNames")]
         public bool HideNames { get; set; }
+        /// <summary>
+        /// Enables/disables showing non-important loot
+        /// </summary>
+        [JsonPropertyName("importantLootOnly")]
+        public bool ImportantLootOnly { get; set; }
+        /// <summary>
+        /// Enables/disables showing loot value
+        /// </summary>
+        [JsonPropertyName("hideLootValue")]
+        public bool HideLootValue { get; set; }
+        /// <summary>
+        /// Enables/disables showing loot containers
+        /// </summary>
+        [JsonPropertyName("hideLootContainer")]
+        public bool HideLootContainer { get; set; }
         /// <summary>
         /// Primary Teammate ACCT ID (for secondary Aimview)
         /// </summary>
@@ -120,6 +136,12 @@ namespace eft_dma_radar
         /// </summary>
         [JsonPropertyName("minImportantLootValue")]
         public int MinImportantLootValue { get; set; }
+        
+        /// <summary>
+        /// Allows storage of multiple loot filters
+        /// </summary>
+        [JsonPropertyName("LootFilters")]
+        public List<LootFilter> Filters { get; set; }
 
         public Config()
         {
@@ -128,14 +150,18 @@ namespace eft_dma_radar
             DefaultZoom = 100;
             UIScale = 100;
             LootEnabled = true;
-            AimViewEnabled = false;
+            AimviewEnabled = false;
             HideNames = false;
+            ImportantLootOnly = false;
+            HideLootValue = false;
+            HideLootContainer = false;
             LoggingEnabled = false;
             MaxDistance = 325;
             AimViewFOV = 30;
             MinLootValue = 90000;
             MinImportantLootValue = 300000;
             PrimaryTeammateId = null;
+            Filters = new List<LootFilter>();
         }
 
         /// <summary>
@@ -287,10 +313,10 @@ namespace eft_dma_radar
         /// <summary>
         /// Draws a loot item on this location.
         /// </summary>
-        public void DrawLoot(SKCanvas canvas, string label, bool important, float heightDiff)
+        public void DrawLoot(SKCanvas canvas, string label, SKPaint paint, SKPaint text, float heightDiff)
         {
-            SKPaint paint = important ? SKPaints.PaintImportantLoot : SKPaints.PaintLoot;
-            SKPaint text = important ? SKPaints.TextImportantLoot : SKPaints.TextLoot;
+            //SKPaint paint = important ? SKPaints.PaintImportantLoot : SKPaints.PaintLoot;
+            //SKPaint text = important ? SKPaints.TextImportantLoot : SKPaints.TextLoot;
             if (heightDiff > 1.45) // loot is above player
             {
                 using var path = this.GetUpArrow();
@@ -308,7 +334,6 @@ namespace eft_dma_radar
             canvas.DrawText(label, this.GetPoint(7 * UIScale, 3 * UIScale), text);
         }
 
-        
         /// <summary>
         /// Draws a Player Marker on this location.
         /// </summary>
@@ -343,7 +368,7 @@ namespace eft_dma_radar
 
         public void DrawContainerTooltip(SKCanvas canvas, string container)
         {
-            
+            //TODO
         }
         /// <summary>
         /// Draws tooltips on Map Markers
@@ -1633,6 +1658,7 @@ namespace eft_dma_radar
             "Yastreb",
             "Zubr",
             "Akusher", // Sanitar guards
+            "Khirurg",
             "Anesteziolog",
             "Dermatolog",
             "Farmacevt",
@@ -1686,7 +1712,6 @@ namespace eft_dma_radar
             "Sluzhebka",
             "Slonolyub",
         };
-
     }
     #endregion
     

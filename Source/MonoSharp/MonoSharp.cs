@@ -1,18 +1,14 @@
-﻿﻿/***********************************************************************
+﻿/***********************************************************************
 ** Written by Frost 8/15/2023 https://github.com/imerzan/MonoSharp
 ** Major Thanks to Reahly: https://github.com/reahly/mono-external-lib
 ************************************************************************/
 
 using System.Text;
 
-namespace eft_dma_radar.Source.MonoSharp
-{
-    internal static class MonoSharp
-    {
-        public static bool InitializeFunctions()
-        {
-            if (Monolib.init_functions())
-            {
+namespace eft_dma_radar.Source.MonoSharp {
+    internal static class MonoSharp {
+        public static bool InitializeFunctions() {
+            if (Monolib.init_functions()) {
                 Program.Log("Mono Init Funcs [OK]");
                 return true;
             }
@@ -20,21 +16,19 @@ namespace eft_dma_radar.Source.MonoSharp
             return false;
         }
 
-        public static ulong FindClass(string assembly_name, string class_name)
-        {
+        public static ulong FindClass(string assembly_name, string class_name) {
 
             var monoClass = Monolib.find_class(assembly_name, class_name);
             if (monoClass == 0x0)
                 throw new Exception("NULL " + nameof(monoClass));
-			
-	    var deref = Memory.ReadValue<ulong>(monoClass + 0x0); // Deref at 0x0
-	    if (deref == 0x0)
-            	throw new Exception("NULL " + nameof(deref));
+
+            var deref = Memory.ReadValue<ulong>(monoClass + 0x0); // Deref at 0x0
+            if (deref == 0x0)
+                throw new Exception("NULL " + nameof(deref));
             return deref;
         }
 
-        public static ulong FindMethodOfClass(string assembly_name, string class_name, string method_name)
-        {
+        public static ulong FindMethodOfClass(string assembly_name, string class_name, string method_name) {
             var monoClass = Monolib.find_class(assembly_name, class_name);
             if (monoClass == 0x0)
                 throw new Exception("NULL " + nameof(monoClass));
@@ -45,55 +39,45 @@ namespace eft_dma_radar.Source.MonoSharp
             return monoMethod;
         }
 
-        public static ulong GetStaticFieldDataOfClass(string assembly_name, string class_name)
-        {
+        public static ulong GetStaticFieldDataOfClass(string assembly_name, string class_name) {
             var staticFieldData = Monolib.find_class(assembly_name, class_name).get_vtable(Monolib.get_root_domain()).get_static_field_data();
             if (staticFieldData == 0x0)
-            	throw new Exception("NULL " + nameof(staticFieldData));
-	    var deref =  Memory.ReadValue<ulong>(staticFieldData + 0x0); // Deref at 0x0
+                throw new Exception("NULL " + nameof(staticFieldData));
+            var deref = Memory.ReadValue<ulong>(staticFieldData + 0x0); // Deref at 0x0
             if (deref == 0x0)
-            	throw new Exception("NULL " + nameof(deref));
+                throw new Exception("NULL " + nameof(deref));
             return deref;
         }
 
-        public static uint FindFieldOffsetInClass(string assembly_name, string class_name, string field_name)
-        {
+        public static uint FindFieldOffsetInClass(string assembly_name, string class_name, string field_name) {
             return (uint)Monolib.find_class(assembly_name, class_name).find_field(field_name).offset();
         }
 
-        private static class Monolib
-        {
+        private static class Monolib {
             public static Dictionary<ulong, ulong> functions = new();
 
-            public static ushort utf8_to_utf16(string val)
-            {
+            public static ushort utf8_to_utf16(string val) {
                 var utf16Bytes = Encoding.Unicode.GetBytes(val);
                 return BitConverter.ToUInt16(utf16Bytes, 0);
             }
 
-            public static string read_widechar(ulong addr, int size)
-            {
-                try
-                {
+            public static string read_widechar(ulong addr, int size) {
+                try {
                     var buffer = Memory.ReadBuffer(addr, size);
                     return Encoding.UTF8.GetString(buffer).Split('\0')[0];
-                }
-                catch
-                {
+                } catch {
                     return string.Empty;
                 }
             }
 
-            public static mono_root_domain_t get_root_domain()
-            {
+            public static mono_root_domain_t get_root_domain() {
                 var mono_module = Memory.GetMonoModule();
                 if (mono_module == 0x0)
                     return default;
                 return new mono_root_domain_t(Memory.ReadValue<ulong>(mono_module + 0x499c78));
             }
 
-            public static bool init_functions()
-            {
+            public static bool init_functions() {
                 functions = new(); // Reset dictionary
                 var rootDomain = get_root_domain();
                 if (rootDomain == 0x0)
@@ -102,24 +86,20 @@ namespace eft_dma_radar.Source.MonoSharp
                 if (jitted_table == 0x0)
                     return false;
                 int iCount = Memory.ReadValue<int>(jitted_table + 0x8);
-                if (iCount > 10000)
-                {
+                if (iCount > 10000) {
                     Program.Log($"{nameof(iCount)} out of bounds!");
                     return false;
                 }
-                for (int i = 0; i < iCount; i++)
-                {
+                for (int i = 0; i < iCount; i++) {
                     var entry = Memory.ReadValue<ulong>(jitted_table + 0x10 + (uint)i * 0x8);
                     if (entry == 0x0)
                         continue;
                     int jCount = Memory.ReadValue<int>(entry + 0x4);
-                    if (jCount > 1000)
-                    {
+                    if (jCount > 1000) {
                         Program.Log($"{nameof(jCount)} out of bounds!");
                         return false;
                     }
-                    for (int j = 0; j < jCount; j++)
-                    {
+                    for (int j = 0; j < jCount; j++) {
                         var function = Memory.ReadValue<ulong>(entry + 0x18 + (uint)j * 0x8);
                         if (function == 0x0)
                             continue;
@@ -132,15 +112,13 @@ namespace eft_dma_radar.Source.MonoSharp
                 return true;
             }
 
-            public static mono_assembly_t domain_assembly_open(mono_root_domain_t domain, string name)
-            {
+            public static mono_assembly_t domain_assembly_open(mono_root_domain_t domain, string name) {
                 var domain_assemblies = domain.domain_assemblies();
                 if (domain_assemblies == 0x0)
                     return default;
 
                 ulong data = 0x0;
-                while (true)
-                {
+                while (true) {
                     data = domain_assemblies.data();
                     if (data == 0x0)
                         continue;
@@ -156,8 +134,7 @@ namespace eft_dma_radar.Source.MonoSharp
                 return new mono_assembly_t(data);
             }
 
-            public static mono_class_t find_class(string assembly_name, string class_name)
-            {
+            public static mono_class_t find_class(string assembly_name, string class_name) {
                 var root_domain = get_root_domain();
                 if (root_domain == 0x0)
                     return default;
@@ -171,13 +148,11 @@ namespace eft_dma_radar.Source.MonoSharp
                 if (table_info == 0x0)
                     return default;
                 int rowCount = table_info.get_rows();
-                if (rowCount > 25000)
-                {
+                if (rowCount > 25000) {
                     Program.Log($"{nameof(rowCount)} out of bounds!");
                     return default;
                 }
-                for (int i = 0; i < rowCount; i++)
-                {
+                for (int i = 0; i < rowCount; i++) {
                     var ptr = new mono_class_t(new mono_hash_table_t(mono_image + 0x4C0).lookup((ulong)(0x02000000 | i + 1)));
                     if (ptr == 0x0)
                         continue;
@@ -192,13 +167,11 @@ namespace eft_dma_radar.Source.MonoSharp
             }
         }
 
-        public readonly struct glist_t
-        {
+        public readonly struct glist_t {
             public static implicit operator ulong(glist_t x) => x.Base;
             private readonly ulong Base;
 
-            public glist_t(ulong baseAddr)
-            {
+            public glist_t(ulong baseAddr) {
                 Base = baseAddr;
             }
 
@@ -206,13 +179,11 @@ namespace eft_dma_radar.Source.MonoSharp
             public readonly ulong next() => Memory.ReadValue<ulong>(this + 0x8);
         }
 
-        public readonly struct mono_root_domain_t
-        {
+        public readonly struct mono_root_domain_t {
             public static implicit operator ulong(mono_root_domain_t x) => x.Base;
             private readonly ulong Base;
 
-            public mono_root_domain_t(ulong baseAddr)
-            {
+            public mono_root_domain_t(ulong baseAddr) {
                 Base = baseAddr;
             }
 
@@ -221,36 +192,30 @@ namespace eft_dma_radar.Source.MonoSharp
             public readonly ulong jitted_function_table() => Memory.ReadValue<ulong>(this + 0x148);
         }
 
-        public readonly struct mono_table_info_t
-        {
+        public readonly struct mono_table_info_t {
             public static implicit operator ulong(mono_table_info_t x) => x.Base;
             private readonly ulong Base;
 
-            public mono_table_info_t(ulong baseAddr)
-            {
+            public mono_table_info_t(ulong baseAddr) {
                 Base = baseAddr;
             }
 
             public readonly int get_rows() => Memory.ReadValue<int>(this + 0x8) & 0xFFFFFF;
         }
 
-        public readonly struct mono_method_t
-        {
+        public readonly struct mono_method_t {
             public static implicit operator ulong(mono_method_t x) => x.Base;
             private readonly ulong Base;
 
-            public mono_method_t(ulong baseAddr)
-            {
+            public mono_method_t(ulong baseAddr) {
                 Base = baseAddr;
             }
 
-            public readonly string name()
-            {
+            public readonly string name() {
                 var address = Memory.ReadValue<ulong>(this + 0x18);
                 string name = Monolib.read_widechar(address, 128);
 
-                if (name.Length > 0 && (byte)name[0] == 0xEE)
-                {
+                if (name.Length > 0 && (byte)name[0] == 0xEE) {
                     var utf16Value = Monolib.utf8_to_utf16(name);
                     name = $"\\u{utf16Value:X4}";
                 }
@@ -258,88 +223,74 @@ namespace eft_dma_radar.Source.MonoSharp
                 return name;
             }
         }
-        public readonly struct mono_class_field_t
-        {
+        public readonly struct mono_class_field_t {
             public static implicit operator ulong(mono_class_field_t x) => x.Base;
             private readonly ulong Base;
 
-            public mono_class_field_t(ulong baseAddr)
-            {
+            public mono_class_field_t(ulong baseAddr) {
                 Base = baseAddr;
             }
 
-            public readonly string name()
-            {
+            public readonly string name() {
                 var address = Memory.ReadValue<ulong>(this + 0x8);
                 string name = Monolib.read_widechar(address, 128);
 
-                if (name.Length > 0 && (byte)name[0] == 0xEE)
-                {
+                if (name.Length > 0 && (byte)name[0] == 0xEE) {
                     var utf16Value = Monolib.utf8_to_utf16(name);
                     name = $"\\u{utf16Value:X4}";
                 }
 
                 return name;
             }
-            public readonly int offset()
-            {
+            public readonly int offset() {
                 return Memory.ReadValue<int>(this + 0x18);
             }
         }
 
-        public readonly struct mono_class_runtime_info_t
-        {
+        public readonly struct mono_class_runtime_info_t {
             public static implicit operator ulong(mono_class_runtime_info_t x) => x.Base;
             private readonly ulong Base;
 
-            public mono_class_runtime_info_t(ulong baseAddr)
-            {
+            public mono_class_runtime_info_t(ulong baseAddr) {
                 Base = baseAddr;
             }
 
             public readonly int max_domain() => Memory.ReadValue<int>(this + 0x0);
         }
 
-        public readonly struct mono_vtable_t
-        {
+        public readonly struct mono_vtable_t {
             public static implicit operator ulong(mono_vtable_t x) => x.Base;
             private readonly ulong Base;
 
-            public mono_vtable_t(ulong baseAddr)
-            {
+            public mono_vtable_t(ulong baseAddr) {
                 Base = baseAddr;
             }
 
             public readonly byte flags() => Memory.ReadValue<byte>(this + 0x30);
 
-            public readonly ulong get_static_field_data()
-            {
+            public readonly ulong get_static_field_data() {
                 if ((this.flags() & 4) != 0)
                     return Memory.ReadValue<ulong>(this + 0x40 + 8 * (uint)Memory.ReadValue<int>(Memory.ReadValue<ulong>(this + 0x0) + 0x5C));
                 return 0x0;
             }
         }
 
-        public readonly struct mono_class_t
-        {
+        public readonly struct mono_class_t {
             public static implicit operator ulong(mono_class_t x) => x.Base;
             private readonly ulong Base;
 
-            public mono_class_t(ulong baseAddr)
-            {
+            public mono_class_t(ulong baseAddr) {
                 Base = baseAddr;
             }
 
             public readonly int num_fields() => Memory.ReadValue<int>(this + 0x100);
             public readonly mono_class_runtime_info_t runtime_info() => new mono_class_runtime_info_t(Memory.ReadValue<ulong>(this + 0xD0));
 
-            public readonly string name()
-            {
+            public readonly string name() {
                 var address = Memory.ReadValue<ulong>(this + 0x48);
                 string name = Monolib.read_widechar(address, 128);
 
-                if (name.Length > 0 && (byte)name[0] == 0xEE)
-                {
+                if (name.Length > 0 && (byte)name[0] == 0xEE) {
                     var utf16Value = Monolib.utf8_to_utf16(name);
                     name = $"\\u{utf16Value:X4}";
                 }
@@ -347,13 +298,11 @@ namespace eft_dma_radar.Source.MonoSharp
                 return name;
             }
 
-            public readonly string namespace_name()
-            {
+            public readonly string namespace_name() {
                 var address = Memory.ReadValue<ulong>(this + 0x50);
                 string name = Monolib.read_widechar(address, 128);
 
-                if (name.Length > 0 && (byte)name[0] == 0xEE)
-                {
+                if (name.Length > 0 && (byte)name[0] == 0xEE) {
                     var utf16Value = Monolib.utf8_to_utf16(name);
                     name = $"\\u{utf16Value:X4}";
                 }
@@ -361,11 +310,9 @@ namespace eft_dma_radar.Source.MonoSharp
                 return name;
             }
 
-            public readonly int get_num_methods()
-            {
+            public readonly int get_num_methods() {
                 var v2 = (Memory.ReadValue<int>(this + 0x2A) & 7) - 1;
-                switch (v2)
-                {
+                switch (v2) {
                     case 0:
                     case 1:
                         return Memory.ReadValue<int>(this + 0xFC);
@@ -387,15 +334,13 @@ namespace eft_dma_radar.Source.MonoSharp
                 new mono_method_t(Memory.ReadValue<ulong>(Memory.ReadValue<ulong>(this + 0xA0) + 0x8 * (uint)i));
 
 
-            public readonly mono_class_field_t get_field(int i)
-            {
+            public readonly mono_class_field_t get_field(int i) {
                 var fieldsPtr = Memory.ReadValue<ulong>(this + 0x98);
                 return new mono_class_field_t(fieldsPtr + (ulong)(0x20 * i));
             }
 
 
-            public readonly mono_vtable_t get_vtable(mono_root_domain_t domain)
-            {
+            public readonly mono_vtable_t get_vtable(mono_root_domain_t domain) {
                 var runtime_info = new mono_class_runtime_info_t(this.runtime_info());
                 if (runtime_info == 0x0)
                     return default;
@@ -407,18 +352,15 @@ namespace eft_dma_radar.Source.MonoSharp
                 return new mono_vtable_t(Memory.ReadValue<ulong>(runtime_info + 8 * (uint)domain_id + 8));
             }
 
-            public readonly mono_method_t find_method(string method_name)
-            {
+            public readonly mono_method_t find_method(string method_name) {
                 ulong monoPtr = 0x0;
 
                 int methodCount = this.get_num_methods();
-                if (methodCount > 10000)
-                {
+                if (methodCount > 10000) {
                     Program.Log($"{nameof(methodCount)} out of bounds!");
                     return default;
                 }
-                for (int i = 0; i < methodCount; i++)
-                {
+                for (int i = 0; i < methodCount; i++) {
                     var method = this.get_method(i);
 
                     if (method == 0x0)
@@ -431,16 +373,13 @@ namespace eft_dma_radar.Source.MonoSharp
                 return new mono_method_t(Monolib.functions[monoPtr]);
             }
 
-            public readonly mono_class_field_t find_field(string field_name)
-            {
+            public readonly mono_class_field_t find_field(string field_name) {
                 int fieldCount = this.num_fields();
-                if (fieldCount > 10000)
-                {
+                if (fieldCount > 10000) {
                     Program.Log($"{nameof(fieldCount)} out of bounds!");
                     return default;
                 }
-                for (int i = 0; i < fieldCount; i++)
-                {
+                for (int i = 0; i < fieldCount; i++) {
                     var field = this.get_field(i);
                     if (field == 0x0)
                         continue;
@@ -451,13 +390,11 @@ namespace eft_dma_radar.Source.MonoSharp
             }
         }
 
-        public readonly struct mono_hash_table_t
-        {
+        public readonly struct mono_hash_table_t {
             public static implicit operator ulong(mono_hash_table_t x) => x.Base;
             private readonly ulong Base;
 
-            public mono_hash_table_t(ulong baseAddr)
-            {
+            public mono_hash_table_t(ulong baseAddr) {
                 Base = baseAddr;
             }
 
@@ -466,14 +403,12 @@ namespace eft_dma_radar.Source.MonoSharp
             public readonly ulong next_value() => Memory.ReadValue<ulong>(this + 0x108);
             public readonly uint key_extract() => Memory.ReadValue<uint>(this + 0x58);
 
-            public readonly ulong lookup(ulong key)
-            {
+            public readonly ulong lookup(ulong key) {
                 var v4 = new mono_hash_table_t(Memory.ReadValue<ulong>(data() + 0x8 * (ulong)((uint)key % this.size())));
                 if (v4 == 0x0)
                     return default;
 
-                while ((ulong)v4.key_extract() != key)
-                {
+                while ((ulong)v4.key_extract() != key) {
                     v4 = new mono_hash_table_t(v4.next_value());
                     if (v4 == 0x0)
                         return default;
@@ -483,27 +418,23 @@ namespace eft_dma_radar.Source.MonoSharp
             }
         }
 
-        public readonly struct mono_image_t
-        {
+        public readonly struct mono_image_t {
             public static implicit operator ulong(mono_image_t x) => x.Base;
             private readonly ulong Base;
 
-            public mono_image_t(ulong baseAddr)
-            {
+            public mono_image_t(ulong baseAddr) {
                 Base = baseAddr;
             }
 
             public readonly int flags() => Memory.ReadValue<int>(this + 0x1C);
 
-            public readonly mono_table_info_t get_table_info(int table_id)
-            {
+            public readonly mono_table_info_t get_table_info(int table_id) {
                 if (table_id > 55)
                     return default;
                 return new mono_table_info_t(this + 0x10 * ((uint)table_id + 0xE));
             }
 
-            public readonly mono_class_t get(int type_id)
-            {
+            public readonly mono_class_t get(int type_id) {
                 if ((this.flags() & 0x20) != 0)
                     return default;
                 if ((type_id & 0xFF000000) != 0x2000000)
@@ -512,13 +443,11 @@ namespace eft_dma_radar.Source.MonoSharp
             }
         }
 
-        public readonly struct mono_assembly_t
-        {
+        public readonly struct mono_assembly_t {
             public static implicit operator ulong(mono_assembly_t x) => x.Base;
             private readonly ulong Base;
 
-            public mono_assembly_t(ulong baseAddr)
-            {
+            public mono_assembly_t(ulong baseAddr) {
                 Base = baseAddr;
             }
 

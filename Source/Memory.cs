@@ -185,23 +185,17 @@ namespace eft_dma_radar
         /// </summary>
         /// <returns>Module Base Address of mono-2.0-bdwgc.dll</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public static ulong GetMonoModule()
-        {
+        public static ulong GetMonoModule() {
             ulong monoBase = 0;
-            try
-            {
+            try {
                 ThrowIfDMAShutdown();
                 monoBase = vmmInstance.ProcessGetModuleBase(_pid, "mono-2.0-bdwgc.dll");
                 if (monoBase == 0) throw new DMAException("Unable to obtain Module Base Address. Game may not be running");
-                else
-                {
+                else {
                     Program.Log($"Found mono-2.0-bdwgc.dll at 0x{monoBase:x}");
                     return monoBase;
                 }
-            }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
-            {
+            } catch (DMAShutdown) { throw; } catch (Exception ex) {
                 Program.Log($"ERROR getting module base: {ex}");
             }
             return monoBase;
