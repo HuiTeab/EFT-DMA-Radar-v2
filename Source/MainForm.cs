@@ -1162,10 +1162,6 @@ namespace eft_dma_radar
                     _mapCanvas.GRContext.PurgeResources(); // Seems to fix mem leak issue on increasing resource cache
                     string title = "EFT Radar";
                     if (inGame && localPlayer is not null) {
-                        if (_selectedMap is null) {
-                            _selectedMap = _maps[0];
-                        }
-
                         // Check if map changed
                         if (currentMap.ToLower() != _selectedMap.MapID.ToLower()) {
                             _selectedMap = _maps.FirstOrDefault(x => x.MapID.ToLower() == currentMap.ToLower());
@@ -1178,31 +1174,44 @@ namespace eft_dma_radar
                             if (_selectedMap is null) {
                                 _selectedMap = _maps[0];
                             }
-                        }
-
-                        if (_selectedMap is null) {
-                            _selectedMap = _maps[0];
-                        }
-
-                        //init map
-                        if (_loadedBitmaps is not null) {
-                            foreach (var bitmap in _loadedBitmaps)
-                                bitmap?.Dispose(); // Cleanup resources
-                        }
-
-                        _loadedBitmaps = new SKBitmap[_selectedMap.ConfigFile.MapLayers.Count];
-
-                        for (int i = 0; i < _loadedBitmaps.Length; i++) {
-                            using (
-                                var stream = File.Open(
-                                    _selectedMap.ConfigFile.MapLayers[i].Filename,
-                                    FileMode.Open,
-                                    FileAccess.Read)) {
-                                _loadedBitmaps[i] = SKBitmap.Decode(stream); // Load new bitmap(s)
+                            //init map
+                            if (_loadedBitmaps is not null) {
+                                foreach (var bitmap in _loadedBitmaps)
+                                    bitmap?.Dispose(); // Cleanup resources
                             }
-                        }
 
-                        tabRadar.Text = $"Radar ({_selectedMap.Name})";
+                            _loadedBitmaps = new SKBitmap[_selectedMap.ConfigFile.MapLayers.Count];
+                            for (int i = 0; i < _loadedBitmaps.Length; i++) {
+                                using (
+                                    var stream = File.Open(
+                                        _selectedMap.ConfigFile.MapLayers[i].Filename,
+                                        FileMode.Open,
+                                        FileAccess.Read)) {
+                                    _loadedBitmaps[i] = SKBitmap.Decode(stream); // Load new bitmap(s)
+                                }
+                            }
+                            tabRadar.Text = $"Radar ({_selectedMap.Name})";
+                        }
+                        else if (_selectedMap is null) {
+                            _selectedMap = _maps[0];
+                            //init map
+                            if (_loadedBitmaps is not null) {
+                                foreach (var bitmap in _loadedBitmaps)
+                                    bitmap?.Dispose(); // Cleanup resources
+                            }
+
+                            _loadedBitmaps = new SKBitmap[_selectedMap.ConfigFile.MapLayers.Count];
+                            for (int i = 0; i < _loadedBitmaps.Length; i++) {
+                                using (
+                                    var stream = File.Open(
+                                        _selectedMap.ConfigFile.MapLayers[i].Filename,
+                                        FileMode.Open,
+                                        FileAccess.Read)) {
+                                    _loadedBitmaps[i] = SKBitmap.Decode(stream); // Load new bitmap(s)
+                                }
+                            }
+                            tabRadar.Text = $"Radar ({_selectedMap.Name})";
+                        }
 
                         title += $" ({_fps} fps) ({Memory.Ticks} mem/s)";
 
