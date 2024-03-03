@@ -187,18 +187,8 @@ namespace eft_dma_radar
         private void HandleRaidEnded(RaidEnded e) {
             Program.Log("Raid has ended!");
 
+            Memory.Restart();
             _inGame = false;
-            // sleep for 60 seconds to allow for raid end
-            Thread.Sleep(60000);
-            //Clear all game objects
-            _lootManager = null;
-            _rgtPlayers = null;
-            _grenadeManager = null;
-            _exfilManager = null;
-            _mapName = string.Empty;
-            _localGameWorld = 0;
-            _questManager = null;
-            _cameraManager = null;
         }
 
         /// <summary>
@@ -416,6 +406,11 @@ namespace eft_dma_radar
             if (_lootManager is null || _refreshLoot)
             {
                 _loadingLoot = true;
+                if (_lootManager is null)
+                {
+                    // wait for loot to be loaded
+                    Thread.Sleep(5000);
+                }
                 try
                 {
                     var loot = new LootManager(_localGameWorld);
