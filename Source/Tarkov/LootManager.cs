@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
@@ -244,7 +245,19 @@ namespace eft_dma_radar {
                     x.Filter.Color,
             });
 
-            var filteredLoot = from l in loot
+            //ghetto way to prevent overriding DevLootItems in the original loot list
+            var lootCopy = loot.Select(l => new DevLootItem {
+                Label = l.Label,
+                Important = l.Important,
+                Position = l.Position,
+                AlwaysShow = l.AlwaysShow,
+                BsgId = l.BsgId,
+                ContainerName = l.ContainerName,
+                Container = l.Container,
+                Item = l.Item
+            }).ToList();
+
+            var filteredLoot = from l in lootCopy
                                join id in orderedItems on l.Item.id equals id.ItemId
                                select l;
 
@@ -252,17 +265,7 @@ namespace eft_dma_radar {
                 lootItem.Important = true;
             }
 
-            filteredLoot = filteredLoot.Union(alwaysShow);
-
-            if (false) { // use this to verify if any dupes exist
-                Console.WriteLine("\n=====START=====");
-
-                foreach (var item in filteredLoot.OrderBy(i => i.Item.id)) {
-                    Console.WriteLine($"{item.Item.name} => {item.Position}, {item.Important} ({item.Item.id})");
-                }
-
-                Console.WriteLine("=====END=====\n");
-            }
+            filteredLoot = filteredLoot.UnionBy(alwaysShow, x => x.Position);
 
             this.LootFilterColors = orderedItems.ToDictionary(item => item.ItemId, item => item.Color);
             this.Filter = new ReadOnlyCollection<DevLootItem>(filteredLoot.ToList());

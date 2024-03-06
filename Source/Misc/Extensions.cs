@@ -60,6 +60,7 @@ namespace eft_dma_radar
                 Height = vector.Z // Keep as float, calculation done later
             };
         }
+
         /// <summary>
         /// Gets 'Zoomed' map position coordinates.
         /// </summary>
@@ -73,77 +74,63 @@ namespace eft_dma_radar
                 Height = location.Height
             };
         }
+
         /// <summary>
-        /// Gets drawing paintbrush based on Player Type.
+        /// Ghetto helper method to get the Color from a PaintColor object by Key & return a new SKColor object based on it
         /// </summary>
-        public static SKPaint GetPaint(this Player player)
-        {
-            switch (player.Type)
-            {
-                case PlayerType.LocalPlayer:
-                    return SKPaints.PaintLocalPlayer;
-                case PlayerType.Teammate:
-                    return SKPaints.PaintTeammate;
-                case PlayerType.PMC:
-                    return SKPaints.PaintPMC;
-                case PlayerType.BEAR:
-                    return SKPaints.PaintBear;
-                case PlayerType.USEC:
-                    return SKPaints.PaintUsec;
-                case PlayerType.AIScav:
-                    return SKPaints.PaintScav;
-                case PlayerType.AIRaider:
-                    return SKPaints.PaintRaider;
-                case PlayerType.AIBoss:
-                    return SKPaints.PaintBoss;
-                case PlayerType.PScav:
-                    return SKPaints.PaintPScav;
-                case PlayerType.SpecialPlayer:
-                    return SKPaints.PaintSpecial;
-                case PlayerType.AIOfflineScav:
-                    return SKPaints.PaintScav;
-                case PlayerType.AIBossGuard:
-                    return SKPaints.PaintRaider;
-                case PlayerType.AISniperScav:
-                    return SKPaints.PaintSpecial;
-                default:
-                    return SKPaints.PaintPMC;
-            }
+        public static SKColor SKColorFromPaintColor(string key) {
+            var col = Program.Config.PaintColors[key];
+            return new SKColor(col.R, col.G, col.B, col.A);
         }
+
         /// <summary>
-        /// Gets text paintbrush based on Player Type.
+        /// Gets drawing paintbrush based on Player Type
         /// </summary>
-        public static SKPaint GetText(this Player player)
-        {
-            switch (player.Type)
-            {
-                case PlayerType.Teammate:
-                    return SKPaints.TextTeammate;
-                case PlayerType.PMC:
-                    return SKPaints.TextPMC;
-                case PlayerType.BEAR:
-                    return SKPaints.TextBear;
-                case PlayerType.USEC:
-                    return SKPaints.TextUsec;
-                case PlayerType.AIScav:
-                    return SKPaints.TextScav;
-                case PlayerType.AIRaider:
-                    return SKPaints.TextRaider;
-                case PlayerType.AIBoss:
-                    return SKPaints.TextBoss;
-                case PlayerType.PScav:
-                    return SKPaints.TextPScav;
-                case PlayerType.SpecialPlayer:
-                    return SKPaints.TextSpecial;
-                case PlayerType.AIOfflineScav:
-                    return SKPaints.TextScav;
-                case PlayerType.AIBossGuard:
-                    return SKPaints.TextRaider;
-                case PlayerType.AISniperScav:
-                    return SKPaints.TextSpecial;
-                default:
-                    return SKPaints.TextPMC;
-            }
+        public static SKPaint GetPaint(this Player player) {
+            SKPaint basePaint = SKPaints.PaintBase.Clone();
+
+            basePaint.Color = player.Type switch {
+                PlayerType.LocalPlayer => SKColorFromPaintColor("LocalPlayer"),
+                PlayerType.Teammate => SKColorFromPaintColor("Teammate"),
+                PlayerType.BEAR => SKColorFromPaintColor("BEAR"),
+                PlayerType.USEC => SKColorFromPaintColor("USEC"),
+                PlayerType.AIScav => SKColorFromPaintColor("AIScav"),
+                PlayerType.AIBoss => SKColorFromPaintColor("Boss"),
+                PlayerType.AIOfflineScav => SKColorFromPaintColor("AIScav"),
+                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRouge or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
+                PlayerType.AISniperScav => SKColorFromPaintColor(""),
+                PlayerType.PScav => SKColorFromPaintColor("PScav"),
+
+                // default to white
+                _ => new SKColor(255, 255, 255, 255),
+            };
+
+            return basePaint;
+        }
+
+        /// <summary>
+        /// Gets text paintbrush based on Player Type
+        /// </summary>
+        public static SKPaint GetText(this Player player) {
+            SKPaint baseText = SKPaints.TextBase.Clone();
+
+            baseText.Color = player.Type switch {
+                PlayerType.LocalPlayer => SKColorFromPaintColor("LocalPlayer"),
+                PlayerType.Teammate => SKColorFromPaintColor("Teammate"),
+                PlayerType.BEAR => SKColorFromPaintColor("BEAR"),
+                PlayerType.USEC => SKColorFromPaintColor("USEC"),
+                PlayerType.AIScav => SKColorFromPaintColor("AIScav"),
+                PlayerType.AIBoss => SKColorFromPaintColor("Boss"),
+                PlayerType.AIOfflineScav => SKColorFromPaintColor("AIScav"),
+                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRouge or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
+                PlayerType.AISniperScav => SKColorFromPaintColor(""),
+                PlayerType.PScav => SKColorFromPaintColor("PScav"),
+
+                // default to white
+                _ => new SKColor(255, 255, 255, 255),
+            };
+
+            return baseText;
         }
 
         /// <summary>
@@ -151,33 +138,27 @@ namespace eft_dma_radar
         /// </summary>
         public static SKPaint GetAimviewPaint(this Player player)
         {
-            switch (player.Type)
-            {
-                case PlayerType.LocalPlayer:
-                    return SKPaints.PaintAimviewLocalPlayer;
-                case PlayerType.Teammate:
-                    return SKPaints.PaintAimviewTeammate;
-                case PlayerType.PMC:
-                    return SKPaints.PaintAimviewPMC;
-                case PlayerType.AIScav:
-                    return SKPaints.PaintAimviewScav;
-                case PlayerType.AIRaider:
-                    return SKPaints.PaintAimviewRaider;
-                case PlayerType.AIBoss:
-                    return SKPaints.PaintAimviewBoss;
-                case PlayerType.PScav:
-                    return SKPaints.PaintAimviewPScav;
-                case PlayerType.SpecialPlayer:
-                    return SKPaints.PaintAimviewSpecial;
-                case PlayerType.AIOfflineScav:
-                    return SKPaints.PaintAimviewScav;
-                case PlayerType.AIBossGuard:
-                    return SKPaints.PaintAimviewRaider;
-                case PlayerType.AISniperScav:
-                    return SKPaints.PaintAimviewSpecial;
-                default:
-                    return SKPaints.PaintAimviewPMC;
-            }
+            SKPaint basePaint = SKPaints.PaintBase.Clone();
+            basePaint.StrokeWidth = 1;
+            basePaint.Style = SKPaintStyle.Fill;
+
+            basePaint.Color = player.Type switch {
+                PlayerType.LocalPlayer => SKColorFromPaintColor("LocalPlayer"),
+                PlayerType.Teammate => SKColorFromPaintColor("Teammate"),
+                PlayerType.BEAR => SKColorFromPaintColor("BEAR"),
+                PlayerType.USEC => SKColorFromPaintColor("USEC"),
+                PlayerType.AIScav => SKColorFromPaintColor("AIScav"),
+                PlayerType.AIBoss => SKColorFromPaintColor("Boss"),
+                PlayerType.AIOfflineScav => SKColorFromPaintColor("AIScav"),
+                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRouge or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
+                PlayerType.AISniperScav => SKColorFromPaintColor(""),
+                PlayerType.PScav => SKColorFromPaintColor("PScav"),
+
+                // default to white
+                _ => new SKColor(255, 255, 255, 255),
+            };
+
+            return basePaint;
         }
 
         /// <summary>

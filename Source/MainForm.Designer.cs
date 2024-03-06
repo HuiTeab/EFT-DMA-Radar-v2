@@ -50,6 +50,29 @@ namespace eft_dma_radar
             rchTxtPlayerInfo = new RichTextBox();
             tabSettings = new TabPage();
             grpConfig = new GroupBox();
+            grpColors = new GroupBox();
+            picImportantLootColor = new PictureBox();
+            lblImportantLootColor = new Label();
+            picUSECColor = new PictureBox();
+            picRegularLootColor = new PictureBox();
+            lblRegularLootColor = new Label();
+            picTeamHoverColor = new PictureBox();
+            lblTeamHoverColor = new Label();
+            picTeammateColor = new PictureBox();
+            lblTeammateColor = new Label();
+            picLocalPlayerColor = new PictureBox();
+            lblLocalPlayerColor = new Label();
+            picBEARColor = new PictureBox();
+            picBossColor = new PictureBox();
+            picAIRaiderColor = new PictureBox();
+            picPScavColor = new PictureBox();
+            lblBEARColor = new Label();
+            lblUSECColor = new Label();
+            lblBossColor = new Label();
+            lblAIRaiderColor = new Label();
+            lblPScavColor = new Label();
+            picAIScavColor = new PictureBox();
+            lblAIScavColor = new Label();
             grpLootFilters = new GroupBox();
             lstEditLootFilters = new ListBox();
             btnCancelEditFilter = new Button();
@@ -57,24 +80,22 @@ namespace eft_dma_radar
             chkLootFilterEditActive = new CheckBox();
             btnAddNewFilter = new Button();
             btnRemoveFilter = new Button();
-            picLootFilterEditColor = new PictureBox();
-            label2 = new Label();
+            lblLootFilterColor = new Label();
             btnFilterPriorityDown = new Button();
             btnFilterPriorityUp = new Button();
             lblFilterEditName = new Label();
             txtLootFilterEditName = new TextBox();
+            picLootFilterEditColor = new PictureBox();
             grpLoot = new GroupBox();
             grpLootValues = new GroupBox();
             lblImportantLootDisplay = new Label();
             lblRegularLootDisplay = new Label();
-            label1 = new Label();
+            lblImportantLootSlider = new Label();
             trkImportantLootValue = new TrackBar();
             lblRegularLoot = new Label();
             trkRegularLootValue = new TrackBar();
-            label8 = new Label();
             btnRefreshLoot = new Button();
             chkHideLootContainer = new CheckBox();
-            label7 = new Label();
             chkHideLootValue = new CheckBox();
             chkImportantLootOnly = new CheckBox();
             grpUserInterface = new GroupBox();
@@ -112,12 +133,24 @@ namespace eft_dma_radar
             txtMapSetupX = new TextBox();
             lblMapCoords = new Label();
             tabControl = new TabControl();
-            colDialogLootFilter = new ColorDialog();
+            colDialog = new ColorDialog();
             tabLootFilter.SuspendLayout();
             tabPlayerHistory.SuspendLayout();
             tabPlayerLoadouts.SuspendLayout();
             tabSettings.SuspendLayout();
             grpConfig.SuspendLayout();
+            grpColors.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picImportantLootColor).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picUSECColor).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picRegularLootColor).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picTeamHoverColor).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picTeammateColor).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picLocalPlayerColor).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picBEARColor).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picBossColor).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picAIRaiderColor).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picPScavColor).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picAIScavColor).BeginInit();
             grpLootFilters.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picLootFilterEditColor).BeginInit();
             grpLoot.SuspendLayout();
@@ -148,7 +181,7 @@ namespace eft_dma_radar
             tabLootFilter.Location = new Point(4, 24);
             tabLootFilter.Name = "tabLootFilter";
             tabLootFilter.Padding = new Padding(3);
-            tabLootFilter.Size = new Size(1078, 638);
+            tabLootFilter.Size = new Size(1168, 638);
             tabLootFilter.TabIndex = 4;
             tabLootFilter.Text = "Loot Filter";
             tabLootFilter.UseVisualStyleBackColor = true;
@@ -222,16 +255,16 @@ namespace eft_dma_radar
             // 
             // lstViewLootFilter
             // 
-            lstViewLootFilter.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             lstViewLootFilter.AutoArrange = false;
             lstViewLootFilter.Columns.AddRange(new ColumnHeader[] { colHeadBSGId, colHeadFullName, colHeadShortName, colHeadValue });
+            lstViewLootFilter.Dock = DockStyle.Bottom;
             lstViewLootFilter.FullRowSelect = true;
             lstViewLootFilter.GridLines = true;
             lstViewLootFilter.HeaderStyle = ColumnHeaderStyle.Nonclickable;
             lstViewLootFilter.Location = new Point(3, 35);
             lstViewLootFilter.MultiSelect = false;
             lstViewLootFilter.Name = "lstViewLootFilter";
-            lstViewLootFilter.Size = new Size(1072, 600);
+            lstViewLootFilter.Size = new Size(1162, 600);
             lstViewLootFilter.TabIndex = 0;
             lstViewLootFilter.UseCompatibleStateImageBehavior = false;
             lstViewLootFilter.View = View.Details;
@@ -261,7 +294,7 @@ namespace eft_dma_radar
             tabPlayerHistory.Controls.Add(lstViewPMCHistory);
             tabPlayerHistory.Location = new Point(4, 24);
             tabPlayerHistory.Name = "tabPlayerHistory";
-            tabPlayerHistory.Size = new Size(1078, 638);
+            tabPlayerHistory.Size = new Size(1168, 638);
             tabPlayerHistory.TabIndex = 3;
             tabPlayerHistory.Text = "Player History";
             tabPlayerHistory.UseVisualStyleBackColor = true;
@@ -278,7 +311,7 @@ namespace eft_dma_radar
             lstViewPMCHistory.Location = new Point(0, 0);
             lstViewPMCHistory.MultiSelect = false;
             lstViewPMCHistory.Name = "lstViewPMCHistory";
-            lstViewPMCHistory.Size = new Size(1078, 638);
+            lstViewPMCHistory.Size = new Size(1168, 638);
             lstViewPMCHistory.TabIndex = 0;
             lstViewPMCHistory.UseCompatibleStateImageBehavior = false;
             lstViewPMCHistory.View = View.Details;
@@ -298,7 +331,7 @@ namespace eft_dma_radar
             tabPlayerLoadouts.Controls.Add(rchTxtPlayerInfo);
             tabPlayerLoadouts.Location = new Point(4, 24);
             tabPlayerLoadouts.Name = "tabPlayerLoadouts";
-            tabPlayerLoadouts.Size = new Size(1078, 638);
+            tabPlayerLoadouts.Size = new Size(1168, 638);
             tabPlayerLoadouts.TabIndex = 2;
             tabPlayerLoadouts.Text = "Player Loadouts";
             tabPlayerLoadouts.UseVisualStyleBackColor = true;
@@ -310,7 +343,7 @@ namespace eft_dma_radar
             rchTxtPlayerInfo.Location = new Point(0, 0);
             rchTxtPlayerInfo.Name = "rchTxtPlayerInfo";
             rchTxtPlayerInfo.ReadOnly = true;
-            rchTxtPlayerInfo.Size = new Size(1078, 638);
+            rchTxtPlayerInfo.Size = new Size(1168, 638);
             rchTxtPlayerInfo.TabIndex = 0;
             rchTxtPlayerInfo.Text = "";
             // 
@@ -320,13 +353,14 @@ namespace eft_dma_radar
             tabSettings.Location = new Point(4, 24);
             tabSettings.Name = "tabSettings";
             tabSettings.Padding = new Padding(3);
-            tabSettings.Size = new Size(1078, 638);
+            tabSettings.Size = new Size(1168, 638);
             tabSettings.TabIndex = 1;
             tabSettings.Text = "Settings";
             tabSettings.UseVisualStyleBackColor = true;
             // 
             // grpConfig
             // 
+            grpConfig.Controls.Add(grpColors);
             grpConfig.Controls.Add(grpLootFilters);
             grpConfig.Controls.Add(grpLoot);
             grpConfig.Controls.Add(grpUserInterface);
@@ -337,10 +371,250 @@ namespace eft_dma_radar
             grpConfig.Margin = new Padding(4, 3, 4, 3);
             grpConfig.Name = "grpConfig";
             grpConfig.Padding = new Padding(4, 3, 4, 3);
-            grpConfig.Size = new Size(1072, 632);
+            grpConfig.Size = new Size(1162, 632);
             grpConfig.TabIndex = 8;
             grpConfig.TabStop = false;
             grpConfig.Text = "Radar Config";
+            // 
+            // grpColors
+            // 
+            grpColors.Controls.Add(picImportantLootColor);
+            grpColors.Controls.Add(lblImportantLootColor);
+            grpColors.Controls.Add(picUSECColor);
+            grpColors.Controls.Add(picRegularLootColor);
+            grpColors.Controls.Add(lblRegularLootColor);
+            grpColors.Controls.Add(picTeamHoverColor);
+            grpColors.Controls.Add(lblTeamHoverColor);
+            grpColors.Controls.Add(picTeammateColor);
+            grpColors.Controls.Add(lblTeammateColor);
+            grpColors.Controls.Add(picLocalPlayerColor);
+            grpColors.Controls.Add(lblLocalPlayerColor);
+            grpColors.Controls.Add(picBEARColor);
+            grpColors.Controls.Add(picBossColor);
+            grpColors.Controls.Add(picAIRaiderColor);
+            grpColors.Controls.Add(picPScavColor);
+            grpColors.Controls.Add(lblBEARColor);
+            grpColors.Controls.Add(lblUSECColor);
+            grpColors.Controls.Add(lblBossColor);
+            grpColors.Controls.Add(lblAIRaiderColor);
+            grpColors.Controls.Add(lblPScavColor);
+            grpColors.Controls.Add(picAIScavColor);
+            grpColors.Controls.Add(lblAIScavColor);
+            grpColors.Location = new Point(888, 22);
+            grpColors.Name = "grpColors";
+            grpColors.Size = new Size(162, 283);
+            grpColors.TabIndex = 28;
+            grpColors.TabStop = false;
+            grpColors.Text = "Colors";
+            // 
+            // picImportantLootColor
+            // 
+            picImportantLootColor.BackColor = Color.Transparent;
+            picImportantLootColor.Location = new Point(108, 252);
+            picImportantLootColor.Name = "picImportantLootColor";
+            picImportantLootColor.Size = new Size(47, 18);
+            picImportantLootColor.TabIndex = 35;
+            picImportantLootColor.TabStop = false;
+            picImportantLootColor.Click += picImportantLootColor_Click;
+            // 
+            // lblImportantLootColor
+            // 
+            lblImportantLootColor.AutoSize = true;
+            lblImportantLootColor.Location = new Point(12, 252);
+            lblImportantLootColor.Name = "lblImportantLootColor";
+            lblImportantLootColor.Size = new Size(90, 15);
+            lblImportantLootColor.TabIndex = 34;
+            lblImportantLootColor.Text = "Important Loot:";
+            // 
+            // picUSECColor
+            // 
+            picUSECColor.BackColor = Color.Transparent;
+            picUSECColor.Location = new Point(108, 108);
+            picUSECColor.Name = "picUSECColor";
+            picUSECColor.Size = new Size(47, 18);
+            picUSECColor.TabIndex = 26;
+            picUSECColor.TabStop = false;
+            picUSECColor.Click += picUSECColor_Click;
+            // 
+            // picRegularLootColor
+            // 
+            picRegularLootColor.BackColor = Color.Transparent;
+            picRegularLootColor.Location = new Point(108, 228);
+            picRegularLootColor.Name = "picRegularLootColor";
+            picRegularLootColor.Size = new Size(47, 18);
+            picRegularLootColor.TabIndex = 33;
+            picRegularLootColor.TabStop = false;
+            picRegularLootColor.Click += picRegularLootColor_Click;
+            // 
+            // lblRegularLootColor
+            // 
+            lblRegularLootColor.AutoSize = true;
+            lblRegularLootColor.Location = new Point(25, 228);
+            lblRegularLootColor.Name = "lblRegularLootColor";
+            lblRegularLootColor.Size = new Size(77, 15);
+            lblRegularLootColor.TabIndex = 32;
+            lblRegularLootColor.Text = "Regular Loot:";
+            // 
+            // picTeamHoverColor
+            // 
+            picTeamHoverColor.BackColor = Color.Transparent;
+            picTeamHoverColor.Location = new Point(108, 204);
+            picTeamHoverColor.Name = "picTeamHoverColor";
+            picTeamHoverColor.Size = new Size(47, 18);
+            picTeamHoverColor.TabIndex = 31;
+            picTeamHoverColor.TabStop = false;
+            picTeamHoverColor.Click += picTeamHoverColor_Click;
+            // 
+            // lblTeamHoverColor
+            // 
+            lblTeamHoverColor.AutoSize = true;
+            lblTeamHoverColor.Location = new Point(29, 204);
+            lblTeamHoverColor.Name = "lblTeamHoverColor";
+            lblTeamHoverColor.Size = new Size(73, 15);
+            lblTeamHoverColor.TabIndex = 30;
+            lblTeamHoverColor.Text = "Team Hover:";
+            // 
+            // picTeammateColor
+            // 
+            picTeammateColor.BackColor = Color.Transparent;
+            picTeammateColor.Location = new Point(108, 180);
+            picTeammateColor.Name = "picTeammateColor";
+            picTeammateColor.Size = new Size(47, 18);
+            picTeammateColor.TabIndex = 29;
+            picTeammateColor.TabStop = false;
+            picTeammateColor.Click += picTeammateColor_Click;
+            // 
+            // lblTeammateColor
+            // 
+            lblTeammateColor.AutoSize = true;
+            lblTeammateColor.Location = new Point(37, 180);
+            lblTeammateColor.Name = "lblTeammateColor";
+            lblTeammateColor.Size = new Size(65, 15);
+            lblTeammateColor.TabIndex = 28;
+            lblTeammateColor.Text = "Teammate:";
+            // 
+            // picLocalPlayerColor
+            // 
+            picLocalPlayerColor.BackColor = Color.Transparent;
+            picLocalPlayerColor.Location = new Point(108, 156);
+            picLocalPlayerColor.Name = "picLocalPlayerColor";
+            picLocalPlayerColor.Size = new Size(47, 18);
+            picLocalPlayerColor.TabIndex = 27;
+            picLocalPlayerColor.TabStop = false;
+            picLocalPlayerColor.Click += picLocalPlayerColor_Click;
+            // 
+            // lblLocalPlayerColor
+            // 
+            lblLocalPlayerColor.AutoSize = true;
+            lblLocalPlayerColor.Location = new Point(32, 156);
+            lblLocalPlayerColor.Name = "lblLocalPlayerColor";
+            lblLocalPlayerColor.Size = new Size(70, 15);
+            lblLocalPlayerColor.TabIndex = 26;
+            lblLocalPlayerColor.Text = "LocalPlayer:";
+            // 
+            // picBEARColor
+            // 
+            picBEARColor.BackColor = Color.Transparent;
+            picBEARColor.Location = new Point(108, 132);
+            picBEARColor.Name = "picBEARColor";
+            picBEARColor.Size = new Size(47, 18);
+            picBEARColor.TabIndex = 25;
+            picBEARColor.TabStop = false;
+            picBEARColor.Click += picBEARColor_Click;
+            // 
+            // picBossColor
+            // 
+            picBossColor.BackColor = Color.Transparent;
+            picBossColor.Location = new Point(108, 84);
+            picBossColor.Name = "picBossColor";
+            picBossColor.Size = new Size(47, 18);
+            picBossColor.TabIndex = 24;
+            picBossColor.TabStop = false;
+            picBossColor.Click += picBossColor_Click;
+            // 
+            // picAIRaiderColor
+            // 
+            picAIRaiderColor.BackColor = Color.Transparent;
+            picAIRaiderColor.Location = new Point(108, 60);
+            picAIRaiderColor.Name = "picAIRaiderColor";
+            picAIRaiderColor.Size = new Size(47, 18);
+            picAIRaiderColor.TabIndex = 23;
+            picAIRaiderColor.TabStop = false;
+            picAIRaiderColor.Click += picAIRaiderColor_Click;
+            // 
+            // picPScavColor
+            // 
+            picPScavColor.BackColor = Color.Transparent;
+            picPScavColor.Location = new Point(108, 36);
+            picPScavColor.Name = "picPScavColor";
+            picPScavColor.Size = new Size(47, 18);
+            picPScavColor.TabIndex = 22;
+            picPScavColor.TabStop = false;
+            picPScavColor.Click += picPScavColor_Click;
+            // 
+            // lblBEARColor
+            // 
+            lblBEARColor.AutoSize = true;
+            lblBEARColor.Location = new Point(64, 132);
+            lblBEARColor.Name = "lblBEARColor";
+            lblBEARColor.Size = new Size(38, 15);
+            lblBEARColor.TabIndex = 21;
+            lblBEARColor.Text = "BEAR:";
+            // 
+            // lblUSECColor
+            // 
+            lblUSECColor.AutoSize = true;
+            lblUSECColor.Location = new Point(64, 108);
+            lblUSECColor.Name = "lblUSECColor";
+            lblUSECColor.Size = new Size(38, 15);
+            lblUSECColor.TabIndex = 20;
+            lblUSECColor.Text = "USEC:";
+            // 
+            // lblBossColor
+            // 
+            lblBossColor.AutoSize = true;
+            lblBossColor.Location = new Point(68, 84);
+            lblBossColor.Name = "lblBossColor";
+            lblBossColor.Size = new Size(34, 15);
+            lblBossColor.TabIndex = 19;
+            lblBossColor.Text = "Boss:";
+            // 
+            // lblAIRaiderColor
+            // 
+            lblAIRaiderColor.AutoSize = true;
+            lblAIRaiderColor.Location = new Point(20, 60);
+            lblAIRaiderColor.Name = "lblAIRaiderColor";
+            lblAIRaiderColor.Size = new Size(82, 15);
+            lblAIRaiderColor.TabIndex = 18;
+            lblAIRaiderColor.Text = "Raider/Rouge:";
+            // 
+            // lblPScavColor
+            // 
+            lblPScavColor.AutoSize = true;
+            lblPScavColor.Location = new Point(33, 34);
+            lblPScavColor.Name = "lblPScavColor";
+            lblPScavColor.Size = new Size(69, 15);
+            lblPScavColor.TabIndex = 17;
+            lblPScavColor.Text = "Player Scav:";
+            // 
+            // picAIScavColor
+            // 
+            picAIScavColor.BackColor = Color.Transparent;
+            picAIScavColor.Location = new Point(108, 12);
+            picAIScavColor.Name = "picAIScavColor";
+            picAIScavColor.Size = new Size(47, 18);
+            picAIScavColor.TabIndex = 16;
+            picAIScavColor.TabStop = false;
+            picAIScavColor.Click += picAIScavColor_Click;
+            // 
+            // lblAIScavColor
+            // 
+            lblAIScavColor.AutoSize = true;
+            lblAIScavColor.Location = new Point(54, 12);
+            lblAIScavColor.Name = "lblAIScavColor";
+            lblAIScavColor.Size = new Size(48, 15);
+            lblAIScavColor.TabIndex = 15;
+            lblAIScavColor.Text = "AI Scav:";
             // 
             // grpLootFilters
             // 
@@ -350,12 +624,12 @@ namespace eft_dma_radar
             grpLootFilters.Controls.Add(chkLootFilterEditActive);
             grpLootFilters.Controls.Add(btnAddNewFilter);
             grpLootFilters.Controls.Add(btnRemoveFilter);
-            grpLootFilters.Controls.Add(picLootFilterEditColor);
-            grpLootFilters.Controls.Add(label2);
+            grpLootFilters.Controls.Add(lblLootFilterColor);
             grpLootFilters.Controls.Add(btnFilterPriorityDown);
             grpLootFilters.Controls.Add(btnFilterPriorityUp);
             grpLootFilters.Controls.Add(lblFilterEditName);
             grpLootFilters.Controls.Add(txtLootFilterEditName);
+            grpLootFilters.Controls.Add(picLootFilterEditColor);
             grpLootFilters.Location = new Point(474, 238);
             grpLootFilters.Name = "grpLootFilters";
             grpLootFilters.Size = new Size(408, 286);
@@ -376,7 +650,7 @@ namespace eft_dma_radar
             // 
             // btnCancelEditFilter
             // 
-            btnCancelEditFilter.Location = new Point(328, 137);
+            btnCancelEditFilter.Location = new Point(331, 102);
             btnCancelEditFilter.Name = "btnCancelEditFilter";
             btnCancelEditFilter.Size = new Size(71, 23);
             btnCancelEditFilter.TabIndex = 13;
@@ -387,7 +661,7 @@ namespace eft_dma_radar
             // 
             // btnEditSaveFilter
             // 
-            btnEditSaveFilter.Location = new Point(266, 137);
+            btnEditSaveFilter.Location = new Point(269, 102);
             btnEditSaveFilter.Name = "btnEditSaveFilter";
             btnEditSaveFilter.Size = new Size(56, 23);
             btnEditSaveFilter.TabIndex = 12;
@@ -399,7 +673,7 @@ namespace eft_dma_radar
             // 
             chkLootFilterEditActive.AutoSize = true;
             chkLootFilterEditActive.Enabled = false;
-            chkLootFilterEditActive.Location = new Point(266, 112);
+            chkLootFilterEditActive.Location = new Point(269, 77);
             chkLootFilterEditActive.Name = "chkLootFilterEditActive";
             chkLootFilterEditActive.Size = new Size(70, 19);
             chkLootFilterEditActive.TabIndex = 11;
@@ -426,25 +700,14 @@ namespace eft_dma_radar
             btnRemoveFilter.UseVisualStyleBackColor = true;
             btnRemoveFilter.Click += btnRemoveFilter_Click;
             // 
-            // picLootFilterEditColor
+            // lblLootFilterColor
             // 
-            picLootFilterEditColor.BackColor = Color.Transparent;
-            picLootFilterEditColor.Enabled = false;
-            picLootFilterEditColor.Location = new Point(266, 55);
-            picLootFilterEditColor.Name = "picLootFilterEditColor";
-            picLootFilterEditColor.Size = new Size(133, 50);
-            picLootFilterEditColor.TabIndex = 7;
-            picLootFilterEditColor.TabStop = false;
-            picLootFilterEditColor.Click += picLootFilterPreview_Click;
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new Point(221, 58);
-            label2.Name = "label2";
-            label2.Size = new Size(39, 15);
-            label2.TabIndex = 6;
-            label2.Text = "Color:";
+            lblLootFilterColor.AutoSize = true;
+            lblLootFilterColor.Location = new Point(224, 52);
+            lblLootFilterColor.Name = "lblLootFilterColor";
+            lblLootFilterColor.Size = new Size(39, 15);
+            lblLootFilterColor.TabIndex = 6;
+            lblLootFilterColor.Text = "Color:";
             // 
             // btnFilterPriorityDown
             // 
@@ -469,7 +732,7 @@ namespace eft_dma_radar
             // lblFilterEditName
             // 
             lblFilterEditName.AutoSize = true;
-            lblFilterEditName.Location = new Point(218, 25);
+            lblFilterEditName.Location = new Point(221, 23);
             lblFilterEditName.Name = "lblFilterEditName";
             lblFilterEditName.Size = new Size(42, 15);
             lblFilterEditName.TabIndex = 2;
@@ -478,18 +741,27 @@ namespace eft_dma_radar
             // txtLootFilterEditName
             // 
             txtLootFilterEditName.Enabled = false;
-            txtLootFilterEditName.Location = new Point(266, 22);
+            txtLootFilterEditName.Location = new Point(269, 20);
             txtLootFilterEditName.Name = "txtLootFilterEditName";
             txtLootFilterEditName.Size = new Size(133, 23);
             txtLootFilterEditName.TabIndex = 1;
             // 
+            // picLootFilterEditColor
+            // 
+            picLootFilterEditColor.BackColor = Color.Transparent;
+            picLootFilterEditColor.Enabled = false;
+            picLootFilterEditColor.Location = new Point(269, 52);
+            picLootFilterEditColor.Name = "picLootFilterEditColor";
+            picLootFilterEditColor.Size = new Size(47, 18);
+            picLootFilterEditColor.TabIndex = 7;
+            picLootFilterEditColor.TabStop = false;
+            picLootFilterEditColor.Click += picLootFilterPreview_Click;
+            // 
             // grpLoot
             // 
             grpLoot.Controls.Add(grpLootValues);
-            grpLoot.Controls.Add(label8);
             grpLoot.Controls.Add(btnRefreshLoot);
             grpLoot.Controls.Add(chkHideLootContainer);
-            grpLoot.Controls.Add(label7);
             grpLoot.Controls.Add(chkHideLootValue);
             grpLoot.Controls.Add(chkImportantLootOnly);
             grpLoot.Location = new Point(474, 22);
@@ -503,7 +775,7 @@ namespace eft_dma_radar
             // 
             grpLootValues.Controls.Add(lblImportantLootDisplay);
             grpLootValues.Controls.Add(lblRegularLootDisplay);
-            grpLootValues.Controls.Add(label1);
+            grpLootValues.Controls.Add(lblImportantLootSlider);
             grpLootValues.Controls.Add(trkImportantLootValue);
             grpLootValues.Controls.Add(lblRegularLoot);
             grpLootValues.Controls.Add(trkRegularLootValue);
@@ -532,14 +804,14 @@ namespace eft_dma_radar
             lblRegularLootDisplay.TabIndex = 27;
             lblRegularLootDisplay.Text = "xxx";
             // 
-            // label1
+            // lblImportantLootSlider
             // 
-            label1.AutoSize = true;
-            label1.Location = new Point(6, 66);
-            label1.Name = "label1";
-            label1.Size = new Size(87, 15);
-            label1.TabIndex = 32;
-            label1.Text = "Important Loot";
+            lblImportantLootSlider.AutoSize = true;
+            lblImportantLootSlider.Location = new Point(6, 66);
+            lblImportantLootSlider.Name = "lblImportantLootSlider";
+            lblImportantLootSlider.Size = new Size(87, 15);
+            lblImportantLootSlider.TabIndex = 32;
+            lblImportantLootSlider.Text = "Important Loot";
             // 
             // trkImportantLootValue
             // 
@@ -580,13 +852,6 @@ namespace eft_dma_radar
             trkRegularLootValue.Value = 85;
             trkRegularLootValue.Scroll += trkRegularLootValue_Scroll;
             // 
-            // label8
-            // 
-            label8.Location = new Point(0, 0);
-            label8.Name = "label8";
-            label8.Size = new Size(100, 23);
-            label8.TabIndex = 22;
-            // 
             // btnRefreshLoot
             // 
             btnRefreshLoot.Location = new Point(318, 27);
@@ -606,13 +871,6 @@ namespace eft_dma_radar
             chkHideLootContainer.TabIndex = 30;
             chkHideLootContainer.Text = "Hide Container";
             chkHideLootContainer.UseVisualStyleBackColor = true;
-            // 
-            // label7
-            // 
-            label7.Location = new Point(0, 0);
-            label7.Name = "label7";
-            label7.Size = new Size(100, 23);
-            label7.TabIndex = 23;
             // 
             // chkHideLootValue
             // 
@@ -647,7 +905,7 @@ namespace eft_dma_radar
             grpUserInterface.Controls.Add(trkUIScale);
             grpUserInterface.Controls.Add(chkShowAimview);
             grpUserInterface.Controls.Add(chkHideNames);
-            grpUserInterface.Location = new Point(5, 128);
+            grpUserInterface.Location = new Point(5, 165);
             grpUserInterface.Name = "grpUserInterface";
             grpUserInterface.Size = new Size(463, 159);
             grpUserInterface.TabIndex = 26;
@@ -776,9 +1034,9 @@ namespace eft_dma_radar
             grpMemoryWriting.Controls.Add(chkOpticThermalVision);
             grpMemoryWriting.Controls.Add(chkNightVision);
             grpMemoryWriting.Controls.Add(chkThermalVision);
-            grpMemoryWriting.Location = new Point(5, 293);
+            grpMemoryWriting.Location = new Point(6, 330);
             grpMemoryWriting.Name = "grpMemoryWriting";
-            grpMemoryWriting.Size = new Size(462, 231);
+            grpMemoryWriting.Size = new Size(462, 194);
             grpMemoryWriting.TabIndex = 9;
             grpMemoryWriting.TabStop = false;
             grpMemoryWriting.Text = "Memory Writing [RISKY]";
@@ -838,7 +1096,7 @@ namespace eft_dma_radar
             grpRadar.Controls.Add(btnToggleMap);
             grpRadar.Location = new Point(5, 22);
             grpRadar.Name = "grpRadar";
-            grpRadar.Size = new Size(463, 100);
+            grpRadar.Size = new Size(463, 137);
             grpRadar.TabIndex = 26;
             grpRadar.TabStop = false;
             grpRadar.Text = "Radar";
@@ -846,9 +1104,9 @@ namespace eft_dma_radar
             // btnRestartRadar
             // 
             btnRestartRadar.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
-            btnRestartRadar.Location = new Point(359, 30);
+            btnRestartRadar.Location = new Point(350, 22);
             btnRestartRadar.Name = "btnRestartRadar";
-            btnRestartRadar.Size = new Size(98, 44);
+            btnRestartRadar.Size = new Size(107, 27);
             btnRestartRadar.TabIndex = 18;
             btnRestartRadar.Text = "Restart Radar";
             btnRestartRadar.UseVisualStyleBackColor = true;
@@ -857,7 +1115,7 @@ namespace eft_dma_radar
             // chkShowMapSetup
             // 
             chkShowMapSetup.AutoSize = true;
-            chkShowMapSetup.Location = new Point(6, 22);
+            chkShowMapSetup.Location = new Point(6, 28);
             chkShowMapSetup.Name = "chkShowMapSetup";
             chkShowMapSetup.Size = new Size(153, 19);
             chkShowMapSetup.TabIndex = 9;
@@ -867,7 +1125,7 @@ namespace eft_dma_radar
             // 
             // btnToggleMap
             // 
-            btnToggleMap.Location = new Point(245, 40);
+            btnToggleMap.Location = new Point(236, 22);
             btnToggleMap.Margin = new Padding(4, 3, 4, 3);
             btnToggleMap.Name = "btnToggleMap";
             btnToggleMap.Size = new Size(107, 27);
@@ -886,7 +1144,7 @@ namespace eft_dma_radar
             tabRadar.Location = new Point(4, 24);
             tabRadar.Name = "tabRadar";
             tabRadar.Padding = new Padding(3);
-            tabRadar.Size = new Size(1078, 638);
+            tabRadar.Size = new Size(1168, 638);
             tabRadar.TabIndex = 0;
             tabRadar.Text = "Radar";
             tabRadar.UseVisualStyleBackColor = true;
@@ -895,7 +1153,7 @@ namespace eft_dma_radar
             // 
             chkNoVisorDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             chkNoVisorDebug.AutoSize = true;
-            chkNoVisorDebug.Location = new Point(968, 82);
+            chkNoVisorDebug.Location = new Point(1066, 82);
             chkNoVisorDebug.Name = "chkNoVisorDebug";
             chkNoVisorDebug.Size = new Size(71, 19);
             chkNoVisorDebug.TabIndex = 17;
@@ -907,7 +1165,7 @@ namespace eft_dma_radar
             // 
             chkOpticThermalVisionDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             chkOpticThermalVisionDebug.AutoSize = true;
-            chkOpticThermalVisionDebug.Location = new Point(968, 56);
+            chkOpticThermalVisionDebug.Location = new Point(1066, 56);
             chkOpticThermalVisionDebug.Name = "chkOpticThermalVisionDebug";
             chkOpticThermalVisionDebug.Size = new Size(101, 19);
             chkOpticThermalVisionDebug.TabIndex = 16;
@@ -919,7 +1177,7 @@ namespace eft_dma_radar
             // 
             chkNightVisionDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             chkNightVisionDebug.AutoSize = true;
-            chkNightVisionDebug.Location = new Point(968, 6);
+            chkNightVisionDebug.Location = new Point(1066, 6);
             chkNightVisionDebug.Name = "chkNightVisionDebug";
             chkNightVisionDebug.Size = new Size(94, 19);
             chkNightVisionDebug.TabIndex = 14;
@@ -931,7 +1189,7 @@ namespace eft_dma_radar
             // 
             chkThermalVisionDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             chkThermalVisionDebug.AutoSize = true;
-            chkThermalVisionDebug.Location = new Point(968, 31);
+            chkThermalVisionDebug.Location = new Point(1066, 31);
             chkThermalVisionDebug.Name = "chkThermalVisionDebug";
             chkThermalVisionDebug.Size = new Size(104, 19);
             chkThermalVisionDebug.TabIndex = 15;
@@ -1028,18 +1286,18 @@ namespace eft_dma_radar
             tabControl.Location = new Point(0, 0);
             tabControl.Name = "tabControl";
             tabControl.SelectedIndex = 0;
-            tabControl.Size = new Size(1086, 666);
+            tabControl.Size = new Size(1176, 666);
             tabControl.TabIndex = 8;
             // 
-            // colDialogLootFilter
+            // colDialog
             // 
-            colDialogLootFilter.FullOpen = true;
+            colDialog.FullOpen = true;
             // 
             // frmMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1086, 666);
+            ClientSize = new Size(1176, 666);
             Controls.Add(tabControl);
             Margin = new Padding(4, 3, 4, 3);
             Name = "frmMain";
@@ -1050,6 +1308,19 @@ namespace eft_dma_radar
             tabPlayerLoadouts.ResumeLayout(false);
             tabSettings.ResumeLayout(false);
             grpConfig.ResumeLayout(false);
+            grpColors.ResumeLayout(false);
+            grpColors.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picImportantLootColor).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picUSECColor).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picRegularLootColor).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picTeamHoverColor).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picTeammateColor).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picLocalPlayerColor).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picBEARColor).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picBossColor).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picAIRaiderColor).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picPScavColor).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picAIScavColor).EndInit();
             grpLootFilters.ResumeLayout(false);
             grpLootFilters.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)picLootFilterEditColor).EndInit();
@@ -1103,9 +1374,7 @@ namespace eft_dma_radar
         private TrackBar trkRegularLootValue;
         private Button btnRefreshLoot;
         private CheckBox chkHideLootContainer;
-        private Label label8;
         private CheckBox chkHideLootValue;
-        private Label label7;
         private CheckBox chkImportantLootOnly;
         private Label lblRegularLoot;
         private GroupBox grpUserInterface;
@@ -1144,7 +1413,7 @@ namespace eft_dma_radar
         private Label lblMapCoords;
         private TabControl tabControl;
         private GroupBox grpLootValues;
-        private Label label1;
+        private Label lblImportantLootSlider;
         private TrackBar trkImportantLootValue;
         private Label lblRegularLootDisplay;
         private Label lblImportantLootDisplay;
@@ -1153,8 +1422,8 @@ namespace eft_dma_radar
         private Label lblFilterEditName;
         private Button btnFilterPriorityDown;
         private Button btnFilterPriorityUp;
-        private Label label2;
-        private ColorDialog colDialogLootFilter;
+        private Label lblLootFilterColor;
+        private ColorDialog colDialog;
         private PictureBox picLootFilterEditColor;
         private Button btnAddNewFilter;
         private Button btnRemoveFilter;
@@ -1162,6 +1431,29 @@ namespace eft_dma_radar
         private Button btnEditSaveFilter;
         private Button btnCancelEditFilter;
         private ListBox lstEditLootFilters;
+        private GroupBox grpColors;
+        private PictureBox picAIScavColor;
+        private Label lblAIScavColor;
+        private Label lblBEARColor;
+        private Label lblUSECColor;
+        private Label lblBossColor;
+        private Label lblAIRaiderColor;
+        private Label lblPScavColor;
+        private PictureBox picUSECColor;
+        private PictureBox picBEARColor;
+        private PictureBox picBossColor;
+        private PictureBox picAIRaiderColor;
+        private PictureBox picPScavColor;
+        private PictureBox picTeamHoverColor;
+        private Label lblTeamHoverColor;
+        private PictureBox picTeammateColor;
+        private Label lblTeammateColor;
+        private PictureBox picLocalPlayerColor;
+        private Label lblLocalPlayerColor;
+        private PictureBox picRegularLootColor;
+        private Label lblRegularLootColor;
+        private PictureBox picImportantLootColor;
+        private Label lblImportantLootColor;
     }
 }
 
