@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
+using System.Drawing;
 using System.Drawing.Text;
 using System.Numerics;
 using System.Text;
@@ -28,7 +29,6 @@ namespace eft_dma_radar
         private float _aimviewWindowSize = 200;
         private Player _closestToMouse = null;
         private int? _mouseOverGroup = null;
-        private string _filterEntry = null;
         private int _fps = 0;
         private int _mapSelectionIndex = 0;
         private Map _selectedMap;
@@ -132,7 +132,6 @@ namespace eft_dma_radar
             lstViewPMCHistory.MouseDoubleClick += lstViewPMCHistory_MouseDoubleClick;
             _fpsWatch.Start(); // fps counter
         }
-
         #endregion
 
         #region Events
@@ -197,36 +196,6 @@ namespace eft_dma_radar
                 lstViewPMCHistory.Items.Clear(); // Clear old view
                 lstViewPMCHistory.Items.AddRange(Player.History); // Obtain new view
                 lstViewPMCHistory.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent); // resize Player History columns automatically
-            } else if (tabControl.SelectedIndex == 4) {
-                if (_config.Filters.Count == 0) { // add a default, blank config
-                    LootFilter newFilter = new LootFilter() {
-                        Order = 1,
-                        IsActive = true,
-                        Name = "Default",
-                        Items = new List<String>(),
-                        Color = new Colors() {
-                            R = 255,
-                            G = 0,
-                            B = 0,
-                            A = 255
-                        }
-                    };
-
-                    _config.Filters.Add(newFilter);
-
-                    Config.SaveConfig(_config);
-                }
-
-                if (cboFilters.Items.Count == 0) { // add filters to the combo box
-                    UpdateLootFilterComboBoxes();
-                }
-
-                if (cboLootItems.Items.Count == 0) { // add loot items loot item combobox
-                    List<DevLootItem> lootList = TarkovDevAPIManager.AllItems.Take(25).Select(x => x.Value).ToList();
-
-                    cboLootItems.DataSource = lootList;
-                    cboLootItems.DisplayMember = "Label";
-                }
             }
         }
 
@@ -238,36 +207,51 @@ namespace eft_dma_radar
             selectedFilter.IsActive = chkLootFilterActive.Checked;
 
             Config.SaveConfig(_config);
-
-            UpdateEditFilterListBox();
+            this.Loot?.ApplyFilter();
         }
 
         /// <summary>
         /// Fired when NightVision checkbox has been adjusted
         /// </summary>
         private void chkNightVision_CheckedChanged(object sender, EventArgs e) {
-            Game.CameraManager.NightVision(chkNightVision.Checked || chkNightVisionDebug.Checked);
+            _config.NightVisionEnabled = chkNightVision.Checked;
+
+            if (Memory.InGame) {
+                Game.CameraManager.NightVision(chkNightVision.Checked || chkNightVisionDebug.Checked);
+            }
         }
 
         /// <summary>
         /// Fired when ThermalVision checkbox has been adjusted
         /// </summary>
         private void chkThermalVision_CheckedChanged(object sender, EventArgs e) {
-            Game.CameraManager.ThermalVision(chkThermalVision.Checked || chkThermalVisionDebug.Checked);
+            _config.ThermalVisionEnabled = chkThermalVision.Checked;
+
+            if (Memory.InGame) {
+                Game.CameraManager.ThermalVision(chkThermalVision.Checked || chkThermalVisionDebug.Checked);
+            }
         }
 
         /// <summary>
         /// Fired when OpticThermalVision checkbox has been adjusted
         /// </summary>
         private void chkOpticThermalVision_CheckedChanged(object sender, EventArgs e) {
-            Game.CameraManager.OpticThermalVision(chkOpticThermalVision.Checked | chkOpticThermalVisionDebug.Checked);
+            _config.OpticThermalVisionEnabled = chkOpticThermalVision.Checked;
+
+            if (Memory.InGame) {
+                Game.CameraManager.OpticThermalVision(chkOpticThermalVision.Checked || chkOpticThermalVisionDebug.Checked);
+            }
         }
 
         /// <summary>
         /// Fired when NoVisor checkbox has been adjusted
         /// </summary>
         private void chkNoVisor_CheckedChanged(object sender, EventArgs e) {
-            Game.CameraManager.VisorEffect(chkNoVisor.Checked || chkNoVisorDebug.Checked);
+            _config.NoVisorEnabled = chkNoVisor.Checked;
+
+            if (Memory.InGame) {
+                Game.CameraManager.VisorEffect(chkNoVisor.Checked || chkNoVisorDebug.Checked);
+            }
         }
 
         /// <summary>
@@ -353,36 +337,13 @@ namespace eft_dma_radar
             #region UpdatePaints
             SKPaints.PaintMouseoverGroup.StrokeWidth = 3 * _uiScale;
             SKPaints.TextMouseoverGroup.TextSize = 12 * _uiScale;
-            SKPaints.PaintLocalPlayer.StrokeWidth = 3 * _uiScale;
-            SKPaints.PaintTeammate.StrokeWidth = 3 * _uiScale;
-            SKPaints.TextTeammate.TextSize = 12 * _uiScale;
-            SKPaints.PaintPMC.StrokeWidth = 3 * _uiScale;
-            SKPaints.TextPMC.TextSize = 12 * _uiScale;
-            SKPaints.PaintSpecial.StrokeWidth = 3 * _uiScale;
-            SKPaints.TextSpecial.TextSize = 12 * _uiScale;
-            SKPaints.PaintScav.StrokeWidth = 3 * _uiScale;
-            SKPaints.TextScav.TextSize = 12 * _uiScale;
-            SKPaints.PaintRaider.StrokeWidth = 3 * _uiScale;
-            SKPaints.TextRaider.TextSize = 12 * _uiScale;
-            SKPaints.PaintBoss.StrokeWidth = 3 * _uiScale;
-            SKPaints.TextBoss.TextSize = 12 * _uiScale;
-            SKPaints.PaintPScav.StrokeWidth = 3 * _uiScale;
-            SKPaints.TextWhite.TextSize = 12 * _uiScale;
+            SKPaints.PaintBase.StrokeWidth = 3 * _uiScale;
+            SKPaints.TextBase.TextSize = 12 * _uiScale;
             SKPaints.PaintDeathMarker.StrokeWidth = 3 * _uiScale;
             SKPaints.PaintLoot.StrokeWidth = 3 * _uiScale;
-            SKPaints.PaintImportantLoot.StrokeWidth = 3 * _uiScale;
             SKPaints.TextLoot.TextSize = 13 * _uiScale;
-            SKPaints.TextImportantLoot.TextSize = 13 * _uiScale;
             SKPaints.PaintTransparentBacker.StrokeWidth = 1 * _uiScale;
             SKPaints.PaintAimviewCrosshair.StrokeWidth = 1 * _uiScale;
-            SKPaints.PaintAimviewLocalPlayer.StrokeWidth = 1 * _uiScale;
-            SKPaints.PaintAimviewPMC.StrokeWidth = 1 * _uiScale;
-            SKPaints.PaintAimviewSpecial.StrokeWidth = 1 * _uiScale;
-            SKPaints.PaintAimviewTeammate.StrokeWidth = 1 * _uiScale;
-            SKPaints.PaintAimviewBoss.StrokeWidth = 1 * _uiScale;
-            SKPaints.PaintAimviewScav.StrokeWidth = 1 * _uiScale;
-            SKPaints.PaintAimviewRaider.StrokeWidth = 1 * _uiScale;
-            SKPaints.PaintAimviewPScav.StrokeWidth = 1 * _uiScale;
             SKPaints.TextRadarStatus.TextSize = 48 * _uiScale;
             SKPaints.PaintGrenades.StrokeWidth = 3 * _uiScale;
             SKPaints.PaintExfilOpen.StrokeWidth = 1 * _uiScale;
@@ -605,9 +566,11 @@ namespace eft_dma_radar
             lblRegularLootDisplay.Text = TarkovDevAPIManager.FormatNumber(value);
             _config.MinLootValue = value;
 
-            Loot.ApplyFilter();
+            if (Loot is not null) {
+                Loot.ApplyFilter();
+            }
         }
-        
+
         /// <summary>
         /// Adjusts min important loot based on slider value
         /// </summary>
@@ -616,25 +579,27 @@ namespace eft_dma_radar
             lblImportantLootDisplay.Text = TarkovDevAPIManager.FormatNumber(value);
             _config.MinImportantLootValue = value;
 
-            Loot.ApplyFilter();
+            if (Loot is not null) {
+                Loot.ApplyFilter();
+            }
         }
-        
+
         /// <summary>
         /// Refreshes the loot in the match
         /// </summary>
         private void btnRefreshLoot_Click(object sender, EventArgs e) {
             Memory.RefreshLoot();
         }
-       
+
         /// <summary>
         /// Handles color modification for loot filters
         /// </summary>
         private void picLootFilterPreview_Click(object sender, EventArgs e) {
-            if (colDialogLootFilter.ShowDialog() == DialogResult.OK) {
-                picLootFilterEditColor.BackColor = colDialogLootFilter.Color;
+            if (colDialog.ShowDialog() == DialogResult.OK) {
+                picLootFilterEditColor.BackColor = colDialog.Color;
             }
         }
-        
+
         /// <summary>
         /// Handles the edit/save button for modifying filters
         /// </summary>
@@ -680,7 +645,7 @@ namespace eft_dma_radar
                 }
             }
         }
-        
+
         /// <summary>
         /// Handles cancel button when modifying filters
         /// </summary>
@@ -797,15 +762,14 @@ namespace eft_dma_radar
                 Items = new List<String>(),
                 Color = new Colors() {
                     R = 255,
-                    G = 0,
-                    B = 0,
+                    G = 255,
+                    B = 255,
                     A = 255
                 }
             };
 
             _config.Filters.Add(newFilter);
             Config.SaveConfig(_config);
-
             UpdateEditFilterListBox();
         }
 
@@ -827,15 +791,14 @@ namespace eft_dma_radar
                             Items = new List<String>(),
                             Color = new Colors() {
                                 R = 255,
-                                G = 0,
-                                B = 0,
+                                G = 255,
+                                B = 255,
                                 A = 255
                             }
                         };
 
                         _config.Filters.Add(newFilter);
                         Config.SaveConfig(_config);
-
                         UpdateEditFilterListBox();
                     }
                 } else {
@@ -849,11 +812,54 @@ namespace eft_dma_radar
                         }
 
                         Config.SaveConfig(_config);
-
                         UpdateEditFilterListBox();
                     }
                 }
             }
+        }
+
+        private void picAIScavColor_Click(object sender, EventArgs e) {
+            UpdatePaintColorByName("AIScav", picAIScavColor);
+        }
+
+        private void picPScavColor_Click(object sender, EventArgs e) {
+            UpdatePaintColorByName("PScav", picPScavColor);
+        }
+
+        private void picAIRaiderColor_Click(object sender, EventArgs e) {
+            UpdatePaintColorByName("AIRaider", picAIRaiderColor);
+        }
+
+        private void picBossColor_Click(object sender, EventArgs e) {
+            UpdatePaintColorByName("Boss", picBossColor);
+        }
+
+        private void picBEARColor_Click(object sender, EventArgs e) {
+            UpdatePaintColorByName("BEAR", picBEARColor);
+        }
+
+        private void picUSECColor_Click(object sender, EventArgs e) {
+            UpdatePaintColorByName("USEC", picUSECColor);
+        }
+
+        private void picLocalPlayerColor_Click(object sender, EventArgs e) {
+            UpdatePaintColorByName("LocalPlayer", picLocalPlayerColor);
+        }
+
+        private void picTeammateColor_Click(object sender, EventArgs e) {
+            UpdatePaintColorByName("AIScav", picTeammateColor);
+        }
+
+        private void picTeamHoverColor_Click(object sender, EventArgs e) {
+            UpdatePaintColorByName("TeamHover", picTeamHoverColor);
+        }
+
+        private void picRegularLootColor_Click(object sender, EventArgs e) {
+            UpdatePaintColorByName("RegularLoot", picRegularLootColor);
+        }
+
+        private void picImportantLootColor_Click(object sender, EventArgs e) {
+            UpdatePaintColorByName("ImportantLoot", picImportantLootColor);
         }
         #endregion
 
@@ -874,13 +880,43 @@ namespace eft_dma_radar
             txtTeammateID.Text = _config.PrimaryTeammateId;
             trkRegularLootValue.Value = _config.MinLootValue / 1000;
             trkImportantLootValue.Value = _config.MinImportantLootValue / 1000;
-
             lblRegularLootDisplay.Text = TarkovDevAPIManager.FormatNumber(_config.MinLootValue);
             lblImportantLootDisplay.Text = TarkovDevAPIManager.FormatNumber(_config.MinImportantLootValue);
+
+            chkNightVision.Checked = _config.NightVisionEnabled;
+            chkThermalVision.Checked = _config.ThermalVisionEnabled;
+            chkOpticThermalVision.Checked = _config.OpticThermalVisionEnabled;
+            chkNoVisor.Checked = _config.NoVisorEnabled;
+
+            if (_config.Filters.Count == 0) { // add a default, blank config
+                LootFilter newFilter = new LootFilter() {
+                    Order = 1,
+                    IsActive = true,
+                    Name = "Default",
+                    Items = new List<String>(),
+                    Color = new Colors() {
+                        R = 255,
+                        G = 255,
+                        B = 255,
+                        A = 255
+                    }
+                };
+
+                _config.Filters.Add(newFilter);
+                Config.SaveConfig(_config);
+            }
+
+            if (cboLootItems.Items.Count == 0) { // add loot items loot item combobox
+                List<DevLootItem> lootList = TarkovDevAPIManager.AllItems.Select(x => x.Value).OrderBy(x => x.Label).Take(25).ToList();
+
+                cboLootItems.DataSource = lootList;
+                cboLootItems.DisplayMember = "Label";
+            }
 
             UpdateLootFilterComboBoxes();
             UpdateLootFilterList();
             UpdateEditFilterListBox();
+            UpdatePaintColorControls();
         }
 
         /// <summary>
@@ -1027,11 +1063,10 @@ namespace eft_dma_radar
             if (isFiltered) {
                 Colors col = Loot.LootFilterColors[item.Item.id];
                 paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
-
             } else if (isImportant) {
-                paintToUse.Color = SKColors.Turquoise;
+                paintToUse.Color = Extensions.SKColorFromPaintColor("ImportantLoot");
             } else {
-                paintToUse.Color = SKColors.WhiteSmoke;
+                paintToUse.Color = Extensions.SKColorFromPaintColor("RegularLoot");
             }
 
             return paintToUse;
@@ -1050,11 +1085,10 @@ namespace eft_dma_radar
             if (isFiltered) {
                 Colors col = Loot.LootFilterColors[item.Item.id];
                 paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
-
             } else if (isImportant) {
-                paintToUse.Color = SKColors.Turquoise;
+                paintToUse.Color = Extensions.SKColorFromPaintColor("ImportantLoot");
             } else {
-                paintToUse.Color = SKColors.WhiteSmoke;
+                paintToUse.Color = Extensions.SKColorFromPaintColor("RegularLoot");
             }
 
             return paintToUse;
@@ -1141,6 +1175,48 @@ namespace eft_dma_radar
                 return false;
             }
         }
+
+        private void UpdatePaintColorControls() {
+            var colors = _config.PaintColors;
+
+            Action<PictureBox, string> setColor = (pictureBox, name) => {
+                if (colors.ContainsKey(name)) {
+                    PaintColor.Colors color = colors[name];
+                    pictureBox.BackColor = Color.FromArgb(color.A, color.R, color.G, color.B);
+                } else {
+                    pictureBox.BackColor = Color.FromArgb(255, 255, 255, 255);
+                }
+            };
+
+            setColor(picAIScavColor, "AIScav");
+            setColor(picPScavColor, "PScav");
+            setColor(picAIRaiderColor, "AIRaider");
+            setColor(picBossColor, "Boss");
+            setColor(picUSECColor, "USEC");
+            setColor(picBEARColor, "BEAR");
+            setColor(picLocalPlayerColor, "LocalPlayer");
+            setColor(picTeammateColor, "Teammate");
+            setColor(picTeamHoverColor, "TeamHover");
+            setColor(picRegularLootColor, "RegularLoot");
+            setColor(picImportantLootColor, "ImportantLoot");
+        }
+
+        /// <summary>
+        /// Updates the Color of a PaintColor object in the PaintColors dictionary by name
+        /// </summary>
+        private void UpdatePaintColorByName(string name, PictureBox pictureBox) {
+            if (colDialog.ShowDialog() == DialogResult.OK) {
+                Color col = colDialog.Color;
+                pictureBox.BackColor = col;
+
+                _config.PaintColors[name] = new PaintColor.Colors {
+                    A = col.A,
+                    R = col.R,
+                    G = col.G,
+                    B = col.B
+                };
+            }
+        }
         #endregion
 
         #region Render
@@ -1191,8 +1267,7 @@ namespace eft_dma_radar
                                 }
                             }
                             tabRadar.Text = $"Radar ({_selectedMap.Name})";
-                        }
-                        else if (_selectedMap is null) {
+                        } else if (_selectedMap is null) {
                             _selectedMap = _maps[0];
                             //init map
                             if (_loadedBitmaps is not null) {
@@ -1698,6 +1773,12 @@ namespace eft_dma_radar
             _config.DefaultZoom = trkZoom.Value;
             _config.UIScale = trkUIScale.Value;
             _config.PrimaryTeammateId = txtTeammateID.Text;
+
+            _config.ThermalVisionEnabled = chkThermalVision.Checked;
+            _config.NightVisionEnabled = chkNightVision.Checked;
+            _config.NoVisorEnabled = chkNoVisor.Checked;
+            _config.OpticThermalVisionEnabled = chkOpticThermalVision.Checked;
+
             Config.SaveConfig(_config); // Save Config to Config.json
             Memory.Shutdown(); // Wait for Memory Thread to gracefully exit
             e.Cancel = false; // Ready to close

@@ -8,6 +8,7 @@ using System.Text;
 using eft_dma_radar.Source.Misc;
 using System.Runtime.Intrinsics;
 using OpenTK.Graphics.OpenGL;
+using static vmmsharp.LeechCore;
 
 namespace eft_dma_radar
 {
@@ -136,12 +137,44 @@ namespace eft_dma_radar
         /// </summary>
         [JsonPropertyName("minImportantLootValue")]
         public int MinImportantLootValue { get; set; }
-        
+
+        /// <summary>
+        /// Enables / disables thermal vision.
+        /// </summary>
+        [JsonPropertyName("thermalVisionEnabled")]
+        public bool ThermalVisionEnabled { get; set; }
+
+        /// <summary>
+        /// Enables / disables night vision.
+        /// </summary>
+        [JsonPropertyName("nightVisionEnabled")]
+        public bool NightVisionEnabled { get; set; }
+
+        /// <summary>
+        /// Enables / disables thermal optic vision.
+        /// </summary>
+        [JsonPropertyName("opticThermalVisionEnabled")]
+        public bool OpticThermalVisionEnabled { get; set; }
+
+        /// <summary>
+        /// Enables / disables no visor.
+        /// </summary>
+        [JsonPropertyName("noVisorEnabled")]
+        public bool NoVisorEnabled { get; set; }
+
+
         /// <summary>
         /// Allows storage of multiple loot filters
         /// </summary>
         [JsonPropertyName("LootFilters")]
         public List<LootFilter> Filters { get; set; }
+
+        /// <summary>
+        /// Allows storage of colors for ai scav, pscav etc
+        /// </summary>
+        [JsonPropertyName("PaintColors")]
+        //public List<PaintColor> PaintColors { get; set; }
+        public Dictionary<string, PaintColor.Colors> PaintColors { get; set; }
 
         public Config()
         {
@@ -162,6 +195,26 @@ namespace eft_dma_radar
             MinImportantLootValue = 300000;
             PrimaryTeammateId = null;
             Filters = new List<LootFilter>();
+
+            PaintColors = new Dictionary<string, PaintColor.Colors> {
+                ["AIScav"] = new PaintColor.Colors { A = 255, R = 255, G = 255, B = 0 },
+                ["PScav"] = new PaintColor.Colors { A = 255, R = 255, G = 165, B = 0 },
+                ["AIRaider"] = new PaintColor.Colors { A = 255, R = 128, G = 0, B = 128 },
+                ["Boss"] = new PaintColor.Colors { A = 255, R = 255, G = 0, B = 255 },
+                ["USEC"] = new PaintColor.Colors { A = 255, R = 255, G = 0, B = 0 },
+                ["BEAR"] = new PaintColor.Colors { A = 255, R = 0, G = 0, B = 255 },
+                ["LocalPlayer"] = new PaintColor.Colors { A = 255, R = 255, G = 255, B = 255 },
+                ["Teammate"] = new PaintColor.Colors { A = 255, R = 50, G = 205, B = 50 },
+                ["TeamHover"] = new PaintColor.Colors { A = 255, R = 125, G = 252, B = 50 },
+                ["Special"] = new PaintColor.Colors { A = 255, R = 255, G = 105, B = 180 },
+                ["RegularLoot"] = new PaintColor.Colors { A = 255, R = 245, G = 245, B = 245 },
+                ["ImportantLoot"] = new PaintColor.Colors { A = 255, R = 64, G = 224, B = 208 }
+            };
+
+            NightVisionEnabled = false;
+            ThermalVisionEnabled = false;
+            NoVisorEnabled = false;
+            OpticThermalVisionEnabled = false;
         }
 
         /// <summary>
@@ -315,8 +368,6 @@ namespace eft_dma_radar
         /// </summary>
         public void DrawLoot(SKCanvas canvas, string label, SKPaint paint, SKPaint text, float heightDiff)
         {
-            //SKPaint paint = important ? SKPaints.PaintImportantLoot : SKPaints.PaintLoot;
-            //SKPaint text = important ? SKPaints.TextImportantLoot : SKPaints.TextLoot;
             if (heightDiff > 1.45) // loot is above player
             {
                 using var path = this.GetUpArrow();
@@ -341,9 +392,14 @@ namespace eft_dma_radar
         {
             var radians = player.Rotation.X.ToRadians();
             SKPaint paint;
-            if (mouseoverGrp is not null
-                && mouseoverGrp == player.GroupID) paint = SKPaints.PaintMouseoverGroup;
-            else paint = player.GetPaint();
+            
+            if (mouseoverGrp is not null && mouseoverGrp == player.GroupID) {
+                paint = SKPaints.PaintMouseoverGroup;
+                paint.Color = Extensions.SKColorFromPaintColor("TeamHover");
+            } else {
+                paint = player.GetPaint();
+            }
+
             canvas.DrawCircle(this.GetPoint(), 6 * UIScale, paint); // draw LocalPlayer marker
             canvas.DrawLine(this.GetPoint(),
                 this.GetAimlineEndpoint(radians, aimlineLength),
@@ -355,9 +411,13 @@ namespace eft_dma_radar
         public void DrawPlayerText(SKCanvas canvas, Player player, string[] lines, int? mouseoverGrp)
         {
             SKPaint text;
-            if (mouseoverGrp is not null
-                && mouseoverGrp == player.GroupID) text = SKPaints.TextMouseoverGroup;
-            else text = player.GetText();
+            if (mouseoverGrp is not null && mouseoverGrp == player.GroupID) {
+                text = SKPaints.TextMouseoverGroup;
+                text.Color = Extensions.SKColorFromPaintColor("TeamHover");
+            } else {
+                text = player.GetText();
+            }
+
             float spacing = 3 * UIScale;
             foreach (var line in lines)
             {
@@ -440,7 +500,7 @@ namespace eft_dma_radar
             float maxLength = 0;
             foreach (var line in lines)
             {
-                var length = SKPaints.TextBoss.MeasureText(line);
+                var length = SKPaints.TextBase.MeasureText(line);
                 if (length > maxLength) maxLength = length;
             }
             var backer = new SKRect()
@@ -453,7 +513,7 @@ namespace eft_dma_radar
             canvas.DrawRect(backer, SKPaints.PaintTransparentBacker); // Draw tooltip backer
             foreach (var line in lines) // Draw tooltip text
             {
-                canvas.DrawText(line, this.GetPoint(11 * UIScale, spacing), SKPaints.TextWhite); // draw line text
+                canvas.DrawText(line, this.GetPoint(11 * UIScale, spacing), SKPaints.TextBase); // draw line text
                 spacing += 12 * UIScale;
             }
         }
