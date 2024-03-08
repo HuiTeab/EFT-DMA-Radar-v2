@@ -28,7 +28,8 @@ namespace eft_dma_radar
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent() {
+        private void InitializeComponent()
+        {
             tabLootFilter = new TabPage();
             chkLootFilterActive = new CheckBox();
             lblActiveFilter = new Label();
@@ -110,6 +111,7 @@ namespace eft_dma_radar
             chkShowAimview = new CheckBox();
             chkHideNames = new CheckBox();
             grpMemoryWriting = new GroupBox();
+            chkChams = new CheckBox();
             chkNoVisor = new CheckBox();
             chkOpticThermalVision = new CheckBox();
             chkNightVision = new CheckBox();
@@ -1019,6 +1021,7 @@ namespace eft_dma_radar
             // 
             // grpMemoryWriting
             // 
+            grpMemoryWriting.Controls.Add(chkChams);
             grpMemoryWriting.Controls.Add(chkNoVisor);
             grpMemoryWriting.Controls.Add(chkOpticThermalVision);
             grpMemoryWriting.Controls.Add(chkNightVision);
@@ -1029,6 +1032,18 @@ namespace eft_dma_radar
             grpMemoryWriting.TabIndex = 9;
             grpMemoryWriting.TabStop = false;
             grpMemoryWriting.Text = "Memory Writing [RISKY]";
+            // 
+            // chkChams
+            // 
+            chkChams.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            chkChams.AutoSize = true;
+            chkChams.Location = new Point(5, 72);
+            chkChams.Name = "chkChams";
+            chkChams.Size = new Size(142, 19);
+            chkChams.TabIndex = 22;
+            chkChams.Text = "Chams (Offline - WIP)";
+            chkChams.UseVisualStyleBackColor = true;
+            chkChams.CheckedChanged += chkChams_CheckedChanged;
             // 
             // chkNoVisor
             // 
@@ -1442,6 +1457,7 @@ namespace eft_dma_radar
         private Label lblRegularLootColor;
         private PictureBox picImportantLootColor;
         private Label lblImportantLootColor;
+        private CheckBox chkChams;
     }
 }
 

@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace eft_dma_radar.Source.Misc {
+
     internal class Chams {
+        
         public static void ClothingChams(ulong playerBase) {
             var playerBody = Memory.ReadPtr(playerBase + 0xA8);
             if (playerBody == 0) {
@@ -49,7 +52,10 @@ namespace eft_dma_radar.Source.Misc {
                     if (MaterialCount > 0 && MaterialCount < 5) {
                         var MaterialDictionaryBase = Memory.ReadPtr(pMaterialDictionary + 0x148);
                         for (int k = 0; k < MaterialCount; k++) {
-                            //Memory.WriteValue<ulong>(MaterialDictionaryBase + (0x50 * (uint)k), 0);
+                            var MaterialEntryPtr = Memory.ReadPtr(MaterialDictionaryBase + (0x50 * (uint)k));
+                            //Console.WriteLine("MaterialEntryPtr: " + MaterialEntryPtr);
+                            SavePointer(MaterialDictionaryBase + (0x50 * (uint)k), MaterialEntryPtr);
+                            Memory.WriteValue<ulong>(MaterialDictionaryBase + (0x50 * (uint)k), 0);
                         }
                     }
                 }
@@ -104,12 +110,32 @@ namespace eft_dma_radar.Source.Misc {
                         if (MaterialCount > 0 && MaterialCount < 6) {
                             var MaterialDictionaryBase = Memory.ReadPtr(pMaterialDict + 0x148);
                             for (int l = 0; l < MaterialCount; l++) {
-                                //Memory.WriteValue<ulong>(MaterialDictionaryBase + (0x50 * (uint)k), 0);
+                                var MaterialEntryPtr = Memory.ReadPtr(MaterialDictionaryBase + (0x50 * (uint)k));
+                                SavePointer(MaterialDictionaryBase + (0x50 * (uint)k), MaterialEntryPtr);
+                                Memory.WriteValue<ulong>(MaterialDictionaryBase + (0x50 * (uint)k), 0);
                             }
                         }
                     }
                 }
             }
         }
+
+        private static List<PointerBackup> pointerBackups = new List<PointerBackup>();
+
+        private static void SavePointer(ulong address, ulong originalValue) {
+            pointerBackups.Add(new PointerBackup { Address = address, OriginalValue = originalValue });
+        }
+
+        public static void RestorePointers() {
+            foreach (var backup in pointerBackups) {
+                Memory.WriteValue<ulong>(backup.Address, backup.OriginalValue);
+            }
+            pointerBackups.Clear();
+        }
+    }
+
+    public struct PointerBackup {
+        public ulong Address;
+        public ulong OriginalValue;
     }
 }
