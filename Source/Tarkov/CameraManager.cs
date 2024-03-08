@@ -18,8 +18,7 @@ namespace eft_dma_radar.Source.Tarkov
             _unityBase = unityBase;
         }
 
-        private bool GetCamera()
-        {
+        private bool GetCamera(){
             try
             {
                 var addr = Memory.ReadPtr(_unityBase + 0x0179F500);
@@ -64,21 +63,17 @@ namespace eft_dma_radar.Source.Tarkov
             return false;
         }
 
-        public async Task<bool> GetCameraAsync()
-        {
+        public async Task<bool> GetCameraAsync(){
             return await Task.Run(() => GetCamera());
         }
 
         private void UpdateCamera() {
             if (_unityBase == 0)
                 return;
-            if (_opticCamera == 0 || _fpsCamera == 0) {
-                GetCamera();
-            }
+            GetCamera();
         }
 
-        private ulong GetComponentFromGameObject(ulong gameObject, string componentName)
-        {
+        private ulong GetComponentFromGameObject(ulong gameObject, string componentName){
             var component = Memory.ReadPtr(gameObject + 0x30);
             // Loop through a fixed range of potential component slots
             for (int i = 0x8; i < 0x500; i += 0x10) 
@@ -104,13 +99,8 @@ namespace eft_dma_radar.Source.Tarkov
         /// public static function to turn thermalvision on and off
         /// </summary>
         /// 
-        public void ThermalVision(bool on)
-        {
-            if (_fpsCamera == 0)
-            {
-                UpdateCamera();
-            }
-
+        public void ThermalVision(bool on){
+            UpdateCamera();
             if (_fpsCamera != 0)
             {
                 var fpsThermalComponent = GetComponentFromGameObject(_fpsCamera, "ThermalVision");
@@ -133,12 +123,8 @@ namespace eft_dma_radar.Source.Tarkov
         /// public static function to turn nightvision on and off
         /// </summary>
         ///
-        public void NightVision(bool on)
-        {
-            if (_fpsCamera == 0) {
-                UpdateCamera();
-            }
-
+        public void NightVision(bool on){
+            UpdateCamera();
             if (_fpsCamera != 0)
             {
                 var nightVisionComponent = GetComponentFromGameObject(_fpsCamera, "NightVision");
@@ -156,11 +142,7 @@ namespace eft_dma_radar.Source.Tarkov
         /// </summary>
         /// 
         public void VisorEffect(bool on) {
-            if (_fpsCamera == 0)
-            {
-                UpdateCamera();
-            }
-
+            UpdateCamera();
             if (_fpsCamera != 0)
             {
                 var fpsVisorComponent = GetComponentFromGameObject(_fpsCamera, "VisorEffect");
@@ -173,12 +155,8 @@ namespace eft_dma_radar.Source.Tarkov
         /// public static function to turn optic thermalvision on and off
         /// </summary>
         ///    
-        public void OpticThermalVision(bool on)
-        {
-            if (_fpsCamera == 0) {
-                UpdateCamera();
-            }
-
+        public void OpticThermalVision(bool on){
+            UpdateCamera();
             if (_opticCamera != 0)
             {
                 ulong opticComponent = 0;

@@ -192,6 +192,10 @@ namespace eft_dma_radar
         private void HandleRaidEnded(RaidEnded e) {
             Program.Log("Raid has ended!");
 
+            //wait for game to end
+            Thread.Sleep(15000);
+            _cameraManager = null;
+
             Memory.Restart();
             _inGame = false;
         }
