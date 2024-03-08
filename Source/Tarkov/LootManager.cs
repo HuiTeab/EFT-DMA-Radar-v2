@@ -257,11 +257,14 @@ namespace eft_dma_radar {
                 ContainerName = l.ContainerName,
                 Container = l.Container,
                 Item = l.Item
-            });
+            }).ToList();
 
             var filteredLoot = from l in lootCopy
-                               join id in orderedItems on l.Item.id equals id.ItemId
-                               select l;
+                                join id in orderedItems on l.Item.id equals id.ItemId
+                                select l;
+
+            // ghetto quickfix lmao
+            filteredLoot = filteredLoot.ToList();
 
             foreach (var lootItem in filteredLoot) {
                 lootItem.Important = true;

@@ -1,19 +1,9 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
-using System.Drawing;
-using System.Drawing.Text;
 using System.Numerics;
 using System.Text;
-using System.Windows.Forms.VisualStyles;
-using System.Xml.Linq;
-using eft_dma_radar.Source.Tarkov;
-using Offsets;
-using OpenTK.Graphics.OpenGL;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
-using static System.Windows.Forms.AxHost;
 using static eft_dma_radar.LootFilter;
 
 namespace eft_dma_radar
