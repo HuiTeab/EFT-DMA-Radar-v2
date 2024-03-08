@@ -95,7 +95,6 @@ namespace eft_dma_radar
             lblRegularLoot = new Label();
             trkRegularLootValue = new TrackBar();
             btnRefreshLoot = new Button();
-            chkHideLootContainer = new CheckBox();
             chkHideLootValue = new CheckBox();
             chkImportantLootOnly = new CheckBox();
             grpUserInterface = new GroupBox();
@@ -255,9 +254,9 @@ namespace eft_dma_radar
             // 
             // lstViewLootFilter
             // 
+            lstViewLootFilter.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             lstViewLootFilter.AutoArrange = false;
             lstViewLootFilter.Columns.AddRange(new ColumnHeader[] { colHeadBSGId, colHeadFullName, colHeadShortName, colHeadValue });
-            lstViewLootFilter.Dock = DockStyle.Bottom;
             lstViewLootFilter.FullRowSelect = true;
             lstViewLootFilter.GridLines = true;
             lstViewLootFilter.HeaderStyle = ColumnHeaderStyle.Nonclickable;
@@ -761,7 +760,6 @@ namespace eft_dma_radar
             // 
             grpLoot.Controls.Add(grpLootValues);
             grpLoot.Controls.Add(btnRefreshLoot);
-            grpLoot.Controls.Add(chkHideLootContainer);
             grpLoot.Controls.Add(chkHideLootValue);
             grpLoot.Controls.Add(chkImportantLootOnly);
             grpLoot.Location = new Point(474, 22);
@@ -862,30 +860,21 @@ namespace eft_dma_radar
             btnRefreshLoot.UseVisualStyleBackColor = true;
             btnRefreshLoot.Click += btnRefreshLoot_Click;
             // 
-            // chkHideLootContainer
-            // 
-            chkHideLootContainer.AutoSize = true;
-            chkHideLootContainer.Location = new Point(127, 175);
-            chkHideLootContainer.Name = "chkHideLootContainer";
-            chkHideLootContainer.Size = new Size(106, 19);
-            chkHideLootContainer.TabIndex = 30;
-            chkHideLootContainer.Text = "Hide Container";
-            chkHideLootContainer.UseVisualStyleBackColor = true;
-            // 
             // chkHideLootValue
             // 
             chkHideLootValue.AutoSize = true;
-            chkHideLootValue.Location = new Point(12, 175);
+            chkHideLootValue.Location = new Point(6, 143);
             chkHideLootValue.Name = "chkHideLootValue";
             chkHideLootValue.Size = new Size(82, 19);
             chkHideLootValue.TabIndex = 29;
             chkHideLootValue.Text = "Hide Value";
             chkHideLootValue.UseVisualStyleBackColor = true;
+            chkHideLootValue.CheckedChanged += chkHideLootValue_CheckedChanged;
             // 
             // chkImportantLootOnly
             // 
             chkImportantLootOnly.AutoSize = true;
-            chkImportantLootOnly.Location = new Point(12, 152);
+            chkImportantLootOnly.Location = new Point(6, 165);
             chkImportantLootOnly.Name = "chkImportantLootOnly";
             chkImportantLootOnly.Size = new Size(151, 19);
             chkImportantLootOnly.TabIndex = 22;
@@ -1373,7 +1362,6 @@ namespace eft_dma_radar
         private GroupBox grpLoot;
         private TrackBar trkRegularLootValue;
         private Button btnRefreshLoot;
-        private CheckBox chkHideLootContainer;
         private CheckBox chkHideLootValue;
         private CheckBox chkImportantLootOnly;
         private Label lblRegularLoot;

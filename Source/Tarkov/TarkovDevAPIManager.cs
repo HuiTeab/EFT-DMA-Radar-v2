@@ -352,8 +352,8 @@ namespace eft_dma_radar
             //find the best price to sell
             int bestPrice;
 
-            if (tarkovItem.avg24hPrice > tarkovItem.basePrice)
-            {
+            //if (tarkovItem.avg24hPrice > tarkovItem.basePrice)
+            //{
                 bestPrice = (int)tarkovItem.avg24hPrice;
                 foreach (var vendor in tarkovItem.sellFor)
                 {
@@ -362,11 +362,11 @@ namespace eft_dma_radar
                         bestPrice = vendor.price;
                     }
                 }
-            }
-            else
-            {
-                bestPrice = tarkovItem.basePrice;
-            }
+            //}
+            //else
+            //{
+                //bestPrice = tarkovItem.basePrice;
+            //}
 
             return bestPrice;
         }

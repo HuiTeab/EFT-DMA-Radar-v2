@@ -25,7 +25,7 @@ namespace eft_dma_radar {
         /// <summary>
         /// All tracked loot/corpses in Local Game World.
         /// </summary>
-        private ReadOnlyCollection<DevLootItem> Loot {
+        public ReadOnlyCollection<DevLootItem> Loot {
             get;
         }
         /// <summary>
@@ -224,9 +224,8 @@ namespace eft_dma_radar {
         /// </summary>
         public void ApplyFilter() {
             var loot = this.Loot;
-            var filters = _config.Filters;
-            var activeFilters = filters.Where(f => f.IsActive).ToList();
-            var alwaysShow = loot.Where(x => x.AlwaysShow || TarkovDevAPIManager.GetItemValue(x.Item) > _config.MinLootValue).ToList();
+            var activeFilters = _config.Filters.Where(f => f.IsActive).ToList();
+            var minValueLootItems = loot.Where(x => x.AlwaysShow || TarkovDevAPIManager.GetItemValue(x.Item) > _config.MinLootValue).ToList();
 
             var itemsWithData = activeFilters.SelectMany(f => f.Items)
                 .Distinct()
@@ -236,14 +235,17 @@ namespace eft_dma_radar {
                         .Where(f => f.Items.Contains(item))
                         .OrderBy(f => f.Order)
                         .First()
-            });
+                });
 
             var orderedItems = itemsWithData
-                .OrderBy(x => x.Filter.Order)
-                .Select(x => new {
-                    x.ItemId,
-                    x.Filter.Color,
-            });
+               .OrderBy(x => x.Filter.Order)
+               .Select(x => new {
+                   x.ItemId,
+                   x.Filter.Color
+               })
+               .ToList();
+
+            var orderedIds = orderedItems.Select(x => x.ItemId).ToList();
 
             //ghetto way to prevent overriding DevLootItems in the original loot list
             var lootCopy = loot.Select(l => new DevLootItem {
@@ -255,7 +257,7 @@ namespace eft_dma_radar {
                 ContainerName = l.ContainerName,
                 Container = l.Container,
                 Item = l.Item
-            }).ToList();
+            });
 
             var filteredLoot = from l in lootCopy
                                join id in orderedItems on l.Item.id equals id.ItemId
@@ -265,7 +267,23 @@ namespace eft_dma_radar {
                 lootItem.Important = true;
             }
 
-            filteredLoot = filteredLoot.UnionBy(alwaysShow, x => x.Position);
+            foreach (var lootItem in minValueLootItems) {
+                if (TarkovDevAPIManager.GetItemValue(lootItem.Item) >= _config.MinImportantLootValue) {
+                    lootItem.Important = true;
+                }
+            }
+
+            filteredLoot = filteredLoot.Union(minValueLootItems)
+                .GroupBy(x => x.Position)
+                .Select(g => g.OrderBy(x => {
+                    var match = orderedItems.FirstOrDefault(oi => oi.ItemId == x.Item.id);
+                    return match == null ? int.MaxValue : orderedItems.IndexOf(match);
+                })
+                .First())
+                .OrderBy(x => {
+                    var match = orderedItems.FirstOrDefault(oi => oi.ItemId == x.Item.id);
+                    return match == null ? int.MaxValue : orderedItems.IndexOf(match);
+                });
 
             this.LootFilterColors = orderedItems.ToDictionary(item => item.ItemId, item => item.Color);
             this.Filter = new ReadOnlyCollection<DevLootItem>(filteredLoot.ToList());
@@ -276,26 +294,11 @@ namespace eft_dma_radar {
         /// </summary>
         /// <param name="itemToRemove">The item to remove</param>
         public void RemoveFilterItem(DevLootItem itemToRemove) {
-            var shortName = new StringBuilder(itemToRemove.Item.shortName);
-
-            if (shortName.ToString().StartsWith("!!")) {
-                shortName.Remove(0, 2);
-                itemToRemove.Item.shortName = shortName.ToString();
-
-                var lootList = this.Loot?.Select(x => x).Where(x => x.Item.id == itemToRemove.Item.id).ToList();
-
-                if (lootList != null && lootList.Count > 0) {
-                    foreach (DevLootItem item in lootList) {
-                        item.Important = false;
-                        item.Item.shortName = shortName.ToString();
-                    }
-                }
-            }
-
             var filter = this.Filter.ToList();
             filter.Remove(itemToRemove);
 
             this.Filter = new ReadOnlyCollection<DevLootItem>(new List<DevLootItem>(filter));
+            this.ApplyFilter();
         }
 
         ///This method recursively searches grids. Grids work as follows:
@@ -459,6 +462,32 @@ namespace eft_dma_radar {
             get;
             init;
         } = new();
+
+        /// <summary>
+        /// Cached 'Zoomed Position' on the Radar GUI. Used for mouseover events.
+        /// </summary>
+        public Vector2 ZoomedPosition { get; set; } = new();
+
+        /// <summary>
+        /// Gets the formatted the items value
+        /// </summary>
+        public string GetFormattedValue() {
+            return TarkovDevAPIManager.FormatNumber(TarkovDevAPIManager.GetItemValue(this.Item));
+        }
+
+        /// <summary>
+        /// Gets the formatted item value + name
+        /// </summary>
+        public string GetFormattedValueName() {
+            return (this.AlwaysShow || this.Item.shortName is not null) ? $"[{this.GetFormattedValue()}] {this.Item.name}" : "null";
+        }
+
+        /// <summary>
+        /// Gets the formatted item value + name
+        /// </summary>
+        public string GetFormattedValueShortName() {
+            return (this.AlwaysShow || this.Item.shortName is not null) ? $"[{this.GetFormattedValue()}] {this.Item.shortName}" : "null";
+        }
     }
 
     public class LootContainers {

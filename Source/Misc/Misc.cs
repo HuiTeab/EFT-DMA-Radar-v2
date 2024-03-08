@@ -7,8 +7,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using eft_dma_radar.Source.Misc;
 using System.Runtime.Intrinsics;
-using OpenTK.Graphics.OpenGL;
-using static vmmsharp.LeechCore;
 
 namespace eft_dma_radar
 {
@@ -281,6 +279,8 @@ namespace eft_dma_radar
         /// </summary>
         public float Height = 0;
 
+        private SKRect _backerRect = new SKRect();
+
         /// <summary>
         /// Get exact player location (with optional X,Y offsets).
         /// </summary>
@@ -366,8 +366,12 @@ namespace eft_dma_radar
         /// <summary>
         /// Draws a loot item on this location.
         /// </summary>
-        public void DrawLoot(SKCanvas canvas, string label, SKPaint paint, SKPaint text, float heightDiff)
-        {
+        //public void DrawLoot(SKCanvas canvas, string label, SKPaint paint, SKPaint text, float heightDiff)
+        public void DrawLoot(SKCanvas canvas, DevLootItem item, float heightDiff) {
+            var paint = Helpers.GetLootPaint(item);
+            var text = Helpers.GetLootTextPaint(item);
+            var label = (item.Container) ? item.ContainerName : (Program.Config.HideLootValue ? item.Item.shortName : item.GetFormattedValueShortName());
+
             if (heightDiff > 1.45) // loot is above player
             {
                 using var path = this.GetUpArrow();
@@ -384,7 +388,6 @@ namespace eft_dma_radar
             }
             canvas.DrawText(label, this.GetPoint(7 * UIScale, 3 * UIScale), text);
         }
-
         /// <summary>
         /// Draws a Player Marker on this location.
         /// </summary>
@@ -425,10 +428,87 @@ namespace eft_dma_radar
                 spacing += 12 * UIScale;
             }
         }
-
-        public void DrawContainerTooltip(SKCanvas canvas, string container)
+        /// <summary>
+        /// Draws Loot information on this location
+        /// </summary>
+        public void DrawContainerTooltip(SKCanvas canvas, DevLootItem item)
         {
-            //TODO
+            _backerRect = new SKRect();
+
+            var containerItems = Helpers.GetContainerItems(item);
+            var maxLength = GetMaxLength(containerItems);
+
+            if (!item.Container) {
+                maxLength = GetTextLength(item);
+            }
+
+            UpdateBackerRect(containerItems, maxLength);
+
+            canvas.DrawRect(_backerRect, SKPaints.PaintTransparentBacker);
+
+            if (item.Container) {
+                DrawContainerItems(canvas, containerItems);
+            } else {
+                DrawItem(canvas, item);
+            }
+        }
+        /// <summary>
+        /// Draws all items within a container
+        /// </summary>
+        private void DrawContainerItems(SKCanvas canvas, List<DevLootItem> items) {
+            float spacing = 6 * UIScale;
+
+            foreach (var lootItem in items) {
+                DrawItem(canvas, lootItem, spacing);
+                spacing += 15 * UIScale;
+            }
+        }
+        /// <summary>
+        /// Updates the backplate rectangle
+        /// </summary>
+        private void UpdateBackerRect(List<DevLootItem> items, float maxLength) {
+            //extremely ghetto & temporary solution for now lol
+            var height = items.Count * (items.Count >= 5 ? 14 : 12) * UIScale;
+
+            height += 6 * UIScale;
+
+            _backerRect.Bottom = Y + height;
+            _backerRect.Left = X + (9 * UIScale);
+            _backerRect.Top = Y - (9 * UIScale);
+            _backerRect.Right = X + (9 * UIScale) + maxLength + (6 * UIScale);
+        }
+        /// <summary>
+        /// Gets the maximum float width of an items text within the list passed
+        /// </summary>
+        private float GetMaxLength(List<DevLootItem> items) {
+            float maxLength = 0;
+            foreach (var lootItem in items) {
+                var length = GetTextLength(lootItem);
+                if (length > maxLength) {
+                    maxLength = length;
+                }
+            }
+            return maxLength;
+        }
+        /// <summary>
+        /// Gets float width of a an items text
+        /// </summary>
+        private float GetTextLength(DevLootItem lootItem) {
+            return Helpers.GetLootTextPaint(lootItem)
+                .MeasureText(lootItem.GetFormattedValueName());
+        }
+        /// <summary>
+        /// Draws an item on the canvas
+        /// </summary>
+        private void DrawItem(SKCanvas canvas, DevLootItem item) {
+            DrawItem(canvas, item, 3 * UIScale);
+        }
+        /// <summary>
+        /// Draws an item on the canvas
+        /// </summary>
+        /// <param name="canvas"></param>
+        private void DrawItem(SKCanvas canvas, DevLootItem item, float spacing) {
+            canvas.DrawText(item.GetFormattedValueName(), GetPoint(11 * UIScale, spacing), Helpers.GetLootTextPaint(item));
         }
         /// <summary>
         /// Draws tooltips on Map Markers
@@ -1322,18 +1402,6 @@ namespace eft_dma_radar
                 {'э', "e"}, {'ю', "yu"}, {'я', "ya"}
         };
 
-        public static string TransliterateCyrillic(string input)
-        {
-            StringBuilder output = new StringBuilder();
-
-            foreach (char c in input)
-            {
-                output.Append(CyrillicToLatinMap.TryGetValue(c, out var latinEquivalent) ? latinEquivalent : c.ToString());
-            }
-
-            return output.ToString();
-        }
-
         public static Dictionary<string, string> NameTranslations = new Dictionary<string, string>
         {
             {"Килла", "Killa"},
@@ -1757,21 +1825,83 @@ namespace eft_dma_radar
             "Zaveduyuschiy",
             "Zaveduyushchiy",
             "Zhgut",
-            "Kozyrek Desatnik", // Kollontay guards
+            "Arsenal", // Kollontay guards
+            "Basyak",
+            "Dezhurka",
+            "Furazhka",
+            "Kozyrek Desatnik",
+            "Mayor",
+            "Slonolyub",
+            "Sluzhebka",
             "Starley Desatnik",
             "Starley brat",
             "Starshiy brat",
             "Strelok brat",
             "Tatyanka Desatnik",
-            "Basyak",
-            "Arsenal",
-            "Furazhka",
-            "Mayor",
-            "Visyak",
-            "Dezhurka",
-            "Sluzhebka",
-            "Slonolyub",
+            "Visyak"
         };
+
+        public static string TransliterateCyrillic(string input)
+        {
+            StringBuilder output = new StringBuilder();
+
+            foreach (char c in input)
+            {
+                output.Append(CyrillicToLatinMap.TryGetValue(c, out var latinEquivalent) ? latinEquivalent : c.ToString());
+            }
+
+            return output.ToString();
+        }
+
+        /// <summary>
+        /// Determines the items paint color.
+        /// </summary>
+        public static SKPaint GetLootPaint(DevLootItem item) {
+            int value = TarkovDevAPIManager.GetItemValue(item.Item);
+            bool isImportant = (item.Important || value >= Program.Config.MinImportantLootValue);
+            bool isFiltered = Memory.Loot.LootFilterColors.ContainsKey(item.Item.id);
+
+            SKPaint paintToUse = SKPaints.PaintLoot;
+
+            if (isFiltered) {
+                LootFilter.Colors col = Memory.Loot.LootFilterColors[item.Item.id];
+                paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
+            } else if (isImportant) {
+                paintToUse.Color = Extensions.SKColorFromPaintColor("ImportantLoot");
+            } else {
+                paintToUse.Color = Extensions.SKColorFromPaintColor("RegularLoot");
+            }
+
+            return paintToUse;
+        }
+
+        /// <summary>
+        /// Determines the items text color.
+        /// </summary>
+        public static SKPaint GetLootTextPaint(DevLootItem item) {
+            int value = TarkovDevAPIManager.GetItemValue(item.Item);
+            bool isImportant = (item.Important || value >= Program.Config.MinImportantLootValue);
+            bool isFiltered = Memory.Loot.LootFilterColors.ContainsKey(item.Item.id);
+
+            SKPaint paintToUse = SKPaints.TextLoot;
+
+            if (isFiltered) {
+                LootFilter.Colors col = Memory.Loot.LootFilterColors[item.Item.id];
+                paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
+            } else if (isImportant) {
+                paintToUse.Color = Extensions.SKColorFromPaintColor("ImportantLoot");
+            } else {
+                paintToUse.Color = Extensions.SKColorFromPaintColor("RegularLoot");
+            }
+
+            return paintToUse;
+        }
+
+        public static List<DevLootItem> GetContainerItems(DevLootItem item) {
+            return Memory.Loot.Loot.Where(x => x.Container && x.Position == item.Position)
+                .OrderByDescending(x => x.Item.avg24hPrice)
+                .ToList();
+        }
     }
     #endregion
     

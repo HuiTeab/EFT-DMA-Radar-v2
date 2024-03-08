@@ -9,6 +9,7 @@ using System.Text;
 using System.Windows.Forms.VisualStyles;
 using System.Xml.Linq;
 using eft_dma_radar.Source.Tarkov;
+using Offsets;
 using OpenTK.Graphics.OpenGL;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
@@ -27,7 +28,8 @@ namespace eft_dma_radar
 
         private float _uiScale = 1.0f;
         private float _aimviewWindowSize = 200;
-        private Player _closestToMouse = null;
+        private Player _closestPlayerToMouse = null;
+        private DevLootItem _closestItemToMouse = null;
         private int? _mouseOverGroup = null;
         private int _fps = 0;
         private int _mapSelectionIndex = 0;
@@ -227,7 +229,7 @@ namespace eft_dma_radar
         private void chkThermalVision_CheckedChanged(object sender, EventArgs e) {
             _config.ThermalVisionEnabled = chkThermalVision.Checked;
 
-            if (Memory.InGame) {
+            if (Memory.InGame && Game.CameraManager is not null) {
                 Game.CameraManager.ThermalVision(chkThermalVision.Checked || chkThermalVisionDebug.Checked);
             }
         }
@@ -238,7 +240,7 @@ namespace eft_dma_radar
         private void chkOpticThermalVision_CheckedChanged(object sender, EventArgs e) {
             _config.OpticThermalVisionEnabled = chkOpticThermalVision.Checked;
 
-            if (Memory.InGame) {
+            if (Memory.InGame && Game.CameraManager is not null) {
                 Game.CameraManager.OpticThermalVision(chkOpticThermalVision.Checked || chkOpticThermalVisionDebug.Checked);
             }
         }
@@ -249,7 +251,7 @@ namespace eft_dma_radar
         private void chkNoVisor_CheckedChanged(object sender, EventArgs e) {
             _config.NoVisorEnabled = chkNoVisor.Checked;
 
-            if (Memory.InGame) {
+            if (Memory.InGame && Game.CameraManager is not null) {
                 Game.CameraManager.VisorEffect(chkNoVisor.Checked || chkNoVisorDebug.Checked);
             }
         }
@@ -383,45 +385,73 @@ namespace eft_dma_radar
                 var players = this.AllPlayers
                     ?.Select(x => x.Value)
                     .Where(x => x.Type is not PlayerType.LocalPlayer && !x.HasExfild); // Get all players except LocalPlayer & Exfil'd Players
-                if (players is not null && players.Any()) {
+
+                var loot = this.Loot?.Filter?.Select(x => x);
+
+                if ((players is not null && players.Any()) || (loot is not null && loot.Any())) {
                     var mouse = new Vector2(e.X, e.Y); // Get current mouse position in control
-                    var closest = players.Aggregate(
-                        (x1, x2) =>
-                            Vector2.Distance(x1.ZoomedPosition, mouse)
-                            < Vector2.Distance(x2.ZoomedPosition, mouse)
-                                ? x1
-                                : x2
-                    ); // Get object 'closest' to mouse position
-                    if (closest is not null) {
-                        var dist = Vector2.Distance(closest.ZoomedPosition, mouse);
-                        if (dist < 12) // See if 'closest object' is close enough.
-                        {
-                            _closestToMouse = closest; // Save ref to closest object
-                            if (closest.IsHumanHostile && closest.GroupID != -1)
-                                _mouseOverGroup = closest.GroupID; // Set group ID for closest player(s)
-                            else
-                                _mouseOverGroup = null; // Clear Group ID
+
+                    if (players is not null && players.Any()) {
+                        var closestPlayer = players.Aggregate(
+                            (x1, x2) =>
+                                Vector2.Distance(x1.ZoomedPosition, mouse)
+                                < Vector2.Distance(x2.ZoomedPosition, mouse)
+                                    ? x1
+                                    : x2
+                        ); // Get player object 'closest' to mouse position
+
+                        if (closestPlayer is not null) {
+                            var dist = Vector2.Distance(closestPlayer.ZoomedPosition, mouse);
+                            if (dist < 12) // See if 'closest object' is close enough.
+                            {
+                                _closestPlayerToMouse = closestPlayer; // Save ref to closest player object
+                                if (closestPlayer.IsHumanHostile && closestPlayer.GroupID != -1)
+                                    _mouseOverGroup = closestPlayer.GroupID; // Set group ID for closest player(s)
+                                else
+                                    _mouseOverGroup = null; // Clear Group ID
+                            } else
+                                ClearPlayerRefs();
                         } else
-                            ClearRefs();
+                            ClearPlayerRefs();
                     } else
-                        ClearRefs();
-                } else
-                    ClearRefs();
-            } else
-                ClearRefs();
-            void ClearRefs() {
-                _closestToMouse = null;
+                        ClearPlayerRefs();
+
+                    if (loot is not null && loot.Any()) {
+                        var closestItem = loot.Aggregate(
+                            (x1, x2) =>
+                                Vector2.Distance(x1.ZoomedPosition, mouse)
+                                < Vector2.Distance(x2.ZoomedPosition, mouse)
+                                    ? x1
+                                    : x2
+                        ); // Get loot object 'closest' to mouse position
+
+                        if (closestItem is not null) {
+                            var dist = Vector2.Distance(closestItem.ZoomedPosition, mouse);
+                            if (dist < 12) // See if 'closest object' is close enough.
+                            {
+                                _closestItemToMouse = closestItem; // Save ref to closest item object
+                            } else
+                                ClearItemRefs();
+                        } else
+                            ClearItemRefs();
+                    } else
+                        ClearItemRefs();
+                } else {
+                    ClearPlayerRefs();
+                    ClearItemRefs();
+                }
+            } else {
+                ClearPlayerRefs();
+                ClearItemRefs();
+            }
+
+            void ClearPlayerRefs() {
+                _closestPlayerToMouse = null;
                 _mouseOverGroup = null;
             }
-        }
 
-        /// <summary>
-        /// Handles mouse movement on Map Canvas, specifically checks if mouse moves close to a 'Container' position.
-        /// </summary>
-        private void MapCanvas_MouseMoveContainer(object sender, MouseEventArgs e) {
-            if (this.InGame) // Must be in-game
-            {
-
+            void ClearItemRefs() {
+                _closestItemToMouse = null;
             }
         }
 
@@ -689,7 +719,9 @@ namespace eft_dma_radar
                 UpdateLootFilterComboBoxes();
             }
 
-            this.Loot?.ApplyFilter();
+            if (Loot is not null) {
+                Loot.ApplyFilter();
+            }
         }
 
         /// <summary>
@@ -861,6 +893,10 @@ namespace eft_dma_radar
         private void picImportantLootColor_Click(object sender, EventArgs e) {
             UpdatePaintColorByName("ImportantLoot", picImportantLootColor);
         }
+
+        private void chkHideLootValue_CheckedChanged(object sender, EventArgs e) {
+            _config.HideLootValue = chkHideLootValue.Checked;
+        }
         #endregion
 
         #region Methods
@@ -874,7 +910,6 @@ namespace eft_dma_radar
             chkHideNames.Checked = _config.HideNames;
             chkImportantLootOnly.Checked = _config.ImportantLootOnly;
             chkHideLootValue.Checked = _config.HideLootValue;
-            chkHideLootContainer.Checked = _config.HideLootContainer;
             trkZoom.Value = _config.DefaultZoom;
             trkUIScale.Value = _config.UIScale;
             txtTeammateID.Text = _config.PrimaryTeammateId;
@@ -1048,58 +1083,6 @@ namespace eft_dma_radar
                 _mapSelectionIndex++; // Move onto next map
             tabRadar.Text = $"Radar ({_maps[_mapSelectionIndex].Name})";
             _mapChangeTimer.Restart(); // Start delay
-        }
-
-        /// <summary>
-        /// Determines the items paint color.
-        /// </summary>
-        private SKPaint GetLootPaint(DevLootItem item) {
-            int value = TarkovDevAPIManager.GetItemValue(item.Item);
-            bool isImportant = (item.Important || value >= _config.MinImportantLootValue);
-            bool isFiltered = Loot.LootFilterColors.ContainsKey(item.Item.id);
-
-            SKPaint paintToUse = SKPaints.PaintLoot;
-
-            if (isFiltered) {
-                Colors col = Loot.LootFilterColors[item.Item.id];
-                paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
-            } else if (isImportant) {
-                paintToUse.Color = Extensions.SKColorFromPaintColor("ImportantLoot");
-            } else {
-                paintToUse.Color = Extensions.SKColorFromPaintColor("RegularLoot");
-            }
-
-            return paintToUse;
-        }
-
-        /// <summary>
-        /// Determines the items text color.
-        /// </summary>
-        private SKPaint GetLootTextPaint(DevLootItem item) {
-            int value = TarkovDevAPIManager.GetItemValue(item.Item);
-            bool isImportant = (item.Important || value >= _config.MinImportantLootValue);
-            bool isFiltered = Loot.LootFilterColors.ContainsKey(item.Item.id);
-
-            SKPaint paintToUse = SKPaints.TextLoot;
-
-            if (isFiltered) {
-                Colors col = Loot.LootFilterColors[item.Item.id];
-                paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
-            } else if (isImportant) {
-                paintToUse.Color = Extensions.SKColorFromPaintColor("ImportantLoot");
-            } else {
-                paintToUse.Color = Extensions.SKColorFromPaintColor("RegularLoot");
-            }
-
-            return paintToUse;
-        }
-
-        /// <summary>
-        /// Checks if item is important.
-        /// </summary>
-        private bool IsItemImportant(DevLootItem item) {
-            var value = TarkovDevAPIManager.GetItemValue(item.Item);
-            return (item.Important || value >= _config.MinImportantLootValue);
         }
 
         /// <summary>
@@ -1306,7 +1289,8 @@ namespace eft_dma_radar
 
                 try {
                     if (inGame && localPlayer is not null) {
-                        var closestToMouse = _closestToMouse; // cache ref
+                        var closestPlayerToMouse = _closestPlayerToMouse; // cache ref
+                        var closestItemToMouse = _closestItemToMouse; // cache ref
                         var mouseOverGrp = _mouseOverGroup; // cache value for entire render
                         // Get main player location
                         var localPlayerPos = localPlayer.Position;
@@ -1410,11 +1394,12 @@ namespace eft_dma_radar
                                 }
                                 // Draw Player Scope
                                 {
-                                    var height = playerMapPos.Height - localPlayerMapPos.Height;
                                     string[] lines = null;
+                                    var height = playerMapPos.Height - localPlayerMapPos.Height;
+                                    var dist = Vector3.Distance(localPlayerPos, playerPos);
+
                                     if (!chkHideNames.Checked) // show full names & info
                                     {
-                                        var dist = Vector3.Distance(localPlayerPos, playerPos);
                                         lines = new string[2]
                                         {
                                             string.Empty,
@@ -1432,7 +1417,7 @@ namespace eft_dma_radar
                                             lines[0] += $"{name}";
                                     } else // just height & hp (for humans)
                                       {
-                                        lines = new string[1] { $"{(int)Math.Round(height)}" };
+                                        lines = new string[1] { $"{(int)Math.Round(height)}, {(int)Math.Round(dist)}" };
 
                                         if (player.IsHuman || player.IsBossRaider)
                                             lines[0] += $" ({player.Health})";
@@ -1469,52 +1454,27 @@ namespace eft_dma_radar
 
                                     if (filter is not null)
                                         foreach (var item in filter) {
-                                            string name = GetItemLabel(item);
-                                            bool isImportant = IsItemImportant(item);
                                             float position = item.Position.Z - localPlayerMapPos.Height;
 
-                                            if (chkImportantLootOnly.Checked && !isImportant) {
+                                            if (chkImportantLootOnly.Checked && !item.Important) {
                                                 continue;
                                             }
 
-                                            SKPaint lootPaintToUse = GetLootPaint(item);
-                                            SKPaint lootTextPaintToUse = GetLootTextPaint(item);
+                                            var itemZoomedPos = item.Position
+                                                                    .ToMapPos(_selectedMap)
+                                                                    .ToZoomedPos(mapParams);
 
-                                            if (item.Container) {
-                                                //If there is item already drawn at this position, then add new item value to it and draw only container name and value
-                                                var itemZoomedPos = item.Position
-                                                    .ToMapPos(_selectedMap)
-                                                    .ToZoomedPos(mapParams);
+                                            item.ZoomedPosition = new Vector2() // Cache Position as Vec2 for MouseMove event
+                                            {
+                                                X = itemZoomedPos.X,
+                                                Y = itemZoomedPos.Y
+                                            };
 
-                                                if (item.ContainerName == "Corpse") {
-                                                    itemZoomedPos.DrawLoot(
-                                                        canvas,
-                                                        "Corpse",
-                                                        lootPaintToUse,
-                                                        lootTextPaintToUse,
-                                                        position
-                                                    );
-                                                }
-
-                                                itemZoomedPos.DrawLoot(
-                                                    canvas,
-                                                    (chkHideLootContainer.Checked ? "" : $"{item.ContainerName} ") + name,
-                                                    lootPaintToUse,
-                                                    lootTextPaintToUse,
-                                                    position
-                                                );
-                                            } else {
-                                                var itemZoomedPos = item.Position
-                                                    .ToMapPos(_selectedMap)
-                                                    .ToZoomedPos(mapParams);
-                                                itemZoomedPos.DrawLoot(
-                                                    canvas,
-                                                    name,
-                                                    lootPaintToUse,
-                                                    lootTextPaintToUse,
-                                                    position
-                                                );
-                                            }
+                                            itemZoomedPos.DrawLoot(
+                                                canvas,
+                                                item,
+                                                position
+                                            );
                                         }
 
                                     // coprses = ootItem {Position = pos,AlwaysShow = true,Label = "Corpse"
@@ -1592,13 +1552,22 @@ namespace eft_dma_radar
                             }
                         }
 
-                        if (closestToMouse is not null) // draw tooltip for player the mouse is closest to
+                        if (closestPlayerToMouse is not null) // draw tooltip for player the mouse is closest to
                         {
-                            var playerZoomedPos = closestToMouse
+                            var playerZoomedPos = closestPlayerToMouse
                                 .Position
                                 .ToMapPos(_selectedMap)
                                 .ToZoomedPos(mapParams);
-                            playerZoomedPos.DrawTooltip(canvas, closestToMouse);
+                            playerZoomedPos.DrawTooltip(canvas, closestPlayerToMouse);
+                        }
+
+                        if (closestItemToMouse is not null) // draw tooltip for player the mouse is closest to
+                        {
+                            var itemZoomedPos = closestItemToMouse
+                                .Position
+                                .ToMapPos(_selectedMap)
+                                .ToZoomedPos(mapParams);
+                            itemZoomedPos.DrawContainerTooltip(canvas, closestItemToMouse);
                         }
                     } else // Not rendering, display reason
                       {
@@ -1769,7 +1738,6 @@ namespace eft_dma_radar
             _config.HideNames = chkHideNames.Checked;
             _config.ImportantLootOnly = chkImportantLootOnly.Checked;
             _config.HideLootValue = chkHideLootValue.Checked;
-            _config.HideLootContainer = chkHideLootContainer.Checked;
             _config.DefaultZoom = trkZoom.Value;
             _config.UIScale = trkUIScale.Value;
             _config.PrimaryTeammateId = txtTeammateID.Text;
