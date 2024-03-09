@@ -145,7 +145,8 @@ namespace eft_dma_radar {
                                 var corpseItemNamePtr = Memory.ReadPtr(itemTemplate + 0x58);
                                 var corpseItemName = Memory.ReadUnityString(corpseItemNamePtr);
                                 var grids = Memory.ReadPtr(containedItem + Offsets.LootItemBase.Grids);
-                                var containerName = slotName;
+                                //var containerName = slotName;
+                                var containerName = "Corpse";
                                 if (grids == 0x0){
                                     //The loot item we found does not have any grids so it's weapon slot?
                                     if (TarkovDevAPIManager.AllItems.TryGetValue(id, out

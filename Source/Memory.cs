@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using eft_dma_radar.Source.Tarkov;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -70,6 +71,10 @@ namespace eft_dma_radar
         public static ReadOnlyCollection<Exfil> Exfils
         {
             get => _game?.Exfils;
+        }
+        public static PlayerManager PlayerManager
+        {
+            get => _game?.PlayerManager;
         }
         #endregion
 

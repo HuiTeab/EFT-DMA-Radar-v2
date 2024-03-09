@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using eft_dma_radar.Source.Misc;
 using System.Runtime.Intrinsics;
+using Offsets;
 
 namespace eft_dma_radar
 {
@@ -100,11 +101,6 @@ namespace eft_dma_radar
         [JsonPropertyName("hideLootValue")]
         public bool HideLootValue { get; set; }
         /// <summary>
-        /// Enables/disables showing loot containers
-        /// </summary>
-        [JsonPropertyName("hideLootContainer")]
-        public bool HideLootContainer { get; set; }
-        /// <summary>
         /// Primary Teammate ACCT ID (for secondary Aimview)
         /// </summary>
         [JsonPropertyName("primaryTeammateAcctId")]
@@ -160,15 +156,38 @@ namespace eft_dma_radar
         [JsonPropertyName("noVisorEnabled")]
         public bool NoVisorEnabled { get; set; }
 
+        /// <summary>
+        /// Enables / disables no recoil.
+        /// </summary>
+        [JsonPropertyName("noRecoilEnabled")]
+        public bool NoRecoilEnabled { get; set; }
 
         /// <summary>
-        /// Allows storage of multiple loot filters
+        /// Enables / disables weapon sway.
+        /// </summary>
+        [JsonPropertyName("noSwayEnabled")]
+        public bool NoSwayEnabled { get; set; }
+
+        /// <summary>
+        /// Enables / disables max / infinite stamina.
+        /// </summary>
+        [JsonPropertyName("maxStaminaEnabled")]
+        public bool MaxStaminaEnabled { get; set; }
+
+        /// <summary>
+        /// Enables / disables max / infinite stamina.
+        /// </summary>
+        [JsonPropertyName("showHoverArmor")]
+        public bool ShowHoverArmor { get; set; }
+
+        /// <summary>
+        /// Allows storage of multiple loot filters.
         /// </summary>
         [JsonPropertyName("LootFilters")]
         public List<LootFilter> Filters { get; set; }
 
         /// <summary>
-        /// Allows storage of colors for ai scav, pscav etc
+        /// Allows storage of colors for ai scav, pscav etc.
         /// </summary>
         [JsonPropertyName("PaintColors")]
         //public List<PaintColor> PaintColors { get; set; }
@@ -185,8 +204,11 @@ namespace eft_dma_radar
             HideNames = false;
             ImportantLootOnly = false;
             HideLootValue = false;
-            HideLootContainer = false;
+            NoRecoilEnabled = false;
+            NoSwayEnabled = false;
+            MaxStaminaEnabled = false;
             LoggingEnabled = false;
+            ShowHoverArmor = false;
             MaxDistance = 325;
             AimViewFOV = 30;
             MinLootValue = 90000;
@@ -194,7 +216,8 @@ namespace eft_dma_radar
             PrimaryTeammateId = null;
             Filters = new List<LootFilter>();
 
-            PaintColors = new Dictionary<string, PaintColor.Colors> {
+            PaintColors = new Dictionary<string, PaintColor.Colors>
+            {
                 ["AIScav"] = new PaintColor.Colors { A = 255, R = 255, G = 255, B = 0 },
                 ["PScav"] = new PaintColor.Colors { A = 255, R = 255, G = 165, B = 0 },
                 ["AIRaider"] = new PaintColor.Colors { A = 255, R = 128, G = 0, B = 128 },
@@ -371,7 +394,7 @@ namespace eft_dma_radar
             var paint = Helpers.GetLootPaint(item);
             var text = Helpers.GetLootTextPaint(item);
             var label = (item.Container) ? item.ContainerName : (Program.Config.HideLootValue ? item.Item.shortName : item.GetFormattedValueShortName());
-
+ 
             if (heightDiff > 1.45) // loot is above player
             {
                 using var path = this.GetUpArrow();
@@ -433,168 +456,170 @@ namespace eft_dma_radar
         /// </summary>
         public void DrawContainerTooltip(SKCanvas canvas, DevLootItem item)
         {
-            _backerRect = new SKRect();
-
-            var containerItems = Helpers.GetContainerItems(item);
-            var maxLength = GetMaxLength(containerItems);
-
-            if (!item.Container) {
-                maxLength = GetTextLength(item);
-            }
-
-            UpdateBackerRect(containerItems, maxLength);
-
-            canvas.DrawRect(_backerRect, SKPaints.PaintTransparentBacker);
-
-            if (item.Container) {
-                DrawContainerItems(canvas, containerItems);
-            } else {
-                DrawItem(canvas, item);
+            if (item.Container)
+            {
+                DrawToolTip(canvas, Helpers.GetContainerItems(item));
+            } else
+            {
+                DrawToolTip(canvas, new List<DevLootItem> { item });
             }
         }
         /// <summary>
-        /// Draws all items within a container
+        /// Draws player tool tip based on if theyre alive or not
         /// </summary>
-        private void DrawContainerItems(SKCanvas canvas, List<DevLootItem> items) {
-            float spacing = 6 * UIScale;
-
-            foreach (var lootItem in items) {
-                DrawItem(canvas, lootItem, spacing);
-                spacing += 15 * UIScale;
+        public void DrawToolTip(SKCanvas canvas, Player player)
+        {
+            if (!player.IsAlive)
+            {
+                DrawCorpseTooltip(canvas, player);
+                return;
             }
+
+            if (!player.IsHostileActive)
+            {
+                return;
+            }
+
+            DrawHostileTooltip(canvas, player);
         }
         /// <summary>
-        /// Updates the backplate rectangle
+        /// Draws tool tip of hostile players 
         /// </summary>
-        private void UpdateBackerRect(List<DevLootItem> items, float maxLength) {
-            //extremely ghetto & temporary solution for now lol
-            var height = items.Count * (items.Count >= 5 ? 14 : 12) * UIScale;
+        private void DrawHostileTooltip(SKCanvas canvas, Player player)
+        {
+            var lines = new List<string>();
 
-            height += 6 * UIScale;
+            lines.Insert(0, player.Name);
 
-            _backerRect.Bottom = Y + height;
-            _backerRect.Left = X + (9 * UIScale);
-            _backerRect.Top = Y - (9 * UIScale);
-            _backerRect.Right = X + (9 * UIScale) + maxLength + (6 * UIScale);
-        }
-        /// <summary>
-        /// Gets the maximum float width of an items text within the list passed
-        /// </summary>
-        private float GetMaxLength(List<DevLootItem> items) {
-            float maxLength = 0;
-            foreach (var lootItem in items) {
-                var length = GetTextLength(lootItem);
-                if (length > maxLength) {
-                    maxLength = length;
+            if (player.Gear != null)
+            {
+                GearItem gearItem;
+                var weaponSlots = new Dictionary<string, string>()
+                {
+                    {"FirstPrimaryWeapon", "Primary"},
+                    {"SecondPrimaryWeapon", "Secondary"},
+                    {"Holster", "Holster"}
+                };
+
+
+                foreach (var slot in weaponSlots)
+                {
+                    if (player.Gear.TryGetValue(slot.Key, out gearItem))
+                    {
+                        lines.Insert(0, $"{slot.Value}: {gearItem.Short}");
+                    }
                 }
+
+                if (Program.Config.ShowHoverArmor)
+                {
+                    var gearSlots = new Dictionary<string, string>()
+                    {
+                        {"Headwear","Head"},
+                        {"FaceCover","Face"},
+                        {"ArmorVest","Armor"},
+                        {"TacticalVest","Vest"},
+                        {"Backpack","Backpack"}
+                    };
+
+                    foreach (var slot in gearSlots)
+                    {
+                        if (player.Gear.TryGetValue(slot.Key, out gearItem))
+                        {
+                            lines.Insert(0, $"{slot.Value}: {gearItem.Short}");
+                        }
+                    }
+                }
+
             }
-            return maxLength;
+
+            lines.Insert(0, $"Value: {TarkovDevAPIManager.FormatNumber(player.PlayerValue)}");
+
+            DrawTooltip(canvas, string.Join("\n", lines));
         }
         /// <summary>
-        /// Gets float width of a an items text
+        /// Draws tooltip for corpses
         /// </summary>
-        private float GetTextLength(DevLootItem lootItem) {
-            return Helpers.GetLootTextPaint(lootItem)
-                .MeasureText(lootItem.GetFormattedValueName());
+        private void DrawCorpseTooltip(SKCanvas canvas, Player player)
+        {
+            var lines = new List<string>();
+
+            lines.Insert(0, "Corpse");
+
+            if (player.Lvl != 0)
+                lines.Insert(0, $"L:{player.Lvl}");
+
+            if (player.GroupID != -1)
+                lines.Insert(0, $"G:{player.GroupID}");
+
+            DrawTooltip(canvas, string.Join("\n", lines));
         }
         /// <summary>
-        /// Draws an item on the canvas
+        /// Draws the tool tip for loot items/containers
         /// </summary>
-        private void DrawItem(SKCanvas canvas, DevLootItem item) {
-            DrawItem(canvas, item, 3 * UIScale);
+        private void DrawToolTip(SKCanvas canvas, List<DevLootItem> items)
+        {
+            var maxWidth = 0f;
+
+            foreach (var item in items)
+            {
+                var width = SKPaints.TextBase.MeasureText(item.GetFormattedValueName());
+                maxWidth = Math.Max(maxWidth, width);
+            }
+
+            var textSpacing = 15 * UIScale;
+            var padding = 3 * UIScale;
+
+            var height = items.Count * textSpacing;
+
+            var left = X + padding;
+            var top = Y - padding;
+            var right = left + maxWidth + padding * 2;
+            var bottom = top + height + padding * 2;
+
+            var backgroundRect = new SKRect(left, top, right, bottom);
+            canvas.DrawRect(backgroundRect, SKPaints.PaintTransparentBacker);
+
+            var y = bottom - (padding * 2.2f);
+            foreach (var item in items)
+            {
+                canvas.DrawText(item.GetFormattedValueName(), left + padding, y, Helpers.GetLootTextPaint(item));
+                y -= textSpacing;
+            }
         }
         /// <summary>
-        /// Draws an item on the canvas
+        /// Draws the tool tip for players/hostiles
         /// </summary>
         /// <param name="canvas"></param>
-        private void DrawItem(SKCanvas canvas, DevLootItem item, float spacing) {
-            canvas.DrawText(item.GetFormattedValueName(), GetPoint(11 * UIScale, spacing), Helpers.GetLootTextPaint(item));
-        }
-        /// <summary>
-        /// Draws tooltips on Map Markers
-        /// </summary>
-        public void DrawTooltip(SKCanvas canvas, Player player)
+        /// <param name="tooltipText"></param>
+        private void DrawTooltip(SKCanvas canvas, string tooltipText)
         {
-            string[] lines = null;
-            if (!player.IsAlive) // Get info about dead bodies ('X' markers)
-            {
-                if (player.GroupID != -1)
-                    lines = new string[3] {
-                        "Corpse",
-                        string.Empty,
-                        string.Empty
-                    };
-                else
-                    lines = new string[2] {
-                        "Corpse",
-                        string.Empty
-                    };
+            var lines = tooltipText.Split('\n');
+            var maxWidth = 0f;
 
-                lines[1] += $"{player.Type}:{player.Name}";
-                if (player.Lvl != 0) lines[2] += $"L:{player.Lvl} ";
-                if (player.GroupID != -1) lines[2] += $"G:{player.GroupID} ";
-            }
-            else if (player.IsHostileActive) // If enemy, display information
-            {
-                if (player.GroupID != -1 || player.KDA != -1f || player.Lvl != 0)
-                    lines = new string[3] {
-                        string.Empty,
-                        string.Empty,
-                        string.Empty
-                    };
-                else
-                    lines = new string[3] {
-                        string.Empty,
-                        string.Empty,
-                        string.Empty
-                    };
-
-                lines[0] += player.Name;
-
-                if (player.Gear is not null) // Get weapon info via GearManager
-                {
-                    string wep = "None";
-                    var value = player.PlayerValue;
-                    GearItem gearItem = null;
-
-                    if (!player.Gear.TryGetValue("FirstPrimaryWeapon", out gearItem))
-                        if (!player.Gear.TryGetValue("SecondPrimaryWeapon", out gearItem))
-                            player.Gear.TryGetValue("Holster", out gearItem);
-
-                    if (gearItem is not null) wep = gearItem.Short; // Get 'short' weapon name/info
-
-                    lines[1] += $"Wep:{wep}";
-
-                    lines[2] += $"Value: {TarkovDevAPIManager.FormatNumber(value)}";
-                } 
-                else
-                    lines[1] += "Wep:ERROR"; // GearManager failed
-
-                //if (player.Lvl != 0) lines[2] += $"L:{player.Lvl} ";
-                //if (player.GroupID != -1) lines[2] += $"G:{player.GroupID} ";
-                //if (player.KDA != -1f) lines[2] += $"KD: {player.KDA.ToString("n1")} ";
-            }
-            else return; // Cancel drawing, not interested in this player object
-            // Strings constructed -> Begin Drawing
-            float spacing = 3 * UIScale;
-            float maxLength = 0;
             foreach (var line in lines)
             {
-                var length = SKPaints.TextBase.MeasureText(line);
-                if (length > maxLength) maxLength = length;
+                var width = SKPaints.TextBase.MeasureText(line);
+                maxWidth = Math.Max(maxWidth, width);
             }
-            var backer = new SKRect()
+
+            var textSpacing = 12 * UIScale;
+            var padding = 3 * UIScale;
+
+            var height = lines.Length * textSpacing;
+
+            var left = X + padding;
+            var top = Y - padding;
+            var right = left + maxWidth + padding * 2;
+            var bottom = top + height + padding * 2;
+
+            var backgroundRect = new SKRect(left, top, right, bottom);
+            canvas.DrawRect(backgroundRect, SKPaints.PaintTransparentBacker);
+
+            var y = bottom - (padding * 1.5f);
+            foreach (var line in lines)
             {
-                Bottom = Y + (3 + lines.Length * (lines.Length + 6)) * UIScale,
-                Left = X + (9 * UIScale),
-                Top = Y - (9 * UIScale),
-                Right = X + (9 * UIScale) + maxLength + (6 * UIScale)
-            };
-            canvas.DrawRect(backer, SKPaints.PaintTransparentBacker); // Draw tooltip backer
-            foreach (var line in lines) // Draw tooltip text
-            {
-                canvas.DrawText(line, this.GetPoint(11 * UIScale, spacing), SKPaints.TextBase); // draw line text
-                spacing += 12 * UIScale;
+                canvas.DrawText(line, left + padding, y, SKPaints.TextBase);
+                y -= textSpacing;
             }
         }
     }
@@ -1899,7 +1924,7 @@ namespace eft_dma_radar
 
         public static List<DevLootItem> GetContainerItems(DevLootItem item) {
             return Memory.Loot.Loot.Where(x => x.Container && x.Position == item.Position)
-                .OrderByDescending(x => x.Item.avg24hPrice)
+                .OrderBy(x => TarkovDevAPIManager.GetItemValue(x.Item))
                 .ToList();
         }
     }

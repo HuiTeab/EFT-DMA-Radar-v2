@@ -8,17 +8,18 @@ namespace eft_dma_radar
     /// Class containing Game (Raid) instance.
     /// </summary>
     public class Game
-    {
-        private readonly ulong _unityBase;
+    { 
         private GameObjectManager _gom;
-        private ulong _localGameWorld;
         private LootManager _lootManager;
         private RegisteredPlayers _rgtPlayers;
-        private bool _inHideout = false;
         private GrenadeManager _grenadeManager;
         private ExfilManager _exfilManager;
+        private PlayerManager _playerManager;
         private Config _config;
         private static CameraManager _cameraManager;
+        private ulong _localGameWorld;
+        private readonly ulong _unityBase;
+        private bool _inHideout = false;
         private volatile bool _inGame = false;
         private volatile bool _loadingLoot = false;
         private volatile bool _refreshLoot = false;
@@ -70,6 +71,10 @@ namespace eft_dma_radar
         }
         public static CameraManager CameraManager {
             get => _cameraManager;
+        }
+        public PlayerManager PlayerManager
+        {
+            get => _playerManager;
         }
         #endregion
 
@@ -140,6 +145,7 @@ namespace eft_dma_radar
                 _rgtPlayers.UpdateAllPlayers();
             }
         }
+
         /// <summary>
         /// Method to get map name using local game world
         /// </summary>
@@ -291,6 +297,7 @@ namespace eft_dma_radar
                 throw new GameNotRunningException($"ERROR getting Game Object Manager, game may not be running: {ex}");
             }
         }
+
         /// <summary>
         /// Gets Local Game World address.
         /// </summary>
@@ -457,6 +464,17 @@ namespace eft_dma_radar
                     }
                 } catch (Exception ex) {
                     Program.Log($"ERROR loading CameraManager: {ex}");
+                }
+            }
+            if (_playerManager is null)
+            {
+                try
+                {
+                    var playerManager = new PlayerManager(_localGameWorld);
+                    _playerManager = playerManager;
+                } catch (Exception ex)
+                {
+                    Program.Log($"ERROR loading PlayerManager: {ex}");
                 }
             }
             if (_grenadeManager is null)

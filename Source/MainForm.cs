@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Text;
 using eft_dma_radar.Source.Misc;
+using eft_dma_radar.Source.Tarkov;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using static eft_dma_radar.LootFilter;
@@ -230,11 +231,6 @@ namespace eft_dma_radar
         private void chkNightVision_CheckedChanged(object sender, EventArgs e)
         {
             _config.NightVisionEnabled = chkNightVision.Checked;
-
-            if (Memory.InGame)
-            {
-                Game.CameraManager.NightVision(chkNightVision.Checked || chkNightVisionDebug.Checked);
-            }
         }
 
         /// <summary>
@@ -243,11 +239,6 @@ namespace eft_dma_radar
         private void chkThermalVision_CheckedChanged(object sender, EventArgs e)
         {
             _config.ThermalVisionEnabled = chkThermalVision.Checked;
-
-            if (Memory.InGame && Game.CameraManager is not null)
-            {
-                Game.CameraManager.ThermalVision(chkThermalVision.Checked || chkThermalVisionDebug.Checked);
-            }
         }
 
         /// <summary>
@@ -256,11 +247,6 @@ namespace eft_dma_radar
         private void chkOpticThermalVision_CheckedChanged(object sender, EventArgs e)
         {
             _config.OpticThermalVisionEnabled = chkOpticThermalVision.Checked;
-
-            if (Memory.InGame && Game.CameraManager is not null)
-            {
-                Game.CameraManager.OpticThermalVision(chkOpticThermalVision.Checked || chkOpticThermalVisionDebug.Checked);
-            }
         }
 
         /// <summary>
@@ -269,13 +255,35 @@ namespace eft_dma_radar
         private void chkNoVisor_CheckedChanged(object sender, EventArgs e)
         {
             _config.NoVisorEnabled = chkNoVisor.Checked;
-
-            if (Memory.InGame && Game.CameraManager is not null)
-            {
-                Game.CameraManager.VisorEffect(chkNoVisor.Checked || chkNoVisorDebug.Checked);
-            }
         }
 
+        /// <summary>
+        /// Fired when NoRecoil checkbox has been adjusted
+        /// </summary>
+        private void chkNoRecoil_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.NoRecoilEnabled = chkNoRecoil.Checked;
+        }
+
+        /// <summary>
+        /// Fired when Max Stamina checkbox has been adjusted
+        /// </summary>
+        private void chkMaxStamina_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.MaxStaminaEnabled = chkMaxStamina.Checked;
+        }
+
+        /// <summary>
+        /// Fired when NoSway checkbox has been adjusted
+        /// </summary>
+        private void chkNoSway_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.NoSwayEnabled = chkNoSway.Checked;
+        }
+
+        /// <summary>
+        /// Fired when Chams checkbox has been adjusted
+        /// </summary>
         private void chkChams_CheckedChanged(object sender, EventArgs e)
         {
             var allPlayers = this.AllPlayers
@@ -303,7 +311,8 @@ namespace eft_dma_radar
                     {
                         Chams.ClothingChams(playerBase);
                     }
-                    else {
+                    else
+                    {
                         Chams.RestorePointers();
                     }
                 }
@@ -1076,6 +1085,11 @@ namespace eft_dma_radar
         {
             _config.HideLootValue = chkHideLootValue.Checked;
         }
+
+        private void chkShowHoverArmor_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.ShowHoverArmor = chkShowHoverArmor.Checked;
+        }
         #endregion
 
         #region Methods
@@ -1090,6 +1104,7 @@ namespace eft_dma_radar
             chkHideNames.Checked = _config.HideNames;
             chkImportantLootOnly.Checked = _config.ImportantLootOnly;
             chkHideLootValue.Checked = _config.HideLootValue;
+            chkShowHoverArmor.Checked = _config.ShowHoverArmor;
             trkZoom.Value = _config.DefaultZoom;
             trkUIScale.Value = _config.UIScale;
             txtTeammateID.Text = _config.PrimaryTeammateId;
@@ -1806,22 +1821,22 @@ namespace eft_dma_radar
                             }
                         }
 
-                        if (closestPlayerToMouse is not null) // draw tooltip for player the mouse is closest to
-                        {
-                            var playerZoomedPos = closestPlayerToMouse
-                                .Position
-                                .ToMapPos(_selectedMap)
-                                .ToZoomedPos(mapParams);
-                            playerZoomedPos.DrawTooltip(canvas, closestPlayerToMouse);
-                        }
-
-                        if (closestItemToMouse is not null) // draw tooltip for player the mouse is closest to
+                        if (closestItemToMouse is not null) // draw tooltip for item the mouse is closest to
                         {
                             var itemZoomedPos = closestItemToMouse
                                 .Position
                                 .ToMapPos(_selectedMap)
                                 .ToZoomedPos(mapParams);
                             itemZoomedPos.DrawContainerTooltip(canvas, closestItemToMouse);
+                        }
+
+                        if (closestPlayerToMouse is not null) // draw tooltip for player the mouse is closest to
+                        {
+                            var playerZoomedPos = closestPlayerToMouse
+                                .Position
+                                .ToMapPos(_selectedMap)
+                                .ToZoomedPos(mapParams);
+                            playerZoomedPos.DrawToolTip(canvas, closestPlayerToMouse);
                         }
                     }
                     else // Not rendering, display reason

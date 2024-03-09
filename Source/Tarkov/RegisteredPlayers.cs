@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.Intrinsics;
 using eft_dma_radar.Source.Misc;
+using eft_dma_radar.Source.Tarkov;
 
 namespace eft_dma_radar
 {
@@ -14,6 +15,7 @@ namespace eft_dma_radar
         private readonly Stopwatch _regSw = new();
         private readonly Stopwatch _healthSw = new();
         private readonly Stopwatch _posSw = new();
+        private readonly Stopwatch _memWriteSw = new();
         private readonly ConcurrentDictionary<string, Player> _players =
             new(StringComparer.OrdinalIgnoreCase);
 
@@ -70,6 +72,7 @@ namespace eft_dma_radar
             _regSw.Start();
             _healthSw.Start();
             _posSw.Start();
+            _memWriteSw.Start();
         }
         
         /// <summary>
@@ -97,7 +100,6 @@ namespace eft_dma_radar
 
             return (id, className);
         }
-
 
         private ulong GetPlayerProfile(string className, ulong playerBase)
         {
@@ -190,11 +192,7 @@ namespace eft_dma_radar
 
         private bool ShouldSkipUpdate()
         {
-            if (_regSw.ElapsedMilliseconds < 750)
-            {
-                return true;
-            }
-            return false;
+            return _regSw.ElapsedMilliseconds < 750;
         }
 
         private void MarkInactivePlayers(HashSet<string> registered)
@@ -302,11 +300,30 @@ namespace eft_dma_radar
                         _localPlayerGroup = localPlayer.GroupID;
                     }
                 }
+                bool checkMemWrites = _memWriteSw.ElapsedMilliseconds > 500; // every 500 ms
                 bool checkHealth = _healthSw.ElapsedMilliseconds > 250; // every 250 ms
                 bool checkPos = _posSw.ElapsedMilliseconds > 10000 && players.Any(x => x.IsHumanActive); // every 10 sec & at least 1 active human player
                 var scatterMap = new ScatterReadMap(players.Length);
                 var round1 = scatterMap.AddRound();
                 ScatterReadRound round2 = null;
+
+                // welcome to the ghetto
+                if (checkMemWrites)
+                {
+                    Game.CameraManager.NightVision(Program.Config.NightVisionEnabled);
+                    Game.CameraManager.ThermalVision(Program.Config.ThermalVisionEnabled);
+
+                    //causes ~20-30 fps drop on radar but w/e
+                    Game.CameraManager.VisorEffect(Program.Config.NoVisorEnabled);
+                    Game.CameraManager.OpticThermalVision(Program.Config.OpticThermalVisionEnabled);
+
+                    Memory.PlayerManager.NoSway(Program.Config.NoSwayEnabled);
+                    Memory.PlayerManager.NoRecoil(Program.Config.NoRecoilEnabled);
+
+                    // uncomment this for inf stamina that WILL probably get you banned :^)
+                    //Memory.PlayerManager.MaxStamina(Program.Config.MaxStaminaEnabled);
+                }
+
                 if (checkPos) // allocate and add extra rounds to map
                 {
                     round2 = scatterMap.AddRound();
@@ -443,6 +460,7 @@ namespace eft_dma_radar
                 }
                 if (checkHealth)_healthSw.Restart();
                 if (checkPos)_posSw.Restart();
+                if (checkMemWrites)_memWriteSw.Restart();
             }
             
             catch (Exception ex)

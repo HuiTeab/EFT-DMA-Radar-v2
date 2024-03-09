@@ -94,11 +94,9 @@ namespace eft_dma_radar.Source.Tarkov
             return 0;
         }
 
-
         /// <summary>
-        /// public static function to turn thermalvision on and off
+        /// public function to turn thermalvision on and off
         /// </summary>
-        /// 
         public void ThermalVision(bool on){
             UpdateCamera();
             if (_fpsCamera != 0)
@@ -118,11 +116,9 @@ namespace eft_dma_radar.Source.Tarkov
             }
         }
 
-
         /// <summary>
-        /// public static function to turn nightvision on and off
+        /// public function to turn nightvision on and off
         /// </summary>
-        ///
         public void NightVision(bool on){
             UpdateCamera();
             if (_fpsCamera != 0)
@@ -138,9 +134,8 @@ namespace eft_dma_radar.Source.Tarkov
         }
 
         /// <summary>
-        /// public static function to turn visor on and off
+        /// public function to turn visor on and off
         /// </summary>
-        /// 
         public void VisorEffect(bool on) {
             UpdateCamera();
             if (_fpsCamera != 0)
@@ -152,9 +147,8 @@ namespace eft_dma_radar.Source.Tarkov
         }
 
         /// <summary>
-        /// public static function to turn optic thermalvision on and off
+        /// public function to turn optic thermalvision on and off
         /// </summary>
-        ///    
         public void OpticThermalVision(bool on){
             UpdateCamera();
             if (_opticCamera != 0)

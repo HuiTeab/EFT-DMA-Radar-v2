@@ -55,7 +55,7 @@ namespace eft_dma_radar
         };
         public static readonly SKPaint PaintDeathMarker = new SKPaint()
         {
-            Color = SKColors.Black,
+            Color = SKColors.Red,
             StrokeWidth = 3,
             Style = SKPaintStyle.Stroke,
             IsAntialias = true,
