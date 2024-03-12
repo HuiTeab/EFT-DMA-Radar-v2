@@ -24,9 +24,4 @@ namespace eft_dma_radar
         public ulong nextObjectLink; // 0x8
         public ulong obj; // 0x10   (to Offsets.GameObject)
     };
-
-    public struct UnityString
-    {
-
-    }
 }

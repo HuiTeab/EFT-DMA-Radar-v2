@@ -28,6 +28,11 @@ namespace eft_dma_radar {
         public ReadOnlyCollection<DevLootItem> Loot {
             get;
         }
+
+        private Collection<QuestItem> QuestItem
+        {
+            get => Memory.QuestManager.QuestItem;
+        }
         /// <summary>
         /// key,value pair of filtered item ids (key) and their filtered color (value)
         /// </summary>
@@ -176,19 +181,19 @@ namespace eft_dma_radar {
                         var item = Memory.ReadPtr(interactiveClass + 0xB0); //EFT.InventoryLogic.Item
                         var itemTemplate = Memory.ReadPtr(item + Offsets.LootItemBase.ItemTemplate); //EFT.InventoryLogic.ItemTemplate
                         bool questItem = Memory.ReadValue < bool > (itemTemplate + Offsets.ItemTemplate.IsQuestItem);
+                        var objectClass = Memory.ReadPtr(gameObject + Offsets.GameObject.ObjectClass);
+                        var transformInternal = Memory.ReadPtrChain(objectClass, Offsets.LootGameObjectClass.To_TransformInternal);
+                        var pos = new Transform(transformInternal).GetPosition();
+                        var BSGIdPtr = Memory.ReadPtr(itemTemplate + Offsets.ItemTemplate.BsgId);
+                        var id = Memory.ReadUnityString(BSGIdPtr);
+                        if (id == null) return;
                         if (!questItem) {
-                            var objectClass = Memory.ReadPtr(gameObject + Offsets.GameObject.ObjectClass);
-                            var transformInternal = Memory.ReadPtrChain(objectClass, Offsets.LootGameObjectClass.To_TransformInternal);
-                            var pos = new Transform(transformInternal).GetPosition();
-                            var BSGIdPtr = Memory.ReadPtr(itemTemplate + Offsets.ItemTemplate.BsgId);
-                            var id = Memory.ReadUnityString(BSGIdPtr);
-                            if (id == null) return;
                             try {
                                 var grids = Memory.ReadPtr(item + Offsets.LootItemBase.Grids);
                                 var count = new MemArray(grids).Count;
                                 GetItemsInGrid(grids, id, pos, loot, false , "Loose Loot");
-                                } 
-                                catch {
+                            } 
+                            catch {
                                     //The loot item we found does not have any grids so it's basically like a keycard or a ledx etc. Therefore add it to our loot dictionary.
                                     if (TarkovDevAPIManager.AllItems.TryGetValue(id, out
                                             var entry)) {
@@ -200,7 +205,14 @@ namespace eft_dma_radar {
                                             Item = entry.Item
                                         });
                                     }
-                                }
+                            }
+                        }
+                        else {
+                            var questItemTest = this.QuestItem.Where(x => x.Id == id).FirstOrDefault();
+                            if (questItemTest != null) {
+                                //update position
+                                questItemTest.Position = pos;
+                            }
                         }
                     }
 

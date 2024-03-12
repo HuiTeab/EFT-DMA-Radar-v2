@@ -103,6 +103,15 @@ namespace eft_dma_radar
         {
             get => Memory.Exfils;
         }
+
+        private Collection<QuestItem> QuestItem
+        {
+            get => Memory.QuestManager.QuestItem;
+        }
+        private Collection<QuestZone> QuestZone
+        {
+            get => Memory.QuestManager.QuestZone;
+        }
         #endregion
 
         #region Constructor
@@ -120,7 +129,6 @@ namespace eft_dma_radar
                 Dock = DockStyle.Fill,
                 VSync = _config.Vsync // cap fps to refresh rate, reduce tearing
             };
-
             tabRadar.Controls.Add(_mapCanvas); // place Radar Map Canvas on top of TabPage1
             chkMapFree.Parent = _mapCanvas; // change parent for checkBox_MapFree 'button'
             trkUIScale.ValueChanged += trkUIScale_ValueChanged; // Handle UI Adjustments
@@ -138,6 +146,7 @@ namespace eft_dma_radar
             _mapCanvas.MouseClick += MapCanvas_MouseClick;
             lstViewPMCHistory.MouseDoubleClick += lstViewPMCHistory_MouseDoubleClick;
             _fpsWatch.Start(); // fps counter
+
         }
         #endregion
 
@@ -1705,6 +1714,8 @@ namespace eft_dma_radar
                             if (chkShowLoot.Checked) // Draw loot (if enabled)
                             {
                                 var loot = this.Loot; // cache ref
+                                var questItems = this.QuestItem; // cache ref
+                                var QuestZone = this.QuestZone; // cache ref
                                 //Debug.WriteLine($"Loot is null: {loot is null}");
                                 if (loot is not null)
                                 {
@@ -1743,6 +1754,43 @@ namespace eft_dma_radar
                                         }
 
                                     // coprses = ootItem {Position = pos,AlwaysShow = true,Label = "Corpse"
+                                }
+                                if (questItems is not null)
+                                {
+                                    foreach (var item in questItems)
+                                    {
+                                        if (item.Position.X != 0)
+                                        {
+                                            float position = item.Position.Z - localPlayerMapPos.Height;
+                                            var itemZoomedPos = item.Position
+                                                                    .ToMapPos(_selectedMap)
+                                                                    .ToZoomedPos(mapParams);
+
+                                            item.ZoomedPosition = new Vector2() // Cache Position as Vec2 for MouseMove event
+                                            {
+                                                X = itemZoomedPos.X,
+                                                Y = itemZoomedPos.Y
+                                            };
+
+                                            itemZoomedPos.DrawQuestItem(
+                                                canvas,
+                                                "Quest: " + item.Name,
+                                                position
+                                            );
+
+                                        }
+                                    }
+                                }
+                            }
+                            if (QuestZone is not null)
+                            {
+                                foreach (var zone in QuestZone)
+                                {
+                                    if (zone.MapName.ToLower() == _selectedMap.Name.ToLower())
+                                    {
+                                       
+                                    }
+
                                 }
                             }
 

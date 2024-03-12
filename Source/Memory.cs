@@ -76,6 +76,10 @@ namespace eft_dma_radar
         {
             get => _game?.PlayerManager;
         }
+        public static QuestManager QuestManager
+        {
+            get => _game?.QuestManager;
+        }
         #endregion
 
         #region Startup

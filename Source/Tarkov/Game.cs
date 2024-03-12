@@ -76,6 +76,10 @@ namespace eft_dma_radar
         {
             get => _playerManager;
         }
+        public QuestManager QuestManager {
+        
+            get => _questManager;
+        }
         #endregion
 
         /// <summary>
