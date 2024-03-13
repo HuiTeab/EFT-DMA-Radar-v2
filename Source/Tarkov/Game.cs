@@ -102,15 +102,15 @@ namespace eft_dma_radar
                 // Update the list of players and their states
                 await UpdatePlayersAsync();
 
-                // Update game environment elements such as loot and exfils
-                if (_inGame && !InHideout )
-                {
-                    UpdateGameEnvironment();
-                }
                 //if registered players is -1, then we are died or exfilled
                 if (_rgtPlayers != null && _rgtPlayers.PlayerCount == -1)
                 {
                     throw new RaidEnded();
+                }
+                // Update game environment elements such as loot and exfils
+                if (_inGame && !InHideout )
+                {
+                    UpdateGameEnvironment();
                 }
             }
             catch (DMAShutdown)
