@@ -145,6 +145,7 @@ namespace eft_dma_radar
             lblMapCoords = new Label();
             tabControl = new TabControl();
             colDialog = new ColorDialog();
+            chkQuestHelper = new CheckBox();
             tabLootFilter.SuspendLayout();
             tabPlayerHistory.SuspendLayout();
             tabPlayerLoadouts.SuspendLayout();
@@ -901,6 +902,7 @@ namespace eft_dma_radar
             // 
             // grpUserInterface
             // 
+            grpUserInterface.Controls.Add(chkQuestHelper);
             grpUserInterface.Controls.Add(chkShowHoverArmor);
             grpUserInterface.Controls.Add(chkShowLoot);
             grpUserInterface.Controls.Add(trkAimLength);
@@ -913,9 +915,9 @@ namespace eft_dma_radar
             grpUserInterface.Controls.Add(trkUIScale);
             grpUserInterface.Controls.Add(chkShowAimview);
             grpUserInterface.Controls.Add(chkHideNames);
-            grpUserInterface.Location = new Point(5, 165);
+            grpUserInterface.Location = new Point(5, 121);
             grpUserInterface.Name = "grpUserInterface";
-            grpUserInterface.Size = new Size(463, 159);
+            grpUserInterface.Size = new Size(463, 203);
             grpUserInterface.TabIndex = 26;
             grpUserInterface.TabStop = false;
             grpUserInterface.Text = "UI";
@@ -945,7 +947,7 @@ namespace eft_dma_radar
             // trkAimLength
             // 
             trkAimLength.LargeChange = 50;
-            trkAimLength.Location = new Point(100, 47);
+            trkAimLength.Location = new Point(100, 99);
             trkAimLength.Margin = new Padding(4, 3, 4, 3);
             trkAimLength.Maximum = 1000;
             trkAimLength.Minimum = 10;
@@ -959,7 +961,7 @@ namespace eft_dma_radar
             // lblAimline
             // 
             lblAimline.AutoSize = true;
-            lblAimline.Location = new Point(4, 50);
+            lblAimline.Location = new Point(4, 102);
             lblAimline.Margin = new Padding(4, 0, 4, 0);
             lblAimline.Name = "lblAimline";
             lblAimline.Size = new Size(88, 15);
@@ -969,7 +971,7 @@ namespace eft_dma_radar
             // 
             // txtTeammateID
             // 
-            txtTeammateID.Location = new Point(249, 120);
+            txtTeammateID.Location = new Point(249, 172);
             txtTeammateID.MaxLength = 12;
             txtTeammateID.Name = "txtTeammateID";
             txtTeammateID.Size = new Size(147, 23);
@@ -978,7 +980,7 @@ namespace eft_dma_radar
             // lblPrimaryTeammate
             // 
             lblPrimaryTeammate.AutoSize = true;
-            lblPrimaryTeammate.Location = new Point(249, 98);
+            lblPrimaryTeammate.Location = new Point(249, 150);
             lblPrimaryTeammate.Name = "lblPrimaryTeammate";
             lblPrimaryTeammate.Size = new Size(76, 15);
             lblPrimaryTeammate.TabIndex = 22;
@@ -987,7 +989,7 @@ namespace eft_dma_radar
             // trkZoom
             // 
             trkZoom.LargeChange = 1;
-            trkZoom.Location = new Point(335, 50);
+            trkZoom.Location = new Point(335, 102);
             trkZoom.Maximum = 200;
             trkZoom.Name = "trkZoom";
             trkZoom.Size = new Size(118, 45);
@@ -998,7 +1000,7 @@ namespace eft_dma_radar
             // lblUIScale
             // 
             lblUIScale.AutoSize = true;
-            lblUIScale.Location = new Point(44, 98);
+            lblUIScale.Location = new Point(44, 150);
             lblUIScale.Name = "lblUIScale";
             lblUIScale.Size = new Size(48, 15);
             lblUIScale.TabIndex = 28;
@@ -1008,7 +1010,7 @@ namespace eft_dma_radar
             // lblZoom
             // 
             lblZoom.AutoSize = true;
-            lblZoom.Location = new Point(241, 50);
+            lblZoom.Location = new Point(241, 102);
             lblZoom.Margin = new Padding(4, 0, 4, 0);
             lblZoom.Name = "lblZoom";
             lblZoom.Size = new Size(87, 15);
@@ -1019,7 +1021,7 @@ namespace eft_dma_radar
             // trkUIScale
             // 
             trkUIScale.LargeChange = 10;
-            trkUIScale.Location = new Point(100, 98);
+            trkUIScale.Location = new Point(100, 150);
             trkUIScale.Maximum = 200;
             trkUIScale.Minimum = 50;
             trkUIScale.Name = "trkUIScale";
@@ -1288,7 +1290,7 @@ namespace eft_dma_radar
             grpRadar.Controls.Add(btnToggleMap);
             grpRadar.Location = new Point(5, 22);
             grpRadar.Name = "grpRadar";
-            grpRadar.Size = new Size(463, 137);
+            grpRadar.Size = new Size(463, 99);
             grpRadar.TabIndex = 26;
             grpRadar.TabStop = false;
             grpRadar.Text = "Radar";
@@ -1432,6 +1434,17 @@ namespace eft_dma_radar
             // colDialog
             // 
             colDialog.FullOpen = true;
+            // 
+            // chkQuestHelper
+            // 
+            chkQuestHelper.AutoSize = true;
+            chkQuestHelper.Location = new Point(6, 47);
+            chkQuestHelper.Name = "chkQuestHelper";
+            chkQuestHelper.Size = new Size(95, 19);
+            chkQuestHelper.TabIndex = 30;
+            chkQuestHelper.Text = "Quest Helper";
+            chkQuestHelper.UseVisualStyleBackColor = true;
+            chkQuestHelper.CheckedChanged += chkQuestHelper_CheckedChanged;
             // 
             // frmMain
             // 
@@ -1612,6 +1625,7 @@ namespace eft_dma_radar
         private GroupBox grpGearFeatures;
         private GroupBox grpGlobalFeatures;
         private CheckBox chkJuggernaut;
+        private CheckBox chkQuestHelper;
     }
 }
 

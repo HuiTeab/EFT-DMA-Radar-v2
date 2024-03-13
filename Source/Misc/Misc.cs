@@ -81,6 +81,11 @@ namespace eft_dma_radar
         [JsonPropertyName("lootEnabled")]
         public bool LootEnabled { get; set; }
         /// <summary>
+        /// Enables Quest Helper output on map.
+        /// </summary>
+        [JsonPropertyName("questHelperEnabled")]
+        public bool QuestHelperEnabled { get; set; }
+        /// <summary>
         /// Enables Aimview window in Main Window.
         /// </summary>
         [JsonPropertyName("aimviewEnabled")]
@@ -248,6 +253,7 @@ namespace eft_dma_radar
             DefaultZoom = 100;
             UIScale = 100;
             LootEnabled = true;
+            QuestHelperEnabled = true;
             AimviewEnabled = false;
             HideNames = false;
             ImportantLootOnly = false;

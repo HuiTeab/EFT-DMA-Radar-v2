@@ -13,6 +13,8 @@ namespace eft_dma_radar
     /// </summary>
     public class Player
     {
+
+        private readonly Config _config;
         private static readonly FileSystemWatcher _watchlistMonitor;
         private static readonly object _watchlistLock = new();
         private static readonly ConcurrentStack<PlayerHistoryEntry> _history = new();
@@ -377,6 +379,12 @@ namespace eft_dma_radar
                             Type = PlayerType.LocalPlayer;
                             IsLocalPlayer = true;
                             IsPmc = true;
+                            _config = Program.Config; // get ref to config
+                            if (_config.NoSwayEnabled)
+                            {
+                                Memory.PlayerManager.SetNoRecoilAndSway(true);
+                            }
+                            
                         }
                     } catch {}
                 } else if (baseClassName == "ObservedPlayerView") {

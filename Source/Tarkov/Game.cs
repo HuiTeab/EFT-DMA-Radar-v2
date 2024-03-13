@@ -393,18 +393,20 @@ namespace eft_dma_radar
         private void UpdateMisc()
         {
             _config = Program.Config;
+            
             if (_questManager is null)
             {
                 try
                 {
                     var questManager = new QuestManager(_localGameWorld);
-                    _questManager = questManager; // update ref
+                     _questManager = questManager; // update ref
                 }
                 catch (Exception ex)
                 {
                     Program.Log($"ERROR loading QuestManager: {ex}");
                 }
             }
+            
             //if show loot is enabled, load loot
             if (_config.LootEnabled)
             {
