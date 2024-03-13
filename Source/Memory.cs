@@ -76,6 +76,32 @@ namespace eft_dma_radar
         {
             get => _game?.PlayerManager;
         }
+        public static QuestManager QuestManager
+        {
+            get => _game?.QuestManager;
+        }
+        public static Toolbox Toolbox
+        {
+            get => _game?.Toolbox;
+        }
+
+        public static Player LocalPlayer
+        {
+            get
+            {
+                Game game = Memory._game;
+                if (game == null)
+                {
+                    return null;
+                }
+                ReadOnlyDictionary<string, Player> players = game.Players;
+                if (players == null)
+                {
+                    return null;
+                }
+                return players.FirstOrDefault((KeyValuePair<string, Player> x) => x.Value.Type == PlayerType.LocalPlayer).Value;
+            }
+        }
         #endregion
 
         #region Startup
@@ -376,7 +402,6 @@ namespace eft_dma_radar
                 entry.SetResult(buffer);
             }
         }
-
         #endregion
 
         #region ReadMethods

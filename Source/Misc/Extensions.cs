@@ -97,7 +97,7 @@ namespace eft_dma_radar
                 PlayerType.AIScav => SKColorFromPaintColor("AIScav"),
                 PlayerType.AIBoss => SKColorFromPaintColor("Boss"),
                 PlayerType.AIOfflineScav => SKColorFromPaintColor("AIScav"),
-                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRouge or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
+                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRogue or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
                 PlayerType.AISniperScav => SKColorFromPaintColor(""),
                 PlayerType.PScav => SKColorFromPaintColor("PScav"),
 
@@ -122,7 +122,7 @@ namespace eft_dma_radar
                 PlayerType.AIScav => SKColorFromPaintColor("AIScav"),
                 PlayerType.AIBoss => SKColorFromPaintColor("Boss"),
                 PlayerType.AIOfflineScav => SKColorFromPaintColor("AIScav"),
-                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRouge or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
+                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRogue or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
                 PlayerType.AISniperScav => SKColorFromPaintColor(""),
                 PlayerType.PScav => SKColorFromPaintColor("PScav"),
 
@@ -150,7 +150,7 @@ namespace eft_dma_radar
                 PlayerType.AIScav => SKColorFromPaintColor("AIScav"),
                 PlayerType.AIBoss => SKColorFromPaintColor("Boss"),
                 PlayerType.AIOfflineScav => SKColorFromPaintColor("AIScav"),
-                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRouge or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
+                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRogue or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
                 PlayerType.AISniperScav => SKColorFromPaintColor(""),
                 PlayerType.PScav => SKColorFromPaintColor("PScav"),
 
@@ -176,173 +176,6 @@ namespace eft_dma_radar
                     return SKPaints.PaintExfilClosed;
                 default:
                     return SKPaints.PaintExfilClosed;
-            }
-        }
-        #endregion
-
-        #region Custom EFT Extensions
-        public static AIRole GetRole(this WildSpawnType type)
-        {
-            switch (type)
-            {
-                case WildSpawnType.marksman:
-                    return new AIRole()
-                    {
-                        Name = "Sniper",
-                        Type = PlayerType.AIScav
-                    };
-                case WildSpawnType.assault:
-                    return new AIRole()
-                    {
-                        Name = "Scav",
-                        Type = PlayerType.AIScav
-                    };
-                case WildSpawnType.bossTest:
-                    return new AIRole()
-                    {
-                        Name = "bossTest",
-                        Type = PlayerType.AIBoss
-                    };
-                case WildSpawnType.bossBully:
-                    return new AIRole()
-                    {
-                        Name = "Reshala",
-                        Type = PlayerType.AIBoss
-                    };
-                case WildSpawnType.followerTest:
-                    return new AIRole()
-                    {
-                        Name = "followerTest",
-                        Type = PlayerType.AIBoss
-                    };
-                case WildSpawnType.followerBully:
-                    return new AIRole()
-                    {
-                        Name = "Guard",
-                        Type = PlayerType.AIRaider
-                    };
-                case WildSpawnType.bossKilla:
-                    return new AIRole()
-                    {
-                        Name = "Killa",
-                        Type = PlayerType.AIBoss
-                    };
-                case WildSpawnType.bossKojaniy:
-                    return new AIRole()
-                    {
-                        Name = "Shturman",
-                        Type = PlayerType.AIBoss
-                    };
-                case WildSpawnType.followerKojaniy:
-                    return new AIRole()
-                    {
-                        Name = "Guard",
-                        Type = PlayerType.AIRaider
-                    };
-                case WildSpawnType.pmcBot:
-                    return new AIRole()
-                    {
-                        Name = "Raider",
-                        Type = PlayerType.AIRaider
-                    };
-                case WildSpawnType.cursedAssault:
-                    return new AIRole()
-                    {
-                        Name = "Scav",
-                        Type = PlayerType.AIScav
-                    };
-                case WildSpawnType.bossGluhar:
-                    return new AIRole()
-                    {
-                        Name = "Gluhar",
-                        Type = PlayerType.AIBoss
-                    };
-                case WildSpawnType.followerGluharAssault:
-                    return new AIRole()
-                    {
-                        Name = "Assault",
-                        Type = PlayerType.AIRaider
-                    };
-                case WildSpawnType.followerGluharSecurity:
-                    return new AIRole()
-                    {
-                        Name = "Security",
-                        Type = PlayerType.AIRaider
-                    };
-                case WildSpawnType.followerGluharScout:
-                    return new AIRole()
-                    {
-                        Name = "Scout",
-                        Type = PlayerType.AIRaider
-                    };
-                case WildSpawnType.followerGluharSnipe:
-                    return new AIRole()
-                    {
-                        Name = "Sniper",
-                        Type = PlayerType.AIRaider
-                    };
-                case WildSpawnType.followerSanitar:
-                    return new AIRole()
-                    {
-                        Name = "Guard",
-                        Type = PlayerType.AIRaider
-                    };
-                case WildSpawnType.bossSanitar:
-                    return new AIRole()
-                    {
-                        Name = "Sanitar",
-                        Type = PlayerType.AIBoss
-                    };
-                case WildSpawnType.test:
-                    return new AIRole()
-                    {
-                        Name = "test",
-                        Type = PlayerType.AIScav
-                    };
-                case WildSpawnType.assaultGroup:
-                    return new AIRole()
-                    {
-                        Name = "assaultGroup",
-                        Type = PlayerType.AIScav
-                    };
-                case WildSpawnType.sectantWarrior:
-                    return new AIRole()
-                    {
-                        Name = "Cultist",
-                        Type = PlayerType.AIRaider
-                    };
-                case WildSpawnType.sectantPriest:
-                    return new AIRole()
-                    {
-                        Name = "Priest",
-                        Type = PlayerType.AIBoss
-                    };
-                case WildSpawnType.bossTagilla:
-                    return new AIRole()
-                    {
-                        Name = "Tagilla",
-                        Type = PlayerType.AIBoss
-                    };
-                case WildSpawnType.followerTagilla:
-                    return new AIRole()
-                    {
-                        Name = "Guard",
-                        Type = PlayerType.AIRaider
-                    };
-                case WildSpawnType.exUsec:
-                    return new AIRole()
-                    {
-                        Name = "Rogue",
-                        Type = PlayerType.AIRaider
-                    };
-                case WildSpawnType.gifter:
-                    return new AIRole()
-                    {
-                        Name = "SANTA",
-                        Type = PlayerType.AIScav
-                    };
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
         }
         #endregion

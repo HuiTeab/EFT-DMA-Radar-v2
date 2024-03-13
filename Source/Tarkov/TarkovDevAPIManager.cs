@@ -170,6 +170,13 @@ namespace eft_dma_radar
                                                 name
                                                 shortName
                                                 }
+                                                questItem {
+                                                    id
+                                                    name
+                                                    shortName
+                                                    normalizedName
+                                                    description
+                                                }
                                                 count
                                             }
                                             ... on TaskObjectiveBasic {
@@ -257,13 +264,60 @@ namespace eft_dma_radar
                 }
                 if (item.data?.tasks != null)
                 {
-                    // WIP //
                     foreach (var task in item.data.tasks)
                     {
-                        var objectiveCount = task.objectives.Count;
-                        for (var i = 0; i < objectiveCount; i++)
+                        var newTask = new Tasks()
                         {
-                            var objective = task.objectives[i];
+                            Name = task.name,
+                            ID = task.id,
+                            Objectives = new List<Tasks.Objective>()
+                        };
+
+                        foreach (var objective in task.objectives)
+                        {
+                            var newObjective = new Tasks.Objective()
+                            {
+                                Description = objective.description,
+                                Type = objective.type,
+                                ID = objective.id,
+                                Maps = objective.maps?.Select(m => new ObjectiveMaps
+                                {
+                                    id = m.id,
+                                    name = m.name,
+                                    normalizedName = m.normalizedName
+                                }).ToList(),
+                                Zones = objective.zones?.Select(z => new ObjectiveZones
+                                {
+                                    id = z.id,
+                                    map = new ObjectiveZones.Map
+                                    {
+                                        id = z.map.id,
+                                        name = z.map.name,
+                                        normalizedName = z.map.normalizedName
+                                    },
+                                    position = new ObjectiveZones.Position
+                                    {
+                                        x = z.position.x,
+                                        y = z.position.y,
+                                        z = z.position.z
+                                    }
+                                }).ToList(),
+                                //how to add objectiveItem
+                                Count = objective.count,
+                                FoundInRaid = objective.foundInRaid
+                            };
+
+                            if (objective.questItem != null) // Check if questItem exists
+                            {
+                                newObjective.QuestItem = new ObjectiveItem
+                                {
+                                    Id = objective.questItem.id,
+                                    Name = objective.questItem.name,
+                                    ShortName = objective.questItem.shortName,
+                                    NormalizedName = objective.questItem.normalizedName,
+                                    Description = objective.questItem.description,
+                                };
+                            }
                             //visit
                             //extract
                             //mark
@@ -273,31 +327,33 @@ namespace eft_dma_radar
                             //plantItem
                             //giveItem
                             //experience
-                            if (objective.type == "findQuestItem"){
-
+                            // Additional processing based on the objective.type
+                            switch (objective.type)
+                            {
+                                case "findQuestItem":
+                                    // Process findQuestItem type objectives here.
+                                    // You might want to add specific properties or actions.
+                                    break;
+                                case "visit":
+                                    // Process visit type objectives here.
+                                    // This could involve adding details about the maps and zones to visit.
+                                    break;
+                                case "mark":
+                                    // Process mark type objectives here.
+                                    // This might include details about the item to mark and its location.
+                                    break;
+                                // Add more cases for other types as necessary.
                             }
-                            if (objective.type == "visit"){
-                                if (objective.maps != null && objective.maps.Any()){
-                                    foreach (var map in objective.maps)
-                                    {
-                                        
-                                    }
-                                }
-                                if (objective.zones != null && objective.zones.Any()){
-                                    foreach (var zone in objective.zones)
-                                    {
 
-                                    }
-                                }
-
-                            }
-                            if (objective.type == "mark"){
-
-                            }
+                            // Add the populated objective to the task's objectives list.
+                            newTask.Objectives.Add(newObjective);
                         }
-                        
+
+                        // Finally, add the fully constructed task to the allTasks dictionary.
+                        allTasks.TryAdd(task.id, newTask);
                     }
                 }
+
                 if (item.data?.questItems != null)
                 {
                     foreach (var questItem in item.data.questItems)
@@ -420,8 +476,17 @@ namespace eft_dma_radar
             public List<ObjectiveZones>? zones { get; set; } 
             public int? count { get; set; }
             public bool? foundInRaid { get; set; }
-
+            public ObjectiveItems questItem { get; set; }
         }
+    }
+
+    public class ObjectiveItems
+    {
+        public string id { get; set; }
+        public string name { get; set; }
+        public string shortName { get; set; }
+        public string normalizedName { get; set; }
+        public string description { get; set; }
     }
 
     public class ObjectiveZones
@@ -477,6 +542,15 @@ namespace eft_dma_radar
 
     }
 
+    public class ObjectiveItem
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string ShortName { get; set; }
+        public string NormalizedName { get; set; }
+        public string Description { get; set; }
+    }
+
     public class Tasks
     {
         public string Name { get; set; }
@@ -489,9 +563,13 @@ namespace eft_dma_radar
             public string Type { get; set; }
             public string ID { get; set; }
             public List<ObjectiveMaps> Maps { get; set; } = new List<ObjectiveMaps>();
-            public List<ObjectiveZones> ObjectiveZones { get; set; } = new List<ObjectiveZones>();
+            public List<ObjectiveZones> Zones { get; set; } = new List<ObjectiveZones>(); // Renamed from ObjectiveZones for clarity
+            // Add more properties here as needed, for example:
+            public ObjectiveItem QuestItem { get; set; }
+            public int? Count { get; set; } // For objectives requiring collecting or using a certain number of items
+            public bool? FoundInRaid { get; set; } // For objectives requiring items to be found in raid
+            // You can add more specific fields as needed for various objective types.
         }
-
     }
 
     public class TarkovDevResponse

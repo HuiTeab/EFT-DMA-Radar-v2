@@ -103,6 +103,15 @@ namespace eft_dma_radar
         {
             get => Memory.Exfils;
         }
+
+        private Collection<QuestItem> QuestItem
+        {
+            get => Memory.QuestManager.QuestItem;
+        }
+        private Collection<QuestZone> QuestZone
+        {
+            get => Memory.QuestManager.QuestZone;
+        }
         #endregion
 
         #region Constructor
@@ -120,7 +129,6 @@ namespace eft_dma_radar
                 Dock = DockStyle.Fill,
                 VSync = _config.Vsync // cap fps to refresh rate, reduce tearing
             };
-
             tabRadar.Controls.Add(_mapCanvas); // place Radar Map Canvas on top of TabPage1
             chkMapFree.Parent = _mapCanvas; // change parent for checkBox_MapFree 'button'
             trkUIScale.ValueChanged += trkUIScale_ValueChanged; // Handle UI Adjustments
@@ -138,6 +146,7 @@ namespace eft_dma_radar
             _mapCanvas.MouseClick += MapCanvas_MouseClick;
             lstViewPMCHistory.MouseDoubleClick += lstViewPMCHistory_MouseDoubleClick;
             _fpsWatch.Start(); // fps counter
+
         }
         #endregion
 
@@ -266,19 +275,70 @@ namespace eft_dma_radar
         }
 
         /// <summary>
-        /// Fired when Max Stamina checkbox has been adjusted
-        /// </summary>
-        private void chkMaxStamina_CheckedChanged(object sender, EventArgs e)
-        {
-            _config.MaxStaminaEnabled = chkMaxStamina.Checked;
-        }
-
-        /// <summary>
         /// Fired when NoSway checkbox has been adjusted
         /// </summary>
         private void chkNoSway_CheckedChanged(object sender, EventArgs e)
         {
             _config.NoSwayEnabled = chkNoSway.Checked;
+        }
+
+        private void chkJumpPower_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.JumpPowerEnabled = chkJumpPower.Checked;
+            trkJumpPower.Visible = chkJumpPower.Checked;
+        }
+
+        private void chkThrowPower_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.ThrowPowerEnabled = chkThrowPower.Checked;
+            trkThrowPower.Visible = chkThrowPower.Checked;
+        }
+
+        private void chkMagDrills_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.MagDrillsEnabled = chkMagDrills.Checked;
+            trkMagDrills.Visible = chkMagDrills.Checked;
+        }
+
+        private void trkJumpPower_Scroll(object sender, EventArgs e)
+        {
+            _config.JumpPowerStrength = trkJumpPower.Value;
+
+            if (chkJumpPower.Checked && Memory.InGame)
+            {
+                Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.JumpStrength);
+            }
+        }
+
+        private void trkThrowPower_Scroll(object sender, EventArgs e)
+        {
+            _config.ThrowPowerStrength = trkThrowPower.Value;
+
+            if (chkThrowPower.Checked && Memory.InGame)
+            {
+                Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.ThrowStrength);
+            }
+        }
+
+        private void trkMagDrills_Scroll(object sender, EventArgs e)
+        {
+            _config.MagDrillSpeed = trkMagDrills.Value;
+
+            if (chkMagDrills.Checked && Memory.InGame)
+            {
+                Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsLoad);
+                Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsUnload);
+            }
+        }
+
+        private void chkJuggernaut_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.JuggernautEnabled = chkJuggernaut.Checked;
+        }
+
+        private void chkDoubleSearch_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.DoubleSearchEnabled = chkDoubleSearch.Checked;
         }
 
         /// <summary>
@@ -1118,6 +1178,15 @@ namespace eft_dma_radar
             chkOpticThermalVision.Checked = _config.OpticThermalVisionEnabled;
             chkNoVisor.Checked = _config.NoVisorEnabled;
 
+            chkJuggernaut.Checked = _config.JuggernautEnabled;
+            chkDoubleSearch.Checked = _config.DoubleSearchEnabled;
+            chkJumpPower.Checked = _config.JumpPowerEnabled;
+            trkJumpPower.Value = (int)_config.JumpPowerStrength;
+            chkThrowPower.Checked = _config.ThrowPowerEnabled;
+            trkThrowPower.Value = (int)_config.ThrowPowerStrength;
+            chkMagDrills.Checked = _config.MagDrillsEnabled;
+            trkMagDrills.Value = (int)_config.MagDrillSpeed;
+
             if (_config.Filters.Count == 0)
             { // add a default, blank config
                 LootFilter newFilter = new LootFilter()
@@ -1705,6 +1774,8 @@ namespace eft_dma_radar
                             if (chkShowLoot.Checked) // Draw loot (if enabled)
                             {
                                 var loot = this.Loot; // cache ref
+                                var questItems = this.QuestItem; // cache ref
+                                var QuestZone = this.QuestZone; // cache ref
                                 //Debug.WriteLine($"Loot is null: {loot is null}");
                                 if (loot is not null)
                                 {
@@ -1743,6 +1814,43 @@ namespace eft_dma_radar
                                         }
 
                                     // coprses = ootItem {Position = pos,AlwaysShow = true,Label = "Corpse"
+                                }
+                                if (questItems is not null)
+                                {
+                                    foreach (var item in questItems)
+                                    {
+                                        if (item.Position.X != 0)
+                                        {
+                                            float position = item.Position.Z - localPlayerMapPos.Height;
+                                            var itemZoomedPos = item.Position
+                                                                    .ToMapPos(_selectedMap)
+                                                                    .ToZoomedPos(mapParams);
+
+                                            item.ZoomedPosition = new Vector2() // Cache Position as Vec2 for MouseMove event
+                                            {
+                                                X = itemZoomedPos.X,
+                                                Y = itemZoomedPos.Y
+                                            };
+
+                                            itemZoomedPos.DrawQuestItem(
+                                                canvas,
+                                                "Quest: " + item.Name,
+                                                position
+                                            );
+
+                                        }
+                                    }
+                                }
+                            }
+                            if (QuestZone is not null)
+                            {
+                                foreach (var zone in QuestZone)
+                                {
+                                    if (zone.MapName.ToLower() == _selectedMap.Name.ToLower())
+                                    {
+
+                                    }
+
                                 }
                             }
 

@@ -175,6 +175,54 @@ namespace eft_dma_radar
         public bool MaxStaminaEnabled { get; set; }
 
         /// <summary>
+        /// Enables / disables double search.
+        /// </summary>
+        [JsonPropertyName("doubleSearchEnabled")]
+        public bool DoubleSearchEnabled { get; set; }
+
+        /// <summary>
+        /// Enables / disables jump power modification
+        /// </summary>
+        [JsonPropertyName("jumpPowerEnabled")]
+        public bool JumpPowerEnabled { get; set; }
+
+        /// <summary>
+        /// Changes jump power strength
+        /// </summary>
+        [JsonPropertyName("jumpPowerStrength")]
+        public float JumpPowerStrength { get; set; }
+
+        /// <summary>
+        /// Enables / disables throw power modification.
+        /// </summary>
+        [JsonPropertyName("throwPowerEnabled")]
+        public bool ThrowPowerEnabled { get; set; }
+
+        /// <summary>
+        /// Changes throw power strength.
+        /// </summary>
+        [JsonPropertyName("throwPowerStrength")]
+        public float ThrowPowerStrength { get; set; }
+
+        /// <summary>
+        /// Enables / disables faster mag drills.
+        /// </summary>
+        [JsonPropertyName("magDrillsEnabled")]
+        public bool MagDrillsEnabled { get; set; }
+
+        /// <summary>
+        /// Changes mag load/unload speed
+        /// </summary>
+        [JsonPropertyName("magDrillSpeed")]
+        public float MagDrillSpeed { get; set; }
+
+        /// <summary>
+        /// Enables / disables juggernaut.
+        /// </summary>
+        [JsonPropertyName("juggernautEnabled")]
+        public bool JuggernautEnabled { get; set; }
+
+        /// <summary>
         /// Enables / disables max / infinite stamina.
         /// </summary>
         [JsonPropertyName("showHoverArmor")]
@@ -236,6 +284,18 @@ namespace eft_dma_radar
             ThermalVisionEnabled = false;
             NoVisorEnabled = false;
             OpticThermalVisionEnabled = false;
+
+            DoubleSearchEnabled = false;
+            JumpPowerEnabled = false;
+            JumpPowerStrength = 0.35f;
+            ThrowPowerEnabled = false;
+            ThrowPowerStrength = 0.35f;
+            MagDrillsEnabled = false;
+            MagDrillSpeed = 0.35f;
+            JuggernautEnabled = false;
+
+            //TO DO:
+            // Implement the above into PlayerManager ChangeSkills function then into Toolbox
         }
 
         /// <summary>
@@ -411,6 +471,66 @@ namespace eft_dma_radar
             }
             canvas.DrawText(label, this.GetPoint(7 * UIScale, 3 * UIScale), text);
         }
+        /// <summary>
+        /// Draws a Quest Item on this location.
+        /// </summary>
+        /// <param name="canvas"></param>
+        /// <param name="Label"></param>
+        /// <param name="heightDiff"></param>
+        public void DrawQuestItem(SKCanvas canvas, string Label, float heightDiff) {
+            var label = Label;
+            SKPaint paint = new SKPaint(); // or assign it to an existing paint object if available
+            paint.Color = SKColors.Coral;
+            SKPaint text = new SKPaint(); // or assign it to an existing paint object if available
+            text.Color = SKColors.Red;
+
+            if (heightDiff > 1.45) // loot is above player
+            {
+                
+                using var path = this.GetUpArrow();
+                canvas.DrawPath(path, paint);
+            }
+            else if (heightDiff < -1.45) // loot is below player
+            {
+                using var path = this.GetDownArrow();
+                canvas.DrawPath(path, paint);
+            }
+            else // loot is level with player
+            {
+                canvas.DrawCircle(this.GetPoint(), 5 * UIScale, paint);
+            }
+            canvas.DrawText(label, this.GetPoint(7 * UIScale, 3 * UIScale), text);
+        }
+        /// <summary>
+        /// Draws task zone on this location.
+        /// </summary>
+        /// <param name="canvas"></param>
+        /// <param name="heightDiff"></param>
+        /// 
+        public void DrawTaskZone(SKCanvas canvas, float heightDiff, string Label)
+        {
+            SKPaint paint = new SKPaint(); // or assign it to an existing paint object if available
+            paint.Color = SKColors.Coral;
+            SKPaint text = new SKPaint(); // or assign it to an existing paint object if available
+            text.Color = SKColors.Red;
+
+            if (heightDiff > 1.45) // loot is above player
+            {
+                using var path = this.GetUpArrow();
+                canvas.DrawPath(path, paint);
+            }
+            else if (heightDiff < -1.45) // loot is below player
+            {
+                using var path = this.GetDownArrow();
+                canvas.DrawPath(path, paint);
+            }
+            else // loot is level with player
+            {
+                canvas.DrawCircle(this.GetPoint(), 5 * UIScale, paint);
+            }
+            canvas.DrawText(Label, this.GetPoint(7 * UIScale, 3 * UIScale), text);
+        }
+        
         /// <summary>
         /// Draws a Player Marker on this location.
         /// </summary>
@@ -1199,9 +1319,9 @@ namespace eft_dma_radar
         /// </summary>
         AIRaider,
         /// <summary>
-        /// Difficult AI Rouge.
+        /// Difficult AI Rogue.
         /// </summary>
-        AIRouge,
+        AIRogue,
         /// <summary>
         /// Difficult AI Boss.
         /// </summary>
@@ -1248,142 +1368,6 @@ namespace eft_dma_radar
     #endregion
 
     #region EFT Enums
-    /// <summary>
-    /// Defines 'type' of AI Bot as determined by reading Offsets.PlayerSettings.Role
-    /// </summary>
-    public enum WildSpawnType : int // EFT.WildSpawnType
-    {
-        /// <summary>
-        /// Sniper Scav.
-        /// </summary>
-        marksman = 1,
-
-        /// <summary>
-        /// Regular Scav.
-        /// </summary>
-        assault = 2,
-
-        /// <summary>
-        /// ???
-        /// </summary>
-        bossTest = 4,
-
-        /// <summary>
-        /// Reshala
-        /// </summary>
-        bossBully = 8,
-
-        /// <summary>
-        /// ???
-        /// </summary>
-        followerTest = 16,
-
-        /// <summary>
-        /// Reshala Guard.
-        /// </summary>
-        followerBully = 32,
-
-        /// <summary>
-        /// Killa
-        /// </summary>
-        bossKilla = 64,
-
-        /// <summary>
-        /// Shturman
-        /// </summary>
-        bossKojaniy = 128,
-
-        /// <summary>
-        /// Shturman Guard.
-        /// </summary>
-        followerKojaniy = 256,
-
-        /// <summary>
-        /// AI Raider
-        /// </summary>
-        pmcBot = 512,
-
-        /// <summary>
-        /// Normal Scav (cursed)
-        /// </summary>
-        cursedAssault = 1024,
-
-        /// <summary>
-        /// Gluhar
-        /// </summary>
-        bossGluhar = 2048,
-
-        /// <summary>
-        /// Gluhar Guard (Assault)
-        /// </summary>
-        followerGluharAssault = 4096,
-
-        /// <summary>
-        /// Gluhar Guard (Security)
-        /// </summary>
-        followerGluharSecurity = 8192,
-
-        /// <summary>
-        /// Gluhar Guard (Scout)
-        /// </summary>
-        followerGluharScout = 16384,
-
-        /// <summary>
-        /// Gluhar Guard (Sniper)
-        /// </summary>
-        followerGluharSnipe = 32768,
-
-        /// <summary>
-        /// Sanitar Guard
-        /// </summary>
-        followerSanitar = 65536,
-
-        /// <summary>
-        /// Sanitar
-        /// </summary>
-        bossSanitar = 131072,
-
-        /// <summary>
-        /// ???
-        /// </summary>
-        test = 262144,
-
-        /// <summary>
-        /// ???
-        /// </summary>
-        assaultGroup = 524288,
-
-        /// <summary>
-        /// Cultist
-        /// </summary>
-        sectantWarrior = 1048576,
-
-        /// <summary>
-        /// Cultist Priest (Boss)
-        /// </summary>
-        sectantPriest = 2097152,
-
-        /// <summary>
-        /// Tagilla
-        /// </summary>
-        bossTagilla = 4194304,
-
-        /// <summary>
-        /// Tagilla Guard?
-        /// </summary>
-        followerTagilla = 8388608,
-
-        /// <summary>
-        /// USEC Rogues
-        /// </summary>
-        exUsec = 16777216,
-
-        /// <summary>
-        /// Santa
-        /// </summary>
-        gifter = 33554432
-    };
-
     [Flags]
     public enum MemberCategory : int
     {
@@ -1446,7 +1430,7 @@ namespace eft_dma_radar
             {"Коллонтай", "Kollontay"}
         };
 
-        public static string[] RaiderGuardRougeNames = {
+        public static string[] RaiderGuardRogueNames = {
             "Afraid",
             "Andresto",
             "Applejuice",
