@@ -135,10 +135,6 @@ namespace eft_dma_radar
             chkShowMapSetup = new CheckBox();
             btnToggleMap = new Button();
             tabRadar = new TabPage();
-            chkNoVisorDebug = new CheckBox();
-            chkOpticThermalVisionDebug = new CheckBox();
-            chkNightVisionDebug = new CheckBox();
-            chkThermalVisionDebug = new CheckBox();
             grpMapSetup = new GroupBox();
             chkMapFree = new CheckBox();
             txtMapSetupScale = new TextBox();
@@ -944,6 +940,7 @@ namespace eft_dma_radar
             chkShowLoot.TabIndex = 17;
             chkShowLoot.Text = "Show Loot (F3)";
             chkShowLoot.UseVisualStyleBackColor = true;
+            chkShowLoot.CheckedChanged += chkShowLoot_CheckedChanged;
             // 
             // trkAimLength
             // 
@@ -1331,10 +1328,6 @@ namespace eft_dma_radar
             // 
             // tabRadar
             // 
-            tabRadar.Controls.Add(chkNoVisorDebug);
-            tabRadar.Controls.Add(chkOpticThermalVisionDebug);
-            tabRadar.Controls.Add(chkNightVisionDebug);
-            tabRadar.Controls.Add(chkThermalVisionDebug);
             tabRadar.Controls.Add(grpMapSetup);
             tabRadar.Location = new Point(4, 24);
             tabRadar.Name = "tabRadar";
@@ -1343,54 +1336,6 @@ namespace eft_dma_radar
             tabRadar.TabIndex = 0;
             tabRadar.Text = "Radar";
             tabRadar.UseVisualStyleBackColor = true;
-            // 
-            // chkNoVisorDebug
-            // 
-            chkNoVisorDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            chkNoVisorDebug.AutoSize = true;
-            chkNoVisorDebug.Location = new Point(1066, 82);
-            chkNoVisorDebug.Name = "chkNoVisorDebug";
-            chkNoVisorDebug.Size = new Size(71, 19);
-            chkNoVisorDebug.TabIndex = 17;
-            chkNoVisorDebug.Text = "No Visor";
-            chkNoVisorDebug.UseVisualStyleBackColor = true;
-            chkNoVisorDebug.CheckedChanged += chkNoVisor_CheckedChanged;
-            // 
-            // chkOpticThermalVisionDebug
-            // 
-            chkOpticThermalVisionDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            chkOpticThermalVisionDebug.AutoSize = true;
-            chkOpticThermalVisionDebug.Location = new Point(1066, 56);
-            chkOpticThermalVisionDebug.Name = "chkOpticThermalVisionDebug";
-            chkOpticThermalVisionDebug.Size = new Size(101, 19);
-            chkOpticThermalVisionDebug.TabIndex = 16;
-            chkOpticThermalVisionDebug.Text = "Optic Thermal";
-            chkOpticThermalVisionDebug.UseVisualStyleBackColor = true;
-            chkOpticThermalVisionDebug.CheckedChanged += chkOpticThermalVision_CheckedChanged;
-            // 
-            // chkNightVisionDebug
-            // 
-            chkNightVisionDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            chkNightVisionDebug.AutoSize = true;
-            chkNightVisionDebug.Location = new Point(1066, 6);
-            chkNightVisionDebug.Name = "chkNightVisionDebug";
-            chkNightVisionDebug.Size = new Size(94, 19);
-            chkNightVisionDebug.TabIndex = 14;
-            chkNightVisionDebug.Text = "Night Vision ";
-            chkNightVisionDebug.UseVisualStyleBackColor = true;
-            chkNightVisionDebug.CheckedChanged += chkNightVision_CheckedChanged;
-            // 
-            // chkThermalVisionDebug
-            // 
-            chkThermalVisionDebug.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            chkThermalVisionDebug.AutoSize = true;
-            chkThermalVisionDebug.Location = new Point(1066, 31);
-            chkThermalVisionDebug.Name = "chkThermalVisionDebug";
-            chkThermalVisionDebug.Size = new Size(104, 19);
-            chkThermalVisionDebug.TabIndex = 15;
-            chkThermalVisionDebug.Text = "Thermal Vision";
-            chkThermalVisionDebug.UseVisualStyleBackColor = true;
-            chkThermalVisionDebug.CheckedChanged += chkThermalVision_CheckedChanged;
             // 
             // grpMapSetup
             // 
@@ -1543,7 +1488,6 @@ namespace eft_dma_radar
             grpRadar.ResumeLayout(false);
             grpRadar.PerformLayout();
             tabRadar.ResumeLayout(false);
-            tabRadar.PerformLayout();
             grpMapSetup.ResumeLayout(false);
             grpMapSetup.PerformLayout();
             tabControl.ResumeLayout(false);
@@ -1601,10 +1545,6 @@ namespace eft_dma_radar
         private CheckBox chkShowMapSetup;
         private Button btnToggleMap;
         private TabPage tabRadar;
-        private CheckBox chkNoVisorDebug;
-        private CheckBox chkOpticThermalVisionDebug;
-        private CheckBox chkNightVisionDebug;
-        private CheckBox chkThermalVisionDebug;
         private GroupBox grpMapSetup;
         private CheckBox chkMapFree;
         private TextBox txtMapSetupScale;

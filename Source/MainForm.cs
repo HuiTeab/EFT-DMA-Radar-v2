@@ -1862,7 +1862,7 @@ namespace eft_dma_radar
                                         var itemZoomedPos = zone.Position
                                                                 .ToMapPos(_selectedMap)
                                                                 .ToZoomedPos(mapParams);
-                                        
+
                                         itemZoomedPos.DrawMarkingTask(
                                             canvas,
                                             $"{zone.ObjectiveType}: " + zone.ID,
@@ -2231,6 +2231,11 @@ namespace eft_dma_radar
             }
 
             base.OnMouseWheel(e);
+        }
+
+        private void chkShowLoot_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.LootEnabled = chkShowLoot.Checked;
         }
     }
     #endregion
