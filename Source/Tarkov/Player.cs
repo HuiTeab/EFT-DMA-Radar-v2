@@ -195,14 +195,14 @@ namespace eft_dma_radar
                     && IsActive && IsAlive;
         }
         /// <summary>
-        /// Player is AI & boss, rouge, raider etc.
+        /// Player is AI & boss, rogue, raider etc.
         /// </summary>
         public bool IsBossRaider {
             get => (
                 Type is PlayerType.AIRaider ||
                 Type is PlayerType.AIBossFollower ||
                 Type is PlayerType.AIBossGuard ||
-                Type is PlayerType.AIRouge ||
+                Type is PlayerType.AIRogue ||
                 Type is PlayerType.AIBoss);
         }
         /// <summary>
@@ -220,7 +220,7 @@ namespace eft_dma_radar
                 Type is PlayerType.AIRaider ||
                 Type is PlayerType.AIBossFollower ||
                 Type is PlayerType.AIBossGuard ||
-                Type is PlayerType.AIRouge ||
+                Type is PlayerType.AIRogue ||
                 Type is PlayerType.AIOfflineScav ||
                 Type is PlayerType.AIBoss) && IsActive && IsAlive;
         }
@@ -409,7 +409,7 @@ namespace eft_dma_radar
                     } else if (playerSide == 4 && playerIsAI) {
                         if (Helpers.NameTranslations.ContainsValue(Name)) {
                             Type = PlayerType.AIBoss;
-                        } else if (Helpers.RaiderGuardRougeNames.Contains(Name)) {
+                        } else if (Helpers.RaiderGuardRogueNames.Contains(Name)) {
                             Type = PlayerType.AIRaider;
                         } else {
                             Type = PlayerType.AIScav;
@@ -705,7 +705,7 @@ namespace eft_dma_radar
                 case 16: return PlayerType.AIBossFollower; // sanitar follower
                 case 17: return PlayerType.AIBoss; // sanitar
                 case 22: return PlayerType.AIBoss; // tagilla
-                case 24: return PlayerType.AIRouge; // rouges
+                case 24: return PlayerType.AIRogue; // rogues
                 case 26: return PlayerType.AIBoss; // knight
                 case 27: return PlayerType.AIBoss; // big pipe
                 case 28: return PlayerType.AIBoss; // bird eye

@@ -175,6 +175,54 @@ namespace eft_dma_radar
         public bool MaxStaminaEnabled { get; set; }
 
         /// <summary>
+        /// Enables / disables double search.
+        /// </summary>
+        [JsonPropertyName("doubleSearchEnabled")]
+        public bool DoubleSearchEnabled { get; set; }
+
+        /// <summary>
+        /// Enables / disables jump power modification
+        /// </summary>
+        [JsonPropertyName("jumpPowerEnabled")]
+        public bool JumpPowerEnabled { get; set; }
+
+        /// <summary>
+        /// Changes jump power strength
+        /// </summary>
+        [JsonPropertyName("jumpPowerStrength")]
+        public float JumpPowerStrength { get; set; }
+
+        /// <summary>
+        /// Enables / disables throw power modification.
+        /// </summary>
+        [JsonPropertyName("throwPowerEnabled")]
+        public bool ThrowPowerEnabled { get; set; }
+
+        /// <summary>
+        /// Changes throw power strength.
+        /// </summary>
+        [JsonPropertyName("throwPowerStrength")]
+        public float ThrowPowerStrength { get; set; }
+
+        /// <summary>
+        /// Enables / disables faster mag drills.
+        /// </summary>
+        [JsonPropertyName("magDrillsEnabled")]
+        public bool MagDrillsEnabled { get; set; }
+
+        /// <summary>
+        /// Changes mag load/unload speed
+        /// </summary>
+        [JsonPropertyName("magDrillSpeed")]
+        public float MagDrillSpeed { get; set; }
+
+        /// <summary>
+        /// Enables / disables juggernaut.
+        /// </summary>
+        [JsonPropertyName("juggernautEnabled")]
+        public bool JuggernautEnabled { get; set; }
+
+        /// <summary>
         /// Enables / disables max / infinite stamina.
         /// </summary>
         [JsonPropertyName("showHoverArmor")]
@@ -236,6 +284,18 @@ namespace eft_dma_radar
             ThermalVisionEnabled = false;
             NoVisorEnabled = false;
             OpticThermalVisionEnabled = false;
+
+            DoubleSearchEnabled = false;
+            JumpPowerEnabled = false;
+            JumpPowerStrength = 0.35f;
+            ThrowPowerEnabled = false;
+            ThrowPowerStrength = 0.35f;
+            MagDrillsEnabled = false;
+            MagDrillSpeed = 0.35f;
+            JuggernautEnabled = false;
+
+            //TO DO:
+            // Implement the above into PlayerManager ChangeSkills function then into Toolbox
         }
 
         /// <summary>
@@ -449,27 +509,43 @@ namespace eft_dma_radar
         /// 
         public void DrawTaskZone(SKCanvas canvas, float heightDiff, string Label)
         {
-            SKPaint paint = new SKPaint(); // or assign it to an existing paint object if available
-            paint.Color = SKColors.Coral;
-            SKPaint text = new SKPaint(); // or assign it to an existing paint object if available
-            text.Color = SKColors.Red;
+            
+        }
 
-            if (heightDiff > 1.45) // loot is above player
+        /// <summary>
+        /// Draws a marking task on this location.
+        /// </summary>
+        /// <param name="canvas"></param>
+        /// 
+        public void DrawMarkingTask(SKCanvas canvas, string Label, float heightDiff)
+        {
+            var label = Label;
+            SKPaint paint = new SKPaint
+            {
+                Color = SKColors.Gold
+            }; // or assign it to an existing paint object if available
+            SKPaint text = new SKPaint
+            {
+                Color = SKColors.Red
+            }; // or assign it to an existing paint object if available
+
+            if (heightDiff > 1.45) // above player
             {
                 using var path = this.GetUpArrow();
                 canvas.DrawPath(path, paint);
             }
-            else if (heightDiff < -1.45) // loot is below player
+            else if (heightDiff < -1.45) // below player
             {
                 using var path = this.GetDownArrow();
                 canvas.DrawPath(path, paint);
             }
-            else // loot is level with player
+            else // level with player
             {
                 canvas.DrawCircle(this.GetPoint(), 5 * UIScale, paint);
             }
-            canvas.DrawText(Label, this.GetPoint(7 * UIScale, 3 * UIScale), text);
+            canvas.DrawText(label, this.GetPoint(7 * UIScale, 3 * UIScale), text);
         }
+
         
         /// <summary>
         /// Draws a Player Marker on this location.
@@ -1259,9 +1335,9 @@ namespace eft_dma_radar
         /// </summary>
         AIRaider,
         /// <summary>
-        /// Difficult AI Rouge.
+        /// Difficult AI Rogue.
         /// </summary>
-        AIRouge,
+        AIRogue,
         /// <summary>
         /// Difficult AI Boss.
         /// </summary>
@@ -1370,7 +1446,7 @@ namespace eft_dma_radar
             {"Коллонтай", "Kollontay"}
         };
 
-        public static string[] RaiderGuardRougeNames = {
+        public static string[] RaiderGuardRogueNames = {
             "Afraid",
             "Andresto",
             "Applejuice",

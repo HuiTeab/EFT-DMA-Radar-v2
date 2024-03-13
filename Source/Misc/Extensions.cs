@@ -97,7 +97,7 @@ namespace eft_dma_radar
                 PlayerType.AIScav => SKColorFromPaintColor("AIScav"),
                 PlayerType.AIBoss => SKColorFromPaintColor("Boss"),
                 PlayerType.AIOfflineScav => SKColorFromPaintColor("AIScav"),
-                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRouge or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
+                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRogue or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
                 PlayerType.AISniperScav => SKColorFromPaintColor(""),
                 PlayerType.PScav => SKColorFromPaintColor("PScav"),
 
@@ -122,7 +122,7 @@ namespace eft_dma_radar
                 PlayerType.AIScav => SKColorFromPaintColor("AIScav"),
                 PlayerType.AIBoss => SKColorFromPaintColor("Boss"),
                 PlayerType.AIOfflineScav => SKColorFromPaintColor("AIScav"),
-                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRouge or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
+                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRogue or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
                 PlayerType.AISniperScav => SKColorFromPaintColor(""),
                 PlayerType.PScav => SKColorFromPaintColor("PScav"),
 
@@ -150,7 +150,7 @@ namespace eft_dma_radar
                 PlayerType.AIScav => SKColorFromPaintColor("AIScav"),
                 PlayerType.AIBoss => SKColorFromPaintColor("Boss"),
                 PlayerType.AIOfflineScav => SKColorFromPaintColor("AIScav"),
-                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRouge or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
+                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRogue or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
                 PlayerType.AISniperScav => SKColorFromPaintColor(""),
                 PlayerType.PScav => SKColorFromPaintColor("PScav"),
 

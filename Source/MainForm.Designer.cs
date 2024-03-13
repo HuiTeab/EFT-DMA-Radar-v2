@@ -112,14 +112,24 @@ namespace eft_dma_radar
             chkShowAimview = new CheckBox();
             chkHideNames = new CheckBox();
             grpMemoryWriting = new GroupBox();
-            chkNoSway = new CheckBox();
-            chkMaxStamina = new CheckBox();
-            chkNoRecoil = new CheckBox();
+            grpGlobalFeatures = new GroupBox();
             chkChams = new CheckBox();
+            chkDoubleSearch = new CheckBox();
+            grpGearFeatures = new GroupBox();
+            chkNoRecoil = new CheckBox();
+            trkMagDrills = new TrackBar();
+            chkNoSway = new CheckBox();
+            chkMagDrills = new CheckBox();
             chkNoVisor = new CheckBox();
-            chkOpticThermalVision = new CheckBox();
             chkNightVision = new CheckBox();
+            chkOpticThermalVision = new CheckBox();
             chkThermalVision = new CheckBox();
+            grpPhysicalFeatures = new GroupBox();
+            chkJuggernaut = new CheckBox();
+            trkThrowPower = new TrackBar();
+            trkJumpPower = new TrackBar();
+            chkThrowPower = new CheckBox();
+            chkJumpPower = new CheckBox();
             grpRadar = new GroupBox();
             btnRestartRadar = new Button();
             chkShowMapSetup = new CheckBox();
@@ -167,6 +177,12 @@ namespace eft_dma_radar
             ((System.ComponentModel.ISupportInitialize)trkZoom).BeginInit();
             ((System.ComponentModel.ISupportInitialize)trkUIScale).BeginInit();
             grpMemoryWriting.SuspendLayout();
+            grpGlobalFeatures.SuspendLayout();
+            grpGearFeatures.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)trkMagDrills).BeginInit();
+            grpPhysicalFeatures.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)trkThrowPower).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)trkJumpPower).BeginInit();
             grpRadar.SuspendLayout();
             tabRadar.SuspendLayout();
             grpMapSetup.SuspendLayout();
@@ -591,7 +607,7 @@ namespace eft_dma_radar
             lblAIRaiderColor.Name = "lblAIRaiderColor";
             lblAIRaiderColor.Size = new Size(82, 15);
             lblAIRaiderColor.TabIndex = 18;
-            lblAIRaiderColor.Text = "Raider/Rouge:";
+            lblAIRaiderColor.Text = "Raider/Rogue:";
             // 
             // lblPScavColor
             // 
@@ -637,7 +653,7 @@ namespace eft_dma_radar
             grpLootFilters.Controls.Add(picLootFilterEditColor);
             grpLootFilters.Location = new Point(474, 238);
             grpLootFilters.Name = "grpLootFilters";
-            grpLootFilters.Size = new Size(408, 286);
+            grpLootFilters.Size = new Size(408, 388);
             grpLootFilters.TabIndex = 27;
             grpLootFilters.TabStop = false;
             grpLootFilters.Text = "Loot Filters/Profiles";
@@ -1037,62 +1053,32 @@ namespace eft_dma_radar
             // 
             // grpMemoryWriting
             // 
-            grpMemoryWriting.Controls.Add(chkNoSway);
-            grpMemoryWriting.Controls.Add(chkMaxStamina);
-            grpMemoryWriting.Controls.Add(chkNoRecoil);
-            grpMemoryWriting.Controls.Add(chkChams);
-            grpMemoryWriting.Controls.Add(chkNoVisor);
-            grpMemoryWriting.Controls.Add(chkOpticThermalVision);
-            grpMemoryWriting.Controls.Add(chkNightVision);
-            grpMemoryWriting.Controls.Add(chkThermalVision);
+            grpMemoryWriting.Controls.Add(grpGlobalFeatures);
+            grpMemoryWriting.Controls.Add(grpGearFeatures);
+            grpMemoryWriting.Controls.Add(grpPhysicalFeatures);
             grpMemoryWriting.Location = new Point(6, 330);
             grpMemoryWriting.Name = "grpMemoryWriting";
-            grpMemoryWriting.Size = new Size(462, 194);
+            grpMemoryWriting.Size = new Size(462, 296);
             grpMemoryWriting.TabIndex = 9;
             grpMemoryWriting.TabStop = false;
             grpMemoryWriting.Text = "Memory Writing [RISKY]";
             // 
-            // chkNoSway
+            // grpGlobalFeatures
             // 
-            chkNoSway.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            chkNoSway.AutoSize = true;
-            chkNoSway.Location = new Point(370, 22);
-            chkNoSway.Name = "chkNoSway";
-            chkNoSway.Size = new Size(72, 19);
-            chkNoSway.TabIndex = 25;
-            chkNoSway.Text = "No Sway";
-            chkNoSway.UseVisualStyleBackColor = true;
-            chkNoSway.CheckedChanged += chkNoSway_CheckedChanged;
-            // 
-            // chkMaxStamina
-            // 
-            chkMaxStamina.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            chkMaxStamina.AutoSize = true;
-            chkMaxStamina.Location = new Point(272, 47);
-            chkMaxStamina.Name = "chkMaxStamina";
-            chkMaxStamina.Size = new Size(95, 19);
-            chkMaxStamina.TabIndex = 24;
-            chkMaxStamina.Text = "Max Stamina";
-            chkMaxStamina.UseVisualStyleBackColor = true;
-            chkMaxStamina.CheckedChanged += chkMaxStamina_CheckedChanged;
-            // 
-            // chkNoRecoil
-            // 
-            chkNoRecoil.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            chkNoRecoil.AutoSize = true;
-            chkNoRecoil.Location = new Point(272, 22);
-            chkNoRecoil.Name = "chkNoRecoil";
-            chkNoRecoil.Size = new Size(77, 19);
-            chkNoRecoil.TabIndex = 23;
-            chkNoRecoil.Text = "No Recoil";
-            chkNoRecoil.UseVisualStyleBackColor = true;
-            chkNoRecoil.CheckedChanged += chkNoRecoil_CheckedChanged;
+            grpGlobalFeatures.Controls.Add(chkChams);
+            grpGlobalFeatures.Controls.Add(chkDoubleSearch);
+            grpGlobalFeatures.Location = new Point(6, 22);
+            grpGlobalFeatures.Name = "grpGlobalFeatures";
+            grpGlobalFeatures.Size = new Size(450, 82);
+            grpGlobalFeatures.TabIndex = 34;
+            grpGlobalFeatures.TabStop = false;
+            grpGlobalFeatures.Text = "Global Features";
             // 
             // chkChams
             // 
             chkChams.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             chkChams.AutoSize = true;
-            chkChams.Location = new Point(5, 72);
+            chkChams.Location = new Point(6, 22);
             chkChams.Name = "chkChams";
             chkChams.Size = new Size(142, 19);
             chkChams.TabIndex = 22;
@@ -1100,11 +1086,88 @@ namespace eft_dma_radar
             chkChams.UseVisualStyleBackColor = true;
             chkChams.CheckedChanged += chkChams_CheckedChanged;
             // 
+            // chkDoubleSearch
+            // 
+            chkDoubleSearch.AutoSize = true;
+            chkDoubleSearch.Location = new Point(6, 47);
+            chkDoubleSearch.Name = "chkDoubleSearch";
+            chkDoubleSearch.Size = new Size(102, 19);
+            chkDoubleSearch.TabIndex = 2;
+            chkDoubleSearch.Text = "Double Search";
+            chkDoubleSearch.UseVisualStyleBackColor = true;
+            chkDoubleSearch.CheckedChanged += chkDoubleSearch_CheckedChanged;
+            // 
+            // grpGearFeatures
+            // 
+            grpGearFeatures.Controls.Add(chkNoRecoil);
+            grpGearFeatures.Controls.Add(trkMagDrills);
+            grpGearFeatures.Controls.Add(chkNoSway);
+            grpGearFeatures.Controls.Add(chkMagDrills);
+            grpGearFeatures.Controls.Add(chkNoVisor);
+            grpGearFeatures.Controls.Add(chkNightVision);
+            grpGearFeatures.Controls.Add(chkOpticThermalVision);
+            grpGearFeatures.Controls.Add(chkThermalVision);
+            grpGearFeatures.Location = new Point(6, 110);
+            grpGearFeatures.Name = "grpGearFeatures";
+            grpGearFeatures.Size = new Size(207, 180);
+            grpGearFeatures.TabIndex = 34;
+            grpGearFeatures.TabStop = false;
+            grpGearFeatures.Text = "Gear Features";
+            // 
+            // chkNoRecoil
+            // 
+            chkNoRecoil.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            chkNoRecoil.AutoSize = true;
+            chkNoRecoil.Location = new Point(6, 22);
+            chkNoRecoil.Name = "chkNoRecoil";
+            chkNoRecoil.Size = new Size(77, 19);
+            chkNoRecoil.TabIndex = 23;
+            chkNoRecoil.Text = "No Recoil";
+            chkNoRecoil.UseVisualStyleBackColor = true;
+            chkNoRecoil.CheckedChanged += chkNoRecoil_CheckedChanged;
+            // 
+            // trkMagDrills
+            // 
+            trkMagDrills.LargeChange = 10;
+            trkMagDrills.Location = new Point(85, 122);
+            trkMagDrills.Maximum = 75;
+            trkMagDrills.Minimum = 1;
+            trkMagDrills.Name = "trkMagDrills";
+            trkMagDrills.Size = new Size(116, 45);
+            trkMagDrills.TabIndex = 33;
+            trkMagDrills.TickStyle = TickStyle.None;
+            trkMagDrills.Value = 50;
+            trkMagDrills.Visible = false;
+            trkMagDrills.Scroll += trkMagDrills_Scroll;
+            // 
+            // chkNoSway
+            // 
+            chkNoSway.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            chkNoSway.AutoSize = true;
+            chkNoSway.Location = new Point(88, 22);
+            chkNoSway.Name = "chkNoSway";
+            chkNoSway.Size = new Size(72, 19);
+            chkNoSway.TabIndex = 25;
+            chkNoSway.Text = "No Sway";
+            chkNoSway.UseVisualStyleBackColor = true;
+            chkNoSway.CheckedChanged += chkNoSway_CheckedChanged;
+            // 
+            // chkMagDrills
+            // 
+            chkMagDrills.AutoSize = true;
+            chkMagDrills.Location = new Point(6, 122);
+            chkMagDrills.Name = "chkMagDrills";
+            chkMagDrills.Size = new Size(79, 19);
+            chkMagDrills.TabIndex = 32;
+            chkMagDrills.Text = "Mag Drills";
+            chkMagDrills.UseVisualStyleBackColor = true;
+            chkMagDrills.CheckedChanged += chkMagDrills_CheckedChanged;
+            // 
             // chkNoVisor
             // 
             chkNoVisor.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             chkNoVisor.AutoSize = true;
-            chkNoVisor.Location = new Point(165, 47);
+            chkNoVisor.Location = new Point(6, 47);
             chkNoVisor.Name = "chkNoVisor";
             chkNoVisor.Size = new Size(71, 19);
             chkNoVisor.TabIndex = 21;
@@ -1112,23 +1175,11 @@ namespace eft_dma_radar
             chkNoVisor.UseVisualStyleBackColor = true;
             chkNoVisor.CheckedChanged += chkNoVisor_CheckedChanged;
             // 
-            // chkOpticThermalVision
-            // 
-            chkOpticThermalVision.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            chkOpticThermalVision.AutoSize = true;
-            chkOpticThermalVision.Location = new Point(165, 22);
-            chkOpticThermalVision.Name = "chkOpticThermalVision";
-            chkOpticThermalVision.Size = new Size(101, 19);
-            chkOpticThermalVision.TabIndex = 20;
-            chkOpticThermalVision.Text = "Optic Thermal";
-            chkOpticThermalVision.UseVisualStyleBackColor = true;
-            chkOpticThermalVision.CheckedChanged += chkOpticThermalVision_CheckedChanged;
-            // 
             // chkNightVision
             // 
             chkNightVision.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             chkNightVision.AutoSize = true;
-            chkNightVision.Location = new Point(6, 22);
+            chkNightVision.Location = new Point(6, 72);
             chkNightVision.Name = "chkNightVision";
             chkNightVision.Size = new Size(144, 19);
             chkNightVision.TabIndex = 18;
@@ -1136,17 +1187,102 @@ namespace eft_dma_radar
             chkNightVision.UseVisualStyleBackColor = true;
             chkNightVision.CheckedChanged += chkNightVision_CheckedChanged;
             // 
+            // chkOpticThermalVision
+            // 
+            chkOpticThermalVision.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            chkOpticThermalVision.AutoSize = true;
+            chkOpticThermalVision.Location = new Point(88, 47);
+            chkOpticThermalVision.Name = "chkOpticThermalVision";
+            chkOpticThermalVision.Size = new Size(101, 19);
+            chkOpticThermalVision.TabIndex = 20;
+            chkOpticThermalVision.Text = "Optic Thermal";
+            chkOpticThermalVision.UseVisualStyleBackColor = true;
+            chkOpticThermalVision.CheckedChanged += chkOpticThermalVision_CheckedChanged;
+            // 
             // chkThermalVision
             // 
             chkThermalVision.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             chkThermalVision.AutoSize = true;
-            chkThermalVision.Location = new Point(5, 47);
+            chkThermalVision.Location = new Point(6, 97);
             chkThermalVision.Name = "chkThermalVision";
             chkThermalVision.Size = new Size(154, 19);
             chkThermalVision.TabIndex = 19;
             chkThermalVision.Text = "Thermal Vision (Ctrl + T)";
             chkThermalVision.UseVisualStyleBackColor = true;
             chkThermalVision.CheckedChanged += chkThermalVision_CheckedChanged;
+            // 
+            // grpPhysicalFeatures
+            // 
+            grpPhysicalFeatures.Controls.Add(chkJuggernaut);
+            grpPhysicalFeatures.Controls.Add(trkThrowPower);
+            grpPhysicalFeatures.Controls.Add(trkJumpPower);
+            grpPhysicalFeatures.Controls.Add(chkThrowPower);
+            grpPhysicalFeatures.Controls.Add(chkJumpPower);
+            grpPhysicalFeatures.Location = new Point(226, 110);
+            grpPhysicalFeatures.Name = "grpPhysicalFeatures";
+            grpPhysicalFeatures.Size = new Size(230, 180);
+            grpPhysicalFeatures.TabIndex = 26;
+            grpPhysicalFeatures.TabStop = false;
+            grpPhysicalFeatures.Text = "Physical Features";
+            // 
+            // chkJuggernaut
+            // 
+            chkJuggernaut.AutoSize = true;
+            chkJuggernaut.Location = new Point(6, 22);
+            chkJuggernaut.Name = "chkJuggernaut";
+            chkJuggernaut.Size = new Size(85, 19);
+            chkJuggernaut.TabIndex = 15;
+            chkJuggernaut.Text = "Juggernaut";
+            chkJuggernaut.UseVisualStyleBackColor = true;
+            chkJuggernaut.CheckedChanged += chkJuggernaut_CheckedChanged;
+            // 
+            // trkThrowPower
+            // 
+            trkThrowPower.LargeChange = 10;
+            trkThrowPower.Location = new Point(108, 72);
+            trkThrowPower.Minimum = 1;
+            trkThrowPower.Name = "trkThrowPower";
+            trkThrowPower.Size = new Size(116, 45);
+            trkThrowPower.TabIndex = 31;
+            trkThrowPower.TickStyle = TickStyle.None;
+            trkThrowPower.Value = 5;
+            trkThrowPower.Visible = false;
+            trkThrowPower.Scroll += trkThrowPower_Scroll;
+            // 
+            // trkJumpPower
+            // 
+            trkJumpPower.LargeChange = 10;
+            trkJumpPower.Location = new Point(108, 47);
+            trkJumpPower.Minimum = 1;
+            trkJumpPower.Name = "trkJumpPower";
+            trkJumpPower.Size = new Size(116, 45);
+            trkJumpPower.TabIndex = 30;
+            trkJumpPower.TickStyle = TickStyle.None;
+            trkJumpPower.Value = 5;
+            trkJumpPower.Visible = false;
+            trkJumpPower.Scroll += trkJumpPower_Scroll;
+            // 
+            // chkThrowPower
+            // 
+            chkThrowPower.AutoSize = true;
+            chkThrowPower.Location = new Point(6, 72);
+            chkThrowPower.Name = "chkThrowPower";
+            chkThrowPower.Size = new Size(95, 19);
+            chkThrowPower.TabIndex = 1;
+            chkThrowPower.Text = "Throw Power";
+            chkThrowPower.UseVisualStyleBackColor = true;
+            chkThrowPower.CheckedChanged += chkThrowPower_CheckedChanged;
+            // 
+            // chkJumpPower
+            // 
+            chkJumpPower.AutoSize = true;
+            chkJumpPower.Location = new Point(6, 47);
+            chkJumpPower.Name = "chkJumpPower";
+            chkJumpPower.Size = new Size(91, 19);
+            chkJumpPower.TabIndex = 0;
+            chkJumpPower.Text = "Jump Power";
+            chkJumpPower.UseVisualStyleBackColor = true;
+            chkJumpPower.CheckedChanged += chkJumpPower_CheckedChanged;
             // 
             // grpRadar
             // 
@@ -1395,7 +1531,15 @@ namespace eft_dma_radar
             ((System.ComponentModel.ISupportInitialize)trkZoom).EndInit();
             ((System.ComponentModel.ISupportInitialize)trkUIScale).EndInit();
             grpMemoryWriting.ResumeLayout(false);
-            grpMemoryWriting.PerformLayout();
+            grpGlobalFeatures.ResumeLayout(false);
+            grpGlobalFeatures.PerformLayout();
+            grpGearFeatures.ResumeLayout(false);
+            grpGearFeatures.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)trkMagDrills).EndInit();
+            grpPhysicalFeatures.ResumeLayout(false);
+            grpPhysicalFeatures.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)trkThrowPower).EndInit();
+            ((System.ComponentModel.ISupportInitialize)trkJumpPower).EndInit();
             grpRadar.ResumeLayout(false);
             grpRadar.PerformLayout();
             tabRadar.ResumeLayout(false);
@@ -1514,9 +1658,20 @@ namespace eft_dma_radar
         private Label lblImportantLootColor;
         private CheckBox chkChams;
         private CheckBox chkNoRecoil;
-        private CheckBox chkMaxStamina;
         private CheckBox chkNoSway;
         private CheckBox chkShowHoverArmor;
+        private Button button1;
+        private GroupBox grpPhysicalFeatures;
+        private CheckBox chkThrowPower;
+        private CheckBox chkJumpPower;
+        private CheckBox chkDoubleSearch;
+        private TrackBar trkJumpPower;
+        private TrackBar trkThrowPower;
+        private CheckBox chkMagDrills;
+        private TrackBar trkMagDrills;
+        private GroupBox grpGearFeatures;
+        private GroupBox grpGlobalFeatures;
+        private CheckBox chkJuggernaut;
     }
 }
 

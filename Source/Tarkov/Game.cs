@@ -15,6 +15,7 @@ namespace eft_dma_radar
         private GrenadeManager _grenadeManager;
         private ExfilManager _exfilManager;
         private PlayerManager _playerManager;
+        private Toolbox _toolbox;
         private Config _config;
         private static CameraManager _cameraManager;
         private ulong _localGameWorld;
@@ -80,6 +81,10 @@ namespace eft_dma_radar
         
             get => _questManager;
         }
+        public Toolbox Toolbox
+        {
+            get => _toolbox;
+        }
         #endregion
 
         /// <summary>
@@ -106,10 +111,6 @@ namespace eft_dma_radar
                 if (_inGame && !InHideout )
                 {
                     UpdateGameEnvironment();
-
-                    // ghetto solution to auto run no visor / optic thermal to accomodate for changes mid raid, drops radar fps to ~6-10
-                    //Game.CameraManager.VisorEffect(Program.Config.NoVisorEnabled);
-                    //Game.CameraManager.OpticThermalVision(Program.Config.OpticThermalVisionEnabled);
                 }
                 //if registered players is -1, then we are died or exfilled
                 if (_rgtPlayers != null && _rgtPlayers.PlayerCount == -1)
@@ -201,10 +202,11 @@ namespace eft_dma_radar
         /// <param name="e">The RaidEnded exception instance containing details about the raid end.</param>
         private void HandleRaidEnded(RaidEnded e) {
             Program.Log("Raid has ended!");
-
+            
             //wait for game to end
             Thread.Sleep(15000);
             _cameraManager = null;
+            _playerManager = null;
 
             Memory.Restart();
             _inGame = false;
@@ -456,16 +458,6 @@ namespace eft_dma_radar
                 try {
                     var cameraManager = new CameraManager(_unityBase);
                     _cameraManager = cameraManager; // update ref
-
-                    if (Program.Config.ThermalVisionEnabled) {
-                        Game.CameraManager.ThermalVision(true);
-                    }
-                    if (Program.Config.NightVisionEnabled) {
-                        Game.CameraManager.NightVision(true);
-                    }
-                    if (Program.Config.NoVisorEnabled) {
-                        Game.CameraManager.VisorEffect(true);
-                    }
                 } catch (Exception ex) {
                     Program.Log($"ERROR loading CameraManager: {ex}");
                 }
@@ -479,6 +471,18 @@ namespace eft_dma_radar
                 } catch (Exception ex)
                 {
                     Program.Log($"ERROR loading PlayerManager: {ex}");
+                }
+            }
+            if (_toolbox is null)
+            {
+                try
+                {
+                    var toolbox = new Toolbox(_localGameWorld);
+                    _toolbox = toolbox;
+                }
+                catch (Exception ex)
+                {
+                    Program.Log($"ERROR loading Toolbox: {ex}");
                 }
             }
             if (_grenadeManager is null)

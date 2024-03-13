@@ -56,7 +56,7 @@ namespace eft_dma_radar
                                 {
                                     continue;
                                 }
-                                if (objective.Type != "visit" && objective.Type != "mark" && objective.Type != "findQuestItem" && objective.Type != "plantItem")
+                                if (objective.Type != "visit" && objective.Type != "mark" && objective.Type != "findQuestItem" && objective.Type != "plantItem" && objective.Type != "plantQuestItem")
                                 {
                                     continue;
                                 }
@@ -69,7 +69,8 @@ namespace eft_dma_radar
                                         {
                                             ID = zone.id,
                                             MapName = zone.map.name,
-                                            Position = new Vector3((float)zone.position.x, (float)zone.position.y, (float)zone.position.z)
+                                            Position = new Vector3((float)zone.position.x, (float)zone.position.y, (float)zone.position.z),
+                                            ObjectiveType = objective.Type
                                         });
                                     }   
                                 }
@@ -118,6 +119,8 @@ namespace eft_dma_radar
         }
 
         public Vector2 ZoomedPosition { get; set; } = new();
+        public string ObjectiveType { get; internal set; }
+
     }
 
 }

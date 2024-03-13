@@ -275,19 +275,70 @@ namespace eft_dma_radar
         }
 
         /// <summary>
-        /// Fired when Max Stamina checkbox has been adjusted
-        /// </summary>
-        private void chkMaxStamina_CheckedChanged(object sender, EventArgs e)
-        {
-            _config.MaxStaminaEnabled = chkMaxStamina.Checked;
-        }
-
-        /// <summary>
         /// Fired when NoSway checkbox has been adjusted
         /// </summary>
         private void chkNoSway_CheckedChanged(object sender, EventArgs e)
         {
             _config.NoSwayEnabled = chkNoSway.Checked;
+        }
+
+        private void chkJumpPower_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.JumpPowerEnabled = chkJumpPower.Checked;
+            trkJumpPower.Visible = chkJumpPower.Checked;
+        }
+
+        private void chkThrowPower_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.ThrowPowerEnabled = chkThrowPower.Checked;
+            trkThrowPower.Visible = chkThrowPower.Checked;
+        }
+
+        private void chkMagDrills_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.MagDrillsEnabled = chkMagDrills.Checked;
+            trkMagDrills.Visible = chkMagDrills.Checked;
+        }
+
+        private void trkJumpPower_Scroll(object sender, EventArgs e)
+        {
+            _config.JumpPowerStrength = trkJumpPower.Value;
+
+            if (chkJumpPower.Checked && Memory.InGame)
+            {
+                Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.JumpStrength);
+            }
+        }
+
+        private void trkThrowPower_Scroll(object sender, EventArgs e)
+        {
+            _config.ThrowPowerStrength = trkThrowPower.Value;
+
+            if (chkThrowPower.Checked && Memory.InGame)
+            {
+                Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.ThrowStrength);
+            }
+        }
+
+        private void trkMagDrills_Scroll(object sender, EventArgs e)
+        {
+            _config.MagDrillSpeed = trkMagDrills.Value;
+
+            if (chkMagDrills.Checked && Memory.InGame)
+            {
+                Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsLoad);
+                Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsUnload);
+            }
+        }
+
+        private void chkJuggernaut_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.JuggernautEnabled = chkJuggernaut.Checked;
+        }
+
+        private void chkDoubleSearch_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.DoubleSearchEnabled = chkDoubleSearch.Checked;
         }
 
         /// <summary>
@@ -1127,6 +1178,24 @@ namespace eft_dma_radar
             chkOpticThermalVision.Checked = _config.OpticThermalVisionEnabled;
             chkNoVisor.Checked = _config.NoVisorEnabled;
 
+            chkJuggernaut.Checked = _config.JuggernautEnabled;
+            chkDoubleSearch.Checked = _config.DoubleSearchEnabled;
+            chkJumpPower.Checked = _config.JumpPowerEnabled;
+            if (chkJumpPower.Checked)
+            {
+                trkJumpPower.Value = (int)_config.JumpPowerStrength;
+            }
+            chkThrowPower.Checked = _config.ThrowPowerEnabled;
+            if (chkThrowPower.Checked)
+            {
+                trkThrowPower.Value = (int)_config.ThrowPowerStrength;
+            }
+            chkMagDrills.Checked = _config.MagDrillsEnabled;
+            if (chkMagDrills.Checked)
+            {
+                trkMagDrills.Value = (int)_config.MagDrillSpeed;
+            }
+
             if (_config.Filters.Count == 0)
             { // add a default, blank config
                 LootFilter newFilter = new LootFilter()
@@ -1788,7 +1857,17 @@ namespace eft_dma_radar
                                 {
                                     if (zone.MapName.ToLower() == _selectedMap.Name.ToLower())
                                     {
-                                       
+                                        float position = zone.Position.Z - localPlayerMapPos.Height;
+                                        ///Console.WriteLine("Position: " + position);
+                                        var itemZoomedPos = zone.Position
+                                                                .ToMapPos(_selectedMap)
+                                                                .ToZoomedPos(mapParams);
+                                        
+                                        itemZoomedPos.DrawMarkingTask(
+                                            canvas,
+                                            $"{zone.ObjectiveType}: " + zone.ID,
+                                            position
+                                        );
                                     }
 
                                 }
