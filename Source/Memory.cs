@@ -80,10 +80,6 @@ namespace eft_dma_radar
         {
             get => _game?.QuestManager;
         }
-        public static Toolbox Toolbox
-        {
-            get => _game?.Toolbox;
-        }
 
         public static Player LocalPlayer
         {
