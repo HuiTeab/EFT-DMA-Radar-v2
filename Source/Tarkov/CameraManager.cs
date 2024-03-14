@@ -20,6 +20,8 @@ namespace eft_dma_radar.Source.Tarkov
         public CameraManager(ulong unityBase)
         {
             _unityBase = unityBase;
+
+            this.GetCamera();
         }
 
         private bool GetCamera()

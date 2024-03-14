@@ -29,9 +29,9 @@ namespace eft_dma_radar {
             get;
         }
 
-        private Collection<QuestItem> QuestItem
+        private Collection<QuestItem> QuestItems
         {
-            get => Memory.QuestManager.QuestItem;
+            get => Memory.QuestManager.QuestItems;
         }
         /// <summary>
         /// key,value pair of filtered item ids (key) and their filtered color (value)
@@ -208,7 +208,7 @@ namespace eft_dma_radar {
                             }
                         }
                         else {
-                            var questItemTest = this.QuestItem.Where(x => x.Id == id).FirstOrDefault();
+                            var questItemTest = this.QuestItems.Where(x => x.Id == id).FirstOrDefault();
                             if (questItemTest != null) {
                                 //update position
                                 questItemTest.Position = pos;

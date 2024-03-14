@@ -583,10 +583,10 @@ namespace eft_dma_radar
                     .Where(x => x.Type is not PlayerType.LocalPlayer && !x.HasExfild); // Get all players except LocalPlayer & Exfil'd Players
 
                 var loot = this.Loot?.Filter?.Select(x => x);
-                var tasksItems = this.QuestManager.QuestItem?.Select(x => x);
-                var tasksZones = this.QuestManager.QuestZone?.Select(x => x);
+                var tasksItems = this.QuestManager.QuestItems?.Select(x => x);
+                var tasksZones = this.QuestManager.QuestZones?.Select(x => x);
 
-                if ((players is not null && players.Any()) || (loot is not null && loot.Any()))
+                if ((players is not null && players.Any()) || (loot is not null && loot.Any()) || (tasksItems is not null && tasksItems.Any()) || (tasksZones is not null && tasksZones.Any()))
                 {
                     var mouse = new Vector2(e.X, e.Y); // Get current mouse position in control
 
@@ -1938,7 +1938,7 @@ namespace eft_dma_radar
                             }
                             if (chkQuestHelper.Checked && !Memory.IsScav) // Draw quest items (if enabled)
                             {
-                                var questItems = this.QuestManager.QuestItem; // cache ref
+                                var questItems = this.QuestManager.QuestItems; // cache ref
                                 if (questItems is not null)
                                 {
                                     foreach (var item in questItems)
@@ -1966,7 +1966,7 @@ namespace eft_dma_radar
                                     }
                                 }
 
-                                var questZones = this.QuestManager.QuestZone; // cache ref
+                                var questZones = this.QuestManager.QuestZones; // cache ref
                                 if (questZones is not null)
                                 {
                                     foreach (var zone in questZones)
@@ -2013,6 +2013,11 @@ namespace eft_dma_radar
                             {
                                 foreach (var exfil in exfils)
                                 {
+                                    if (Memory.IsScav && exfil.Status == ExfilStatus.Pending)
+                                    {
+                                        continue;
+                                    }
+
                                     var exfilZoomedPos = exfil
                                         .Position
                                         .ToMapPos(_selectedMap)

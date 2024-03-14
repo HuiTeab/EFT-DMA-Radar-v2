@@ -46,16 +46,20 @@ namespace eft_dma_radar
                 {
                     var exfilAddr = Memory.ReadPtr(exfilPoints + Offsets.UnityListBase.Start + (i * 0x08));
                     var exfil = new Exfil(exfilAddr);
-                    exfil.UpdateName("test");
+                    var exfilSettings = Memory.ReadPtr(exfilAddr + Offsets.Exfil.Settings);
+                    var exfilName = Memory.ReadPtr(exfilSettings + Offsets.Exfil.Name);
+                    var exfilUnityName = Memory.ReadUnityString(exfilName);
+                    exfil.UpdateName(exfilUnityName);
                     list.Add(exfil);
                 }
-            }else {
+            }
+            else 
+            {
                 var localPlayer = Memory.ReadPtr(localGameWorld + Offsets.LocalGameWorld.MainPlayer);
                 var localPlayerProfile = Memory.ReadPtr(localPlayer + Offsets.Player.Profile);
                 var localPlayerInfo = Memory.ReadPtr(localPlayerProfile + Offsets.Profile.PlayerInfo);
                 var localPlayerEntryPoint = Memory.ReadPtr(localPlayerInfo + 0x30);
                 var localPlayerEntryPointString = Memory.ReadUnityString(localPlayerEntryPoint);
-
 
                 exfilPoints = Memory.ReadPtr(exfilController + Offsets.ExfilController.ExfilList);
                 var count = Memory.ReadValue<int>(exfilPoints + Offsets.ExfilController.ExfilCount);
@@ -133,6 +137,31 @@ namespace eft_dma_radar
         public ExfilStatus Status { get; private set; } = ExfilStatus.Closed;
         public string Name { get; private set; } = "?";
 
+        private Dictionary<string, string> streetsExfilNames = new Dictionary<string, string>
+        {
+            // pmc extracts
+            ["E1"] = "Stylobate Building Elevator",
+            ["E2"] = "Sewer River",
+            ["E3"] = "Damaged House",
+            ["E4"] = "Crash Site",
+            ["E5"] = "Collapsed Crane",
+            ["E7"] = "Expo Checkpoint",
+            ["E7-car"] = "Primorsky Ave Taxi",
+            ["E8-yard"] = "Courtyard",
+            ["E9-sniper"] = "Klimov Street",
+            ["Exit-E10-coop"] = "Pinewood Basement",
+
+            //scav extracts
+            ["scav-e1"] = "Basement Descent",
+            ["scav-e2"] = "Entrance to Catacombs",
+            ["scav-e3"] = "Ventilation Shaft",
+            ["scav-e4"] = "Sewer Manhole",
+            ["scav-e5"] = "Near Kamchatskaya Arch",
+            ["scav-e7"] = "Cardinal Apartment Complex Parking",
+            ["scav-e8"] = "Klimov Shopping Mall",
+            ["Exit-E10-coop"] = "Pinewood Basement"
+        };
+
         public Exfil(ulong baseAddr)
         {
             this.BaseAddr = baseAddr;
@@ -173,6 +202,11 @@ namespace eft_dma_radar
         public void UpdateName(string name)
         {
             this.Name = name.Replace("_", "-");
+
+            if (Memory.MapName == "TarkovStreets")
+            {
+                this.Name = streetsExfilNames[this.Name];
+            }
         }
     }
 

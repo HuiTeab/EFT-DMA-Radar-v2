@@ -49,14 +49,50 @@ namespace eft_dma_radar.Source.Tarkov
 
         private void ToolboxWorker()
         {
-            if (!Game.CameraManager.IsReady)
+            if (Game.CameraManager is not null)
             {
-                Game.CameraManager.UpdateCamera();
+                if (!Game.CameraManager.IsReady)
+                {
+                    Game.CameraManager.UpdateCamera();
+                } else
+                {
+                    Game.CameraManager.VisorEffect(Program.Config.NoVisorEnabled);
+
+                    if (Program.Config.OpticThermalVisionEnabled && Memory.PlayerManager.isADS)
+                    {
+                        Game.CameraManager.OpticThermalVision(true);
+                    }
+                    else if (!Program.Config.OpticThermalVisionEnabled && !Memory.PlayerManager.isADS)
+                    {
+                        Game.CameraManager.OpticThermalVision(false);
+                    }
+
+                    if (Program.Config.ThermalVisionEnabled && !thermalVisionToggled)
+                    {
+                        thermalVisionToggled = true;
+                        Game.CameraManager.ThermalVision(true);
+                    }
+                    else if (!Program.Config.ThermalVisionEnabled && thermalVisionToggled)
+                    {
+                        thermalVisionToggled = false;
+                        Game.CameraManager.ThermalVision(false);
+                    }
+
+                    if (Program.Config.NightVisionEnabled && !nightVisionToggled)
+                    {
+                        nightVisionToggled = true;
+                        Game.CameraManager.NightVision(true);
+                    }
+                    else if (!Program.Config.NightVisionEnabled && nightVisionToggled)
+                    {
+                        nightVisionToggled = false;
+                        Game.CameraManager.NightVision(false);
+                    }
+                }
+                
             }
 
             Memory.PlayerManager.isADS = Memory.ReadValue<bool>(Memory.PlayerManager.proceduralWeaponAnimationPtr + 0x1BD);
-
-            Game.CameraManager.VisorEffect(Program.Config.NoVisorEnabled);
             Memory.PlayerManager.SetNoRecoilSway(Program.Config.NoRecoilSwayEnabled);
 
             //if (Program.Config.NoRecoilSwayEnabled && !noRecoilSwayToggled)
@@ -69,36 +105,6 @@ namespace eft_dma_radar.Source.Tarkov
             //    noRecoilSwayToggled = false;
             //    Memory.PlayerManager.SetNoRecoilSway(false);
             //}
-
-            if (Program.Config.OpticThermalVisionEnabled && Memory.PlayerManager.isADS)
-            {
-                Game.CameraManager.OpticThermalVision(true);
-            } else if (!Program.Config.OpticThermalVisionEnabled && !Memory.PlayerManager.isADS)
-            {
-                Game.CameraManager.OpticThermalVision(false);
-            }
-
-            if (Program.Config.ThermalVisionEnabled && !thermalVisionToggled)
-            {
-                thermalVisionToggled = true;
-                Game.CameraManager.ThermalVision(true);
-            }
-            else if (!Program.Config.ThermalVisionEnabled && thermalVisionToggled)
-            {
-                thermalVisionToggled = false;
-                Game.CameraManager.ThermalVision(false);
-            }
-
-            if (Program.Config.NightVisionEnabled && !nightVisionToggled)
-            {
-                nightVisionToggled = true;
-                Game.CameraManager.NightVision(true);
-            }
-            else if (!Program.Config.NightVisionEnabled && nightVisionToggled)
-            {
-                nightVisionToggled = false;
-                Game.CameraManager.NightVision(false);
-            }
 
             if (Program.Config.DoubleSearchEnabled && !doubleSearchToggled)
             {

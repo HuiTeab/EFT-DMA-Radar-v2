@@ -1,30 +1,34 @@
+using Offsets;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace eft_dma_radar
 {
     public class QuestManager
     {
-
-        public Collection<QuestItem> QuestItem {
+        public Collection<QuestItem> QuestItems
+        {
             get;
             private set;
         }
 
-        public Collection<QuestZone> QuestZone {
+        public Collection<QuestZone> QuestZones
+        {
             get;
             private set;
         }
 
-        public QuestManager(ulong localGameWorld) {
+        public QuestManager(ulong localGameWorld)
+        {
             var mainPlayer = Memory.ReadPtr(localGameWorld + Offsets.LocalGameWorld.MainPlayer);
             var profile = Memory.ReadPtr(mainPlayer + Offsets.Player.Profile);
-            var questData = Memory.ReadPtr(profile + 0x78); 
+            var questData = Memory.ReadPtr(profile + 0x78);
             var questDataCount = Memory.ReadValue<int>(questData + 0x18);
             var questDataBaseList = Memory.ReadPtr(questData + 0x10);
 
-            var questItem = new List < QuestItem > (questDataCount);
-            var questZone = new List < QuestZone > (questDataCount*10);
+            var questItems = new List<QuestItem>(questDataCount);
+            var questZones = new List<QuestZone>(questDataCount * 10);
 
             for (int i = 0; i < questDataCount; i++)
             {
@@ -40,7 +44,8 @@ namespace eft_dma_radar
                 }
                 var questIDPtr = Memory.ReadPtr(questTemplate + 0x10);
                 var questID = Memory.ReadUnityString(questIDPtr);
-                try {
+                try
+                {
                     var questStatus = Memory.ReadValue<int>(questEntry + 0x34);
                     //2 = started
                     if (questStatus == 2)
@@ -65,7 +70,7 @@ namespace eft_dma_radar
                                 {
                                     foreach (var zone in zones)
                                     {
-                                        questZone.Add(new QuestZone
+                                        questZones.Add(new QuestZone
                                         {
                                             ID = zone.id,
                                             MapName = zone.map.name,
@@ -74,11 +79,13 @@ namespace eft_dma_radar
                                             Description = objective.Description,
                                             TaskName = task.Name
                                         });
-                                    }   
+                                    }
                                 }
-                                if (objective.Type == "findQuestItem"){
+                                if (objective.Type == "findQuestItem")
+                                {
                                     //Add to list
-                                    questItem.Add(new QuestItem {
+                                    questItems.Add(new QuestItem
+                                    {
                                         Id = objective.QuestItem.Id,
                                         Name = objective.QuestItem.Name,
                                         ShortName = objective.QuestItem.ShortName,
@@ -91,12 +98,14 @@ namespace eft_dma_radar
                         }
                         continue;
                     }
-                } catch {
-                     Console.WriteLine($"Quest: {questID} is not in the list");
+                }
+                catch
+                {
+                    Console.WriteLine($"Quest: {questID} is not in the list");
                 }
             }
-            this.QuestZone = new(questZone); // update readonly ref
-            this.QuestItem = new(questItem); // update readonly ref
+            QuestZones = new(questZones); // update readonly ref
+            QuestItems = new(questItems); // update readonly ref
         }
     }
 
