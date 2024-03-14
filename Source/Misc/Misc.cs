@@ -8,6 +8,9 @@ using System.Text;
 using eft_dma_radar.Source.Misc;
 using System.Runtime.Intrinsics;
 using Offsets;
+using System.Numerics;
+using static System.Net.Mime.MediaTypeNames;
+using System.IO;
 
 namespace eft_dma_radar
 {
@@ -80,6 +83,11 @@ namespace eft_dma_radar
         /// </summary>
         [JsonPropertyName("lootEnabled")]
         public bool LootEnabled { get; set; }
+        /// <summary>
+        /// Enables Quest Helper output on map.
+        /// </summary>
+        [JsonPropertyName("questHelperEnabled")]
+        public bool QuestHelperEnabled { get; set; }
         /// <summary>
         /// Enables Aimview window in Main Window.
         /// </summary>
@@ -159,14 +167,8 @@ namespace eft_dma_radar
         /// <summary>
         /// Enables / disables no recoil.
         /// </summary>
-        [JsonPropertyName("noRecoilEnabled")]
-        public bool NoRecoilEnabled { get; set; }
-
-        /// <summary>
-        /// Enables / disables weapon sway.
-        /// </summary>
-        [JsonPropertyName("noSwayEnabled")]
-        public bool NoSwayEnabled { get; set; }
+        [JsonPropertyName("noRecoilSwayEnabled")]
+        public bool NoRecoilSwayEnabled { get; set; }
 
         /// <summary>
         /// Enables / disables max / infinite stamina.
@@ -190,7 +192,7 @@ namespace eft_dma_radar
         /// Changes jump power strength
         /// </summary>
         [JsonPropertyName("jumpPowerStrength")]
-        public float JumpPowerStrength { get; set; }
+        public int JumpPowerStrength { get; set; }
 
         /// <summary>
         /// Enables / disables throw power modification.
@@ -202,7 +204,7 @@ namespace eft_dma_radar
         /// Changes throw power strength.
         /// </summary>
         [JsonPropertyName("throwPowerStrength")]
-        public float ThrowPowerStrength { get; set; }
+        public int ThrowPowerStrength { get; set; }
 
         /// <summary>
         /// Enables / disables faster mag drills.
@@ -214,19 +216,25 @@ namespace eft_dma_radar
         /// Changes mag load/unload speed
         /// </summary>
         [JsonPropertyName("magDrillSpeed")]
-        public float MagDrillSpeed { get; set; }
+        public int MagDrillSpeed { get; set; }
 
         /// <summary>
         /// Enables / disables juggernaut.
         /// </summary>
-        [JsonPropertyName("juggernautEnabled")]
-        public bool JuggernautEnabled { get; set; }
+        [JsonPropertyName("increaseMaxWeightEnabled")]
+        public bool IncreaseMaxWeightEnabled { get; set; }
 
         /// <summary>
         /// Enables / disables max / infinite stamina.
         /// </summary>
         [JsonPropertyName("showHoverArmor")]
         public bool ShowHoverArmor { get; set; }
+
+        /// <summary>
+        /// Enables / disables exfil names.
+        /// </summary>
+        [JsonPropertyName("hideExfilNames")]
+        public bool HideExfilNames { get; set; }
 
         /// <summary>
         /// Allows storage of multiple loot filters.
@@ -248,12 +256,12 @@ namespace eft_dma_radar
             DefaultZoom = 100;
             UIScale = 100;
             LootEnabled = true;
+            QuestHelperEnabled = true;
             AimviewEnabled = false;
             HideNames = false;
             ImportantLootOnly = false;
             HideLootValue = false;
-            NoRecoilEnabled = false;
-            NoSwayEnabled = false;
+            NoRecoilSwayEnabled = false;
             MaxStaminaEnabled = false;
             LoggingEnabled = false;
             ShowHoverArmor = false;
@@ -277,25 +285,30 @@ namespace eft_dma_radar
                 ["TeamHover"] = new PaintColor.Colors { A = 255, R = 125, G = 252, B = 50 },
                 ["Special"] = new PaintColor.Colors { A = 255, R = 255, G = 105, B = 180 },
                 ["RegularLoot"] = new PaintColor.Colors { A = 255, R = 245, G = 245, B = 245 },
-                ["ImportantLoot"] = new PaintColor.Colors { A = 255, R = 64, G = 224, B = 208 }
+                ["ImportantLoot"] = new PaintColor.Colors { A = 255, R = 64, G = 224, B = 208 },
+                ["QuestItem"] = new PaintColor.Colors { A = 255, R = 255, G = 0, B = 128 },
+                ["QuestZone"] = new PaintColor.Colors { A = 255, R = 255, G = 0, B = 128 },
+                ["ExfilActiveText"] = new PaintColor.Colors { A = 255, R = 255, G = 255, B = 255 },
+                ["ExfilActiveIcon"] = new PaintColor.Colors { A = 255, R = 50, G = 205, B = 50 },
+                ["ExfilPendingText"] = new PaintColor.Colors { A = 255, R = 255, G = 255, B = 255 },
+                ["ExfilPendingIcon"] = new PaintColor.Colors { A = 255, R = 255, G = 255, B = 0 },
+                ["ExfilClosedText"] = new PaintColor.Colors { A = 255, R = 255, G = 255, B = 255 },
+                ["ExfilClosedIcon"] = new PaintColor.Colors { A = 255, R = 255, G = 0, B = 0 }
             };
 
             NightVisionEnabled = false;
             ThermalVisionEnabled = false;
             NoVisorEnabled = false;
             OpticThermalVisionEnabled = false;
-
             DoubleSearchEnabled = false;
             JumpPowerEnabled = false;
-            JumpPowerStrength = 0.35f;
+            JumpPowerStrength = 4;
             ThrowPowerEnabled = false;
-            ThrowPowerStrength = 0.35f;
+            ThrowPowerStrength = 4;
             MagDrillsEnabled = false;
-            MagDrillSpeed = 0.35f;
-            JuggernautEnabled = false;
-
-            //TO DO:
-            // Implement the above into PlayerManager ChangeSkills function then into Toolbox
+            MagDrillSpeed = 5;
+            IncreaseMaxWeightEnabled = false;
+            HideExfilNames = false;
         }
 
         /// <summary>
@@ -438,6 +451,13 @@ namespace eft_dma_radar
             {
                 canvas.DrawCircle(this.GetPoint(), 4 * UIScale, exfil.Status.GetPaint());
             }
+
+            if (!Program.Config.HideExfilNames)
+            {
+                SKPoint center = this.GetPoint();
+                var textWidth = SKPaints.TextBase.MeasureText(exfil.Name);
+                canvas.DrawText(exfil.Name, (center.X - textWidth / 2) * UIScale, (center.Y - SKPaints.TextBase.TextSize / 2 - 3) * UIScale, Extensions.GetTextPaint(exfil));
+            }
         }
         /// <summary>
         /// Draws a 'Hot' Grenade on this location.
@@ -451,8 +471,8 @@ namespace eft_dma_radar
         /// </summary>
         //public void DrawLoot(SKCanvas canvas, string label, SKPaint paint, SKPaint text, float heightDiff)
         public void DrawLoot(SKCanvas canvas, DevLootItem item, float heightDiff) {
-            var paint = Helpers.GetLootPaint(item);
-            var text = Helpers.GetLootTextPaint(item);
+            var paint = Extensions.GetEntityPaint(item);
+            var text = Extensions.GetTextPaint(item);
             var label = (item.Container) ? item.ContainerName : (Program.Config.HideLootValue ? item.Item.shortName : item.GetFormattedValueShortName());
  
             if (heightDiff > 1.45) // loot is above player
@@ -474,15 +494,10 @@ namespace eft_dma_radar
         /// <summary>
         /// Draws a Quest Item on this location.
         /// </summary>
-        /// <param name="canvas"></param>
-        /// <param name="Label"></param>
-        /// <param name="heightDiff"></param>
-        public void DrawQuestItem(SKCanvas canvas, string Label, float heightDiff) {
-            var label = Label;
-            SKPaint paint = new SKPaint(); // or assign it to an existing paint object if available
-            paint.Color = SKColors.Coral;
-            SKPaint text = new SKPaint(); // or assign it to an existing paint object if available
-            text.Color = SKColors.Red;
+        public void DrawQuestItem(SKCanvas canvas, QuestItem item, float heightDiff) {
+            var label = item.Name;
+            SKPaint paint = Extensions.GetEntityPaint(item);
+            SKPaint text = Extensions.GetTextPaint(item);
 
             if (heightDiff > 1.45) // loot is above player
             {
@@ -504,33 +519,35 @@ namespace eft_dma_radar
         /// <summary>
         /// Draws task zone on this location.
         /// </summary>
-        /// <param name="canvas"></param>
-        /// <param name="heightDiff"></param>
-        /// 
-        public void DrawTaskZone(SKCanvas canvas, float heightDiff, string Label)
+        public void DrawTaskZone(SKCanvas canvas, float heightDiff, QuestZone zone)
         {
-            SKPaint paint = new SKPaint(); // or assign it to an existing paint object if available
-            paint.Color = SKColors.Coral;
-            SKPaint text = new SKPaint(); // or assign it to an existing paint object if available
-            text.Color = SKColors.Red;
+            
+        }
+        /// <summary>
+        /// Draws a quest zone on this location.
+        /// </summary>
+        public void DrawZoneTask(SKCanvas canvas, QuestZone zone, float heightDiff)
+        {
+            var label = zone.ObjectiveType;
+            SKPaint paint = Extensions.GetEntityPaint(zone);
+            SKPaint text = Extensions.GetTextPaint(zone);
 
-            if (heightDiff > 1.45) // loot is above player
+            if (heightDiff > 1.45) // above player
             {
                 using var path = this.GetUpArrow();
                 canvas.DrawPath(path, paint);
             }
-            else if (heightDiff < -1.45) // loot is below player
+            else if (heightDiff < -1.45) // below player
             {
                 using var path = this.GetDownArrow();
                 canvas.DrawPath(path, paint);
             }
-            else // loot is level with player
+            else // level with player
             {
                 canvas.DrawCircle(this.GetPoint(), 5 * UIScale, paint);
             }
-            canvas.DrawText(Label, this.GetPoint(7 * UIScale, 3 * UIScale), text);
+            canvas.DrawText(label, this.GetPoint(7 * UIScale, 3 * UIScale), text);
         }
-        
         /// <summary>
         /// Draws a Player Marker on this location.
         /// </summary>
@@ -543,7 +560,7 @@ namespace eft_dma_radar
                 paint = SKPaints.PaintMouseoverGroup;
                 paint.Color = Extensions.SKColorFromPaintColor("TeamHover");
             } else {
-                paint = player.GetPaint();
+                paint = player.GetEntityPaint();
             }
 
             canvas.DrawCircle(this.GetPoint(), 6 * UIScale, paint); // draw LocalPlayer marker
@@ -561,7 +578,7 @@ namespace eft_dma_radar
                 text = SKPaints.TextMouseoverGroup;
                 text.Color = Extensions.SKColorFromPaintColor("TeamHover");
             } else {
-                text = player.GetText();
+                text = player.GetTextPaint();
             }
 
             float spacing = 3 * UIScale;
@@ -585,6 +602,81 @@ namespace eft_dma_radar
             }
         }
         /// <summary>
+        /// Draws the tool tip for quest items
+        /// </summary>
+        public void DrawToolTip(SKCanvas canvas, QuestItem item)
+        {
+            var tooltipText = new List<string>();
+            tooltipText.Insert(0, item.TaskName);
+
+            var lines = string.Join("\n", tooltipText).Split('\n');
+            var maxWidth = 0f;
+
+            foreach (var line in lines)
+            {
+                var width = SKPaints.TextBase.MeasureText(line);
+                maxWidth = Math.Max(maxWidth, width);
+            }
+
+            var textSpacing = 12 * UIScale;
+            var padding = 3 * UIScale;
+
+            var height = lines.Length * textSpacing;
+
+            var left = X + padding;
+            var top = Y - padding;
+            var right = left + maxWidth + padding * 2;
+            var bottom = top + height + padding * 2;
+
+            var backgroundRect = new SKRect(left, top, right, bottom);
+            canvas.DrawRect(backgroundRect, SKPaints.PaintTransparentBacker);
+
+            var y = bottom - (padding * 1.5f);
+            foreach (var line in lines)
+            {
+                canvas.DrawText(line, left + padding, y, SKPaints.TextBase);
+                y -= textSpacing;
+            }
+        }
+        /// <summary>
+        /// Draws the tool tip for quest items
+        /// </summary>
+        public void DrawToolTip(SKCanvas canvas, QuestZone item)
+        {
+            var tooltipText = new List<string>();
+            tooltipText.Insert(0, item.TaskName);
+            tooltipText.Insert(0, item.Description);
+
+            var lines = string.Join("\n", tooltipText).Split('\n');
+            var maxWidth = 0f;
+
+            foreach (var line in lines)
+            {
+                var width = SKPaints.TextBase.MeasureText(line);
+                maxWidth = Math.Max(maxWidth, width);
+            }
+
+            var textSpacing = 12 * UIScale;
+            var padding = 3 * UIScale;
+
+            var height = lines.Length * textSpacing;
+
+            var left = X + padding;
+            var top = Y - padding;
+            var right = left + maxWidth + padding * 2;
+            var bottom = top + height + padding * 2;
+
+            var backgroundRect = new SKRect(left, top, right, bottom);
+            canvas.DrawRect(backgroundRect, SKPaints.PaintTransparentBacker);
+
+            var y = bottom - (padding * 1.5f);
+            foreach (var line in lines)
+            {
+                canvas.DrawText(line, left + padding, y, SKPaints.TextBase);
+                y -= textSpacing;
+            }
+        }
+        /// <summary>
         /// Draws player tool tip based on if theyre alive or not
         /// </summary>
         public void DrawToolTip(SKCanvas canvas, Player player)
@@ -601,77 +693,6 @@ namespace eft_dma_radar
             }
 
             DrawHostileTooltip(canvas, player);
-        }
-        /// <summary>
-        /// Draws tool tip of hostile players 
-        /// </summary>
-        private void DrawHostileTooltip(SKCanvas canvas, Player player)
-        {
-            var lines = new List<string>();
-
-            lines.Insert(0, player.Name);
-
-            if (player.Gear != null)
-            {
-                GearItem gearItem;
-                var weaponSlots = new Dictionary<string, string>()
-                {
-                    {"FirstPrimaryWeapon", "Primary"},
-                    {"SecondPrimaryWeapon", "Secondary"},
-                    {"Holster", "Holster"}
-                };
-
-
-                foreach (var slot in weaponSlots)
-                {
-                    if (player.Gear.TryGetValue(slot.Key, out gearItem))
-                    {
-                        lines.Insert(0, $"{slot.Value}: {gearItem.Short}");
-                    }
-                }
-
-                if (Program.Config.ShowHoverArmor)
-                {
-                    var gearSlots = new Dictionary<string, string>()
-                    {
-                        {"Headwear","Head"},
-                        {"FaceCover","Face"},
-                        {"ArmorVest","Armor"},
-                        {"TacticalVest","Vest"},
-                        {"Backpack","Backpack"}
-                    };
-
-                    foreach (var slot in gearSlots)
-                    {
-                        if (player.Gear.TryGetValue(slot.Key, out gearItem))
-                        {
-                            lines.Insert(0, $"{slot.Value}: {gearItem.Short}");
-                        }
-                    }
-                }
-
-            }
-
-            lines.Insert(0, $"Value: {TarkovDevAPIManager.FormatNumber(player.PlayerValue)}");
-
-            DrawTooltip(canvas, string.Join("\n", lines));
-        }
-        /// <summary>
-        /// Draws tooltip for corpses
-        /// </summary>
-        private void DrawCorpseTooltip(SKCanvas canvas, Player player)
-        {
-            var lines = new List<string>();
-
-            lines.Insert(0, "Corpse");
-
-            if (player.Lvl != 0)
-                lines.Insert(0, $"L:{player.Lvl}");
-
-            if (player.GroupID != -1)
-                lines.Insert(0, $"G:{player.GroupID}");
-
-            DrawTooltip(canvas, string.Join("\n", lines));
         }
         /// <summary>
         /// Draws the tool tip for loot items/containers
@@ -702,16 +723,83 @@ namespace eft_dma_radar
             var y = bottom - (padding * 2.2f);
             foreach (var item in items)
             {
-                canvas.DrawText(item.GetFormattedValueName(), left + padding, y, Helpers.GetLootTextPaint(item));
+                canvas.DrawText(item.GetFormattedValueName(), left + padding, y, Extensions.GetTextPaint(item));
                 y -= textSpacing;
             }
         }
         /// <summary>
+        /// Draws tool tip of hostile players 
+        /// </summary>
+        private void DrawHostileTooltip(SKCanvas canvas, Player player)
+        {
+            var lines = new List<string>();
+
+            lines.Insert(0, player.Name);
+
+            if (player.Gear != null)
+            {
+                GearItem gearItem;
+                var weaponSlots = new Dictionary<string, string>()
+                {
+                    {"FirstPrimaryWeapon", "Primary"},
+                    {"SecondPrimaryWeapon", "Secondary"},
+                    {"Holster", "Holster"}
+                };
+
+                foreach (var slot in weaponSlots)
+                {
+                    if (player.Gear.TryGetValue(slot.Key, out gearItem))
+                    {
+                        lines.Insert(0, $"{slot.Value}: {gearItem.Short}");
+                    }
+                }
+
+                if (Program.Config.ShowHoverArmor)
+                {
+                    var gearSlots = new Dictionary<string, string>()
+                    {
+                        {"Headwear","Head"},
+                        {"FaceCover","Face"},
+                        {"ArmorVest","Armor"},
+                        {"TacticalVest","Vest"},
+                        {"Backpack","Backpack"}
+                    };
+
+                    foreach (var slot in gearSlots)
+                    {
+                        if (player.Gear.TryGetValue(slot.Key, out gearItem))
+                        {
+                            lines.Insert(0, $"{slot.Value}: {gearItem.Short}");
+                        }
+                    }
+                }
+            }
+
+            lines.Insert(0, $"Value: {TarkovDevAPIManager.FormatNumber(player.PlayerValue)}");
+
+            DrawToolTip(canvas, string.Join("\n", lines));
+        }
+        /// <summary>
+        /// Draws tooltip for corpses
+        /// </summary>
+        private void DrawCorpseTooltip(SKCanvas canvas, Player player)
+        {
+            var lines = new List<string>();
+
+            lines.Insert(0, "Corpse");
+
+            if (player.Lvl != 0)
+                lines.Insert(0, $"L:{player.Lvl}");
+
+            if (player.GroupID != -1)
+                lines.Insert(0, $"G:{player.GroupID}");
+
+            DrawToolTip(canvas, string.Join("\n", lines));
+        }
+        /// <summary>
         /// Draws the tool tip for players/hostiles
         /// </summary>
-        /// <param name="canvas"></param>
-        /// <param name="tooltipText"></param>
-        private void DrawTooltip(SKCanvas canvas, string tooltipText)
+        private void DrawToolTip(SKCanvas canvas, string tooltipText)
         {
             var lines = tooltipText.Split('\n');
             var maxWidth = 0f;
@@ -1860,50 +1948,6 @@ namespace eft_dma_radar
             }
 
             return output.ToString();
-        }
-
-        /// <summary>
-        /// Determines the items paint color.
-        /// </summary>
-        public static SKPaint GetLootPaint(DevLootItem item) {
-            int value = TarkovDevAPIManager.GetItemValue(item.Item);
-            bool isImportant = (item.Important || value >= Program.Config.MinImportantLootValue);
-            bool isFiltered = Memory.Loot.LootFilterColors.ContainsKey(item.Item.id);
-
-            SKPaint paintToUse = SKPaints.PaintLoot;
-
-            if (isFiltered) {
-                LootFilter.Colors col = Memory.Loot.LootFilterColors[item.Item.id];
-                paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
-            } else if (isImportant) {
-                paintToUse.Color = Extensions.SKColorFromPaintColor("ImportantLoot");
-            } else {
-                paintToUse.Color = Extensions.SKColorFromPaintColor("RegularLoot");
-            }
-
-            return paintToUse;
-        }
-
-        /// <summary>
-        /// Determines the items text color.
-        /// </summary>
-        public static SKPaint GetLootTextPaint(DevLootItem item) {
-            int value = TarkovDevAPIManager.GetItemValue(item.Item);
-            bool isImportant = (item.Important || value >= Program.Config.MinImportantLootValue);
-            bool isFiltered = Memory.Loot.LootFilterColors.ContainsKey(item.Item.id);
-
-            SKPaint paintToUse = SKPaints.TextLoot;
-
-            if (isFiltered) {
-                LootFilter.Colors col = Memory.Loot.LootFilterColors[item.Item.id];
-                paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
-            } else if (isImportant) {
-                paintToUse.Color = Extensions.SKColorFromPaintColor("ImportantLoot");
-            } else {
-                paintToUse.Color = Extensions.SKColorFromPaintColor("RegularLoot");
-            }
-
-            return paintToUse;
         }
 
         public static List<DevLootItem> GetContainerItems(DevLootItem item) {

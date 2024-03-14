@@ -298,8 +298,8 @@ namespace eft_dma_radar
                                     position = new ObjectiveZones.Position
                                     {
                                         x = z.position.x,
-                                        y = z.position.y,
-                                        z = z.position.z
+                                        y = z.position.z,
+                                        z = z.position.y
                                     }
                                 }).ToList(),
                                 //how to add objectiveItem

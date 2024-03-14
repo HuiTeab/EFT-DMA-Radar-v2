@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +21,9 @@ namespace eft_dma_radar.Source.Tarkov
         public ulong proceduralWeaponAnimationPtr { get; set; }
         public bool isADS { get; set; }
 
+        /// <summary>
+        /// Stores the different skills that can be modified
+        /// </summary>
         public enum Skills
         {
             MagDrillsLoad,
@@ -31,7 +35,11 @@ namespace eft_dma_radar.Source.Tarkov
             ADS
         }
 
-        public PlayerManager(ulong localGameWorld) {
+        /// <summary>
+        /// Creates new PlayerManager object
+        /// </summary>
+        public PlayerManager(ulong localGameWorld)
+        {
             playerBase = Memory.ReadPtr(localGameWorld + Offsets.LocalGameWorld.MainPlayer);
             proceduralWeaponAnimationPtr = Memory.ReadPtr(playerBase + 0x1A0);
             playerProfile = Memory.ReadPtr(playerBase + 0x588);
@@ -41,23 +49,31 @@ namespace eft_dma_radar.Source.Tarkov
 
             OriginalValues = new Dictionary<string, float>()
             {
-                ["NoSwayBreathEffect"] = -1,
-                ["NoSwayWalkEffect"] = -1,
-                ["NoSwayMotionEffect"] = -1,
-                ["NoSwayForceEffect"] = -1,
                 ["MagDrillsLoad"] = -1,
                 ["MagDrillsUnload"] = -1,
                 ["JumpStrength"] = -1,
                 ["WeightStrength"] = -1,
                 ["ThrowStrength"] = -1,
                 ["SearchDouble"] = -1,
+                ["Mask"] = 125,
                 // TO DO:
                 // 1f -> 7f safe?
                 ["ADSModifier"] = -1
             };
         }
 
-        public void SetMaxSkill(Skills skill, bool revert=false)
+        /// <summary>
+        /// Enables / disables weapon recoil & sway
+        /// </summary>
+        public void SetNoRecoilSway(bool on)
+        {
+            Memory.WriteValue(proceduralWeaponAnimationPtr + 0x138, on ? 0 : OriginalValues["Mask"]);
+        }
+
+        /// <summary>
+        /// Modifies the players skill buffs
+        /// </summary>
+        public void SetMaxSkill(Skills skill, bool revert = false)
         {
             try
             {
@@ -71,7 +87,7 @@ namespace eft_dma_radar.Source.Tarkov
                             {
                                 OriginalValues["MagDrillsLoad"] = Memory.ReadValue<float>(magDrillsLoad + 0x30);
                             }
-                            Memory.WriteValue<float>(magDrillsLoad + 0x30, (revert ? OriginalValues["MagDrillsLoad"] : Program.Config.MagDrillSpeed));
+                            Memory.WriteValue<float>(magDrillsLoad + 0x30, (revert ? OriginalValues["MagDrillsLoad"] : Program.Config.MagDrillSpeed * 10));
                             break;
                         }
                     case Skills.MagDrillsUnload:
@@ -82,7 +98,7 @@ namespace eft_dma_radar.Source.Tarkov
                             {
                                 OriginalValues["MagDrillsUnload"] = Memory.ReadValue<float>(magDrillsUnload + 0x30);
                             }
-                            Memory.WriteValue<float>(magDrillsUnload + 0x30, (revert ? OriginalValues["MagDrillsUnload"] : Program.Config.MagDrillSpeed));
+                            Memory.WriteValue<float>(magDrillsUnload + 0x30, (revert ? OriginalValues["MagDrillsUnload"] : Program.Config.MagDrillSpeed * 10));
                             break;
                         }
                     case Skills.JumpStrength:
@@ -134,61 +150,6 @@ namespace eft_dma_radar.Source.Tarkov
             {
                 throw new Exception($"ERROR Setting Max Skill: #{skill}");
             }
-        }
-
-        public void SetNoRecoil(bool on){
-            var shootinggPtr = Memory.ReadPtr(proceduralWeaponAnimationPtr + 0x48);
-            var newShotRecoilPtr = Memory.ReadPtr(shootinggPtr + 0x18);
-
-            Memory.WriteValue<bool>(newShotRecoilPtr + 0x41, !on);
-        }
-
-        public void SetNoSway(bool on)
-        {
-            var breathEffectorPtr = Memory.ReadPtr(proceduralWeaponAnimationPtr + 0x28);
-            var walkEffectorPtr = Memory.ReadPtr(proceduralWeaponAnimationPtr + 0x30);
-            var motionEffectorPtr = Memory.ReadPtr(proceduralWeaponAnimationPtr + 0x38);
-            var forceEffectorPtr = Memory.ReadPtr(proceduralWeaponAnimationPtr + 0x40);
-            var breathEffectorValue = Memory.ReadValue<float>(breathEffectorPtr + 0xA4);
-            
-            if (breathEffectorValue != 0.0f || OriginalValues["NoSwayBreathEffect"] == -1)
-            {
-                if (OriginalValues["NoSwayBreathEffect"] == -1)
-                {
-                    OriginalValues["NoSwayBreathEffect"] = breathEffectorValue;
-                    OriginalValues["NoSwayWalkEffect"] = Memory.ReadValue<float>(walkEffectorPtr + 0x44);
-                    OriginalValues["NoSwayMotionEffect"] = Memory.ReadValue<float>(motionEffectorPtr + 0xD0);
-                    OriginalValues["NoSwayForceEffect"] = Memory.ReadValue<float>(forceEffectorPtr + 0x30);
-                }
-
-                Memory.WriteValue<float>(breathEffectorPtr + 0xA4, (on ? 0.0f : OriginalValues["NoSwayBreathEffect"]));
-                Memory.WriteValue<float>(walkEffectorPtr + 0x44, (on ? 0.0f : OriginalValues["NoSwayWalkEffect"]));
-                Memory.WriteValue<float>(motionEffectorPtr + 0xD0, (on ? 0.0f : OriginalValues["NoSwayMotionEffect"]));
-                Memory.WriteValue<float>(forceEffectorPtr + 0x30, (on ? 0.0f : OriginalValues["NoSwayForceEffect"]));
-            }
-        }
-
-        public void MaxStamina(bool on){
-            var physicalPtr = Memory.ReadPtr(playerBase + 0x598);
-            var movementContextPtr = Memory.ReadPtr(playerBase + 0x40);
-            var handsStaminaPtr = Memory.ReadPtr(physicalPtr + 0x40);
-            var staminaPtr = Memory.ReadPtr(physicalPtr + 0x38);
-            var currentHandsStamina = Memory.ReadValue<float>(handsStaminaPtr + 0x48);
-            var maxHandsStamina = Memory.ReadValue<float>(physicalPtr + 0xC8);
-            var currentStamina = Memory.ReadValue<float>(staminaPtr + 0x48);
-            var maxStamina = Memory.ReadValue<float>(physicalPtr + 0xC0);
-            try {
-                //23 = falling
-                //6 = jumping
-                //[D0] <CurrentState>k__BackingField : EFT.BaseMovementState
-                ulong movementState = Memory.ReadValue<ulong>(movementContextPtr + 0xD0);
-                byte curMovementName = Memory.ReadValue<byte>(movementState + 0x21);
-                byte moveState = (byte)(on ? (byte)23 : (byte)5);
-
-                Memory.WriteValue<byte>(movementState + 0x21, moveState);
-                Memory.WriteValue<float>(handsStaminaPtr + 0x48, moveState == (byte)23 ? maxHandsStamina : currentHandsStamina);
-                Memory.WriteValue<float>(staminaPtr + 0x48, moveState == (byte)23 ? maxStamina : currentStamina);
-            }catch{}
         }
     }
 }

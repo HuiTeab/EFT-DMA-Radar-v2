@@ -12,14 +12,18 @@ namespace eft_dma_radar.Source.Tarkov
         private ulong _unityBase;
         private ulong _opticCamera;
         private ulong _fpsCamera;
-        public bool IsReady { get { return _opticCamera != 0 && _fpsCamera != 0;} }
-        
+        public bool IsReady
+        {
+            get { return _opticCamera != 0 && _fpsCamera != 0; }
+        }
+
         public CameraManager(ulong unityBase)
         {
             _unityBase = unityBase;
         }
 
-        private bool GetCamera(){
+        private bool GetCamera()
+        {
             try
             {
                 var addr = Memory.ReadPtr(_unityBase + 0x0179F500);
@@ -43,7 +47,8 @@ namespace eft_dma_radar.Source.Tarkov
                                 "BaseOpticCamera(Clone)",
                                 StringComparison.OrdinalIgnoreCase
                             )
-                        ){
+                        )
+                        {
                             _opticCamera = cameraObject;
                         }
                         if (cameraName.Contains("FPS Camera", StringComparison.OrdinalIgnoreCase))
@@ -64,20 +69,23 @@ namespace eft_dma_radar.Source.Tarkov
             return false;
         }
 
-        public async Task<bool> GetCameraAsync(){
+        public async Task<bool> GetCameraAsync()
+        {
             return await Task.Run(() => GetCamera());
         }
 
-        private void UpdateCamera() {
+        public void UpdateCamera()
+        {
             if (_unityBase == 0)
                 return;
             GetCamera();
         }
 
-        private ulong GetComponentFromGameObject(ulong gameObject, string componentName){
+        private ulong GetComponentFromGameObject(ulong gameObject, string componentName)
+        {
             var component = Memory.ReadPtr(gameObject + 0x30);
             // Loop through a fixed range of potential component slots
-            for (int i = 0x8; i < 0x500; i += 0x10) 
+            for (int i = 0x8; i < 0x500; i += 0x10)
             {
                 var componentPtr = Memory.ReadPtr(component + (ulong)i);
                 if (componentPtr == 0)
@@ -98,8 +106,8 @@ namespace eft_dma_radar.Source.Tarkov
         /// <summary>
         /// public function to turn thermalvision on and off
         /// </summary>
-        public void ThermalVision(bool on){
-            UpdateCamera();
+        public void ThermalVision(bool on)
+        {
             if (this.IsReady)
             {
                 var fpsThermalComponent = GetComponentFromGameObject(_fpsCamera, "ThermalVision");
@@ -120,8 +128,8 @@ namespace eft_dma_radar.Source.Tarkov
         /// <summary>
         /// public function to turn nightvision on and off
         /// </summary>
-        public void NightVision(bool on){
-            UpdateCamera();
+        public void NightVision(bool on)
+        {
             if (this.IsReady)
             {
                 var nightVisionComponent = GetComponentFromGameObject(_fpsCamera, "NightVision");
@@ -137,8 +145,8 @@ namespace eft_dma_radar.Source.Tarkov
         /// <summary>
         /// public function to turn visor on and off
         /// </summary>
-        public void VisorEffect(bool on) {
-            UpdateCamera();
+        public void VisorEffect(bool on)
+        {
             if (this.IsReady)
             {
                 var visorComponent = GetComponentFromGameObject(_fpsCamera, "VisorEffect");
@@ -153,9 +161,9 @@ namespace eft_dma_radar.Source.Tarkov
         /// <summary>
         /// public function to turn optic thermalvision on and off
         /// </summary>
-        public void OpticThermalVision(bool on){
-            UpdateCamera();
-            if (_opticCamera != 0)
+        public void OpticThermalVision(bool on)
+        {
+            if (this.IsReady)
             {
                 ulong opticComponent = 0;
                 ulong opticThermalVision = 0;
@@ -181,5 +189,4 @@ namespace eft_dma_radar.Source.Tarkov
             }
         }
     }
-
 }

@@ -15,9 +15,10 @@ namespace eft_dma_radar
         private GrenadeManager _grenadeManager;
         private ExfilManager _exfilManager;
         private PlayerManager _playerManager;
-        private Toolbox _toolbox;
         private Config _config;
         private static CameraManager _cameraManager;
+        private QuestManager _questManager;
+        private Toolbox _toolbox;
         private ulong _localGameWorld;
         private readonly ulong _unityBase;
         private bool _inHideout = false;
@@ -26,7 +27,6 @@ namespace eft_dma_radar
         private volatile bool _refreshLoot = false;
         private volatile string _mapName = string.Empty;
         private volatile bool _isScav = false;
-        private QuestManager _questManager;
         
         #region Getters
         public bool InGame
@@ -77,13 +77,13 @@ namespace eft_dma_radar
         {
             get => _playerManager;
         }
-        public QuestManager QuestManager {
-        
-            get => _questManager;
-        }
         public Toolbox Toolbox
         {
             get => _toolbox;
+        }
+        public QuestManager QuestManager {
+        
+            get => _questManager;
         }
         #endregion
 
@@ -107,15 +107,15 @@ namespace eft_dma_radar
                 // Update the list of players and their states
                 await UpdatePlayersAsync();
 
-                // Update game environment elements such as loot and exfils
-                if (_inGame && !InHideout )
-                {
-                    UpdateGameEnvironment();
-                }
                 //if registered players is -1, then we are died or exfilled
                 if (_rgtPlayers != null && _rgtPlayers.PlayerCount == -1)
                 {
                     throw new RaidEnded();
+                }
+                // Update game environment elements such as loot and exfils
+                if (_inGame && !InHideout )
+                {
+                    UpdateGameEnvironment();
                 }
             }
             catch (DMAShutdown)
@@ -202,10 +202,11 @@ namespace eft_dma_radar
         /// <param name="e">The RaidEnded exception instance containing details about the raid end.</param>
         private void HandleRaidEnded(RaidEnded e) {
             Program.Log("Raid has ended!");
-
+            
             //wait for game to end
             Thread.Sleep(15000);
             _cameraManager = null;
+            _playerManager = null;
 
             Memory.Restart();
             _inGame = false;
@@ -337,9 +338,9 @@ namespace eft_dma_radar
                         continue;
                     }
                     var localPlayer = Memory.ReadPtr(_localGameWorld + Offsets.LocalGameWorld.MainPlayer);
-                    var localPlayerInfo = Memory.ReadPtrChain(localPlayer, new uint[] {Offsets.Player.Profile, Offsets.Profile.PlayerInfo});
-                    var localPlayerSide = Memory.ReadValue<int>(localPlayerInfo + Offsets.PlayerInfo.PlayerSide);
-                    _isScav = (localPlayerSide == 4);
+                    var playerInfoPtr = Memory.ReadPtrChain(localPlayer, new uint[] {0x588, 0x28});
+                    var localPlayerSide = Memory.ReadValue<int>(playerInfoPtr + Offsets.PlayerInfo.PlayerSide);
+                    _isScav = localPlayerSide == 4;
                     var localGameWorldClassnamePtr = Memory.ReadPtrChain(_localGameWorld, Offsets.UnityClass.Name);
                     var localGameWorldClassName = Memory.ReadString(localGameWorldClassnamePtr, 64).Replace("\0", string.Empty);
                     var localPlayerClassnamePtr = Memory.ReadPtrChain(localPlayer, Offsets.UnityClass.Name);
@@ -354,25 +355,11 @@ namespace eft_dma_radar
                         return true;
                     }
                     //Online handling
-                    else if (classNameString == "ClientPlayer" || classNameString == "LocalPlayer" && localGameWorldClassName != "ClientLocalGameWorld")
+                    else if (classNameString == "ClientPlayer" || classNameString == "LocalPlayer" || localGameWorldClassName == "ClientLocalGameWorld")
                     {
                         _inHideout = false;
                         var rgtPlayers = new RegisteredPlayers(Memory.ReadPtr(_localGameWorld + Offsets.LocalGameWorld.RegisteredPlayers));
                         // retry if player count is 0
-                        if (rgtPlayers.PlayerCount == 0)
-                        {
-                            await Task.Delay(retryInterval);
-                            retryCount++;
-                            continue;
-                        }
-
-                        _rgtPlayers = rgtPlayers;
-                        return true; // Successful exit
-                    }
-                    //Offline handling
-                    else if (localGameWorldClassName == "ClientLocalGameWorld") {
-                        _inHideout = false;
-                        var rgtPlayers = new RegisteredPlayers(Memory.ReadPtr(_localGameWorld + Offsets.LocalGameWorld.RegisteredPlayers));
                         if (rgtPlayers.PlayerCount == 0)
                         {
                             await Task.Delay(retryInterval);
@@ -410,37 +397,44 @@ namespace eft_dma_radar
         /// </summary>
         private void UpdateMisc()
         {
+            _config = Program.Config;
+            
             if (_questManager is null)
             {
                 try
                 {
                     var questManager = new QuestManager(_localGameWorld);
-                    _questManager = questManager; // update ref
+                     _questManager = questManager; // update ref
                 }
                 catch (Exception ex)
                 {
                     Program.Log($"ERROR loading QuestManager: {ex}");
                 }
             }
-            if (_lootManager is null || _refreshLoot)
+            
+            //if show loot is enabled, load loot
+            if (_config.LootEnabled)
             {
-                _loadingLoot = true;
-                if (_lootManager is null)
+                if (_lootManager is null || _refreshLoot)
                 {
-                    // wait for loot to be loaded
-                    Thread.Sleep(5000);
+                    _loadingLoot = true;
+                    if (_lootManager is null)
+                    {
+                        // wait for loot to be loaded
+                        Thread.Sleep(5000);
+                    }
+                    try
+                    {
+                        var loot = new LootManager(_localGameWorld);
+                        _lootManager = loot; // update ref
+                        _refreshLoot = false;
+                    }
+                    catch (Exception ex)
+                    {
+                        Program.Log($"ERROR loading LootEngine: {ex}");
+                    }
+                    _loadingLoot = false;
                 }
-                try
-                {
-                    var loot = new LootManager(_localGameWorld);
-                    _lootManager = loot; // update ref
-                    _refreshLoot = false;
-                }
-                catch (Exception ex)
-                {
-                    Program.Log($"ERROR loading LootEngine: {ex}");
-                }
-                _loadingLoot = false;
             }
             if (_mapName == string.Empty)
             {
@@ -482,6 +476,18 @@ namespace eft_dma_radar
                 catch (Exception ex)
                 {
                     Program.Log($"ERROR loading Toolbox: {ex}");
+                }
+            }
+            if (_questManager is null)
+            {
+                try
+                {
+                    var questManager = new QuestManager(_localGameWorld);
+                    _questManager = questManager;
+                }
+                catch (Exception ex)
+                {
+                    Program.Log($"ERROR loading QuestManager: {ex}");
                 }
             }
             if (_grenadeManager is null)

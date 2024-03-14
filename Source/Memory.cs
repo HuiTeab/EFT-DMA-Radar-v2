@@ -237,6 +237,8 @@ namespace eft_dma_radar
         /// <summary>
         /// Main worker thread to perform DMA Reads on.
         /// </summary>
+        /// 
+        private static CancellationTokenSource _cts = new CancellationTokenSource();
         private static async Task WorkerAsync()
         {
             try
@@ -297,7 +299,7 @@ namespace eft_dma_radar
                         finally
                         {
                             _ready = false;
-                            Thread.Sleep(100);
+                            await Task.Delay(100, _cts.Token); // Short delay before restarting the loop
                         }
                     }
                     Program.Log("Game is no longer running! Attempting to restart...");
@@ -557,7 +559,7 @@ namespace eft_dma_radar
             {
                 Program.Log("Closing down Memory Thread...");
                 _running = false;
-                _worker.Interrupt(); // Interrupt thread if sleeping
+                _cts.Cancel(); // Signal cancellation to the worker task
                 while (_worker.IsAlive) Thread.SpinWait(100);
             }
         }
