@@ -89,22 +89,13 @@ namespace eft_dma_radar.Source.Tarkov
                         Game.CameraManager.NightVision(false);
                     }
                 }
-                
             }
 
             Memory.PlayerManager.isADS = Memory.ReadValue<bool>(Memory.PlayerManager.proceduralWeaponAnimationPtr + 0x1BD);
-            Memory.PlayerManager.SetNoRecoilSway(Program.Config.NoRecoilSwayEnabled);
 
-            //if (Program.Config.NoRecoilSwayEnabled && !noRecoilSwayToggled)
-            //{
-            //    noRecoilSwayToggled = true;
-            //    Memory.PlayerManager.SetNoRecoilSway(true);
-            //}
-            //else if (!Program.Config.NoRecoilSwayEnabled && noRecoilSwayToggled)
-            //{
-            //    noRecoilSwayToggled = false;
-            //    Memory.PlayerManager.SetNoRecoilSway(false);
-            //}
+            // run every call so they can dynamically update to game changes (eg weapon swap / localplayer movement otherwise they are useless)
+            Memory.PlayerManager.SetNoRecoilSway(Program.Config.NoRecoilSwayEnabled);
+            Memory.PlayerManager.SetInstantADS(Program.Config.InstantADSEnabled);
 
             if (Program.Config.DoubleSearchEnabled && !doubleSearchToggled)
             {

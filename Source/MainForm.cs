@@ -273,10 +273,6 @@ namespace eft_dma_radar
         private void chkNoRecoilSway_CheckedChanged(object sender, EventArgs e)
         {
             _config.NoRecoilSwayEnabled = chkNoRecoilSway.Checked;
-            if (Memory.LocalPlayer is not null)
-            {
-                Memory.PlayerManager.SetNoRecoilSway(chkNoRecoilSway.Checked);
-            }
         }
 
         private void chkJumpPower_CheckedChanged(object sender, EventArgs e)
@@ -1300,6 +1296,7 @@ namespace eft_dma_radar
             chkOpticThermalVision.Checked = _config.OpticThermalVisionEnabled;
             chkNoVisor.Checked = _config.NoVisorEnabled;
             chkIncreaseMaxWeight.Checked = _config.IncreaseMaxWeightEnabled;
+            chkInstantADS.Checked = _config.InstantADSEnabled;
             chkDoubleSearch.Checked = _config.DoubleSearchEnabled;
             chkJumpPower.Checked = _config.JumpPowerEnabled;
             trkJumpPower.Value = _config.JumpPowerStrength;
@@ -2313,7 +2310,7 @@ namespace eft_dma_radar
             _config.DoubleSearchEnabled = chkDoubleSearch.Checked;
             _config.MagDrillsEnabled = chkMagDrills.Checked;
             _config.MagDrillSpeed = trkMagDrills.Value;
-            _config.NoVisorEnabled = chkNoVisor.Checked;
+            _config.InstantADSEnabled = chkInstantADS.Checked;
             _config.IncreaseMaxWeightEnabled = chkIncreaseMaxWeight.Checked;
             _config.JumpPowerEnabled = chkJumpPower.Checked;
             _config.JumpPowerStrength = trkJumpPower.Value;
@@ -2388,6 +2385,11 @@ namespace eft_dma_radar
             }
 
             base.OnMouseWheel(e);
+        }
+
+        private void chkInstantADS_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.InstantADSEnabled = chkInstantADS.Checked;
         }
     }
     #endregion

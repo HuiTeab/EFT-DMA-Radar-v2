@@ -225,6 +225,12 @@ namespace eft_dma_radar
         public bool IncreaseMaxWeightEnabled { get; set; }
 
         /// <summary>
+        /// Enables / disables juggernaut.
+        /// </summary>
+        [JsonPropertyName("instantADSEnabled")]
+        public bool InstantADSEnabled { get; set; }
+
+        /// <summary>
         /// Enables / disables max / infinite stamina.
         /// </summary>
         [JsonPropertyName("showHoverArmor")]
@@ -308,6 +314,7 @@ namespace eft_dma_radar
             MagDrillsEnabled = false;
             MagDrillSpeed = 5;
             IncreaseMaxWeightEnabled = false;
+            InstantADSEnabled = false;
             HideExfilNames = false;
         }
 

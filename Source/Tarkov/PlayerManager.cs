@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using OpenTK.Graphics.ES11;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,9 +57,7 @@ namespace eft_dma_radar.Source.Tarkov
                 ["ThrowStrength"] = -1,
                 ["SearchDouble"] = -1,
                 ["Mask"] = 125,
-                // TO DO:
-                // 1f -> 7f safe?
-                ["ADSModifier"] = -1
+                ["AimingSpeed"] = -1
             };
         }
 
@@ -67,7 +66,31 @@ namespace eft_dma_radar.Source.Tarkov
         /// </summary>
         public void SetNoRecoilSway(bool on)
         {
-            Memory.WriteValue(proceduralWeaponAnimationPtr + 0x138, on ? 0 : OriginalValues["Mask"]);
+            Memory.WriteValue(proceduralWeaponAnimationPtr + 0x138, on ? 0 : (int)OriginalValues["Mask"]);
+        }
+
+        /// <summary>
+        /// Enables / disables instant ads, changes per weapon
+        /// </summary>
+        public void SetInstantADS(bool on)
+        {
+            var aimingSpeed = Memory.ReadValue<float>(proceduralWeaponAnimationPtr + 0x1DC);
+
+            if (OriginalValues["AimingSpeed"] == -1)
+            {
+                OriginalValues["AimingSpeed"] = aimingSpeed;
+            }
+
+            if (on && aimingSpeed != 6f)
+            {
+                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x1DC, 6f);
+            }
+            else if (!on && aimingSpeed != OriginalValues["AimingSpeed"])
+            {
+                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x1DC, OriginalValues["AimingSpeed"]);
+
+                OriginalValues["AimingSpeed"] = -1;
+            }
         }
 
         /// <summary>

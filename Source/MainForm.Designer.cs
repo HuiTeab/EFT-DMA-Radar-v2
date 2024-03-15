@@ -53,6 +53,12 @@ namespace eft_dma_radar
             tabSettings = new TabPage();
             grpConfig = new GroupBox();
             grpColors = new GroupBox();
+            picExfilClosedIconColor = new PictureBox();
+            lblExfilClosedIconColor = new Label();
+            picExfilPendingIconColor = new PictureBox();
+            lblExfilPendingIconColor = new Label();
+            picExfilActiveIconColor = new PictureBox();
+            lblExfilActiveIconColor = new Label();
             picExfilClosedTextColor = new PictureBox();
             lblExfilClosedTextColor = new Label();
             picExfilPendingTextColor = new PictureBox();
@@ -129,6 +135,7 @@ namespace eft_dma_radar
             chkChams = new CheckBox();
             chkDoubleSearch = new CheckBox();
             grpGearFeatures = new GroupBox();
+            chkInstantADS = new CheckBox();
             trkMagDrills = new TrackBar();
             chkNoRecoilSway = new CheckBox();
             chkMagDrills = new CheckBox();
@@ -158,18 +165,15 @@ namespace eft_dma_radar
             tabControl = new TabControl();
             colDialog = new ColorDialog();
             toolTip = new ToolTip(components);
-            picExfilActiveIconColor = new PictureBox();
-            lblExfilActiveIconColor = new Label();
-            picExfilPendingIconColor = new PictureBox();
-            lblExfilPendingIconColor = new Label();
-            picExfilClosedIconColor = new PictureBox();
-            lblExfilClosedIconColor = new Label();
             tabLootFilter.SuspendLayout();
             tabPlayerHistory.SuspendLayout();
             tabPlayerLoadouts.SuspendLayout();
             tabSettings.SuspendLayout();
             grpConfig.SuspendLayout();
             grpColors.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picExfilClosedIconColor).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picExfilPendingIconColor).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picExfilActiveIconColor).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picExfilClosedTextColor).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picExfilPendingTextColor).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picExfilActiveTextColor).BeginInit();
@@ -207,9 +211,6 @@ namespace eft_dma_radar
             tabRadar.SuspendLayout();
             grpMapSetup.SuspendLayout();
             tabControl.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)picExfilActiveIconColor).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)picExfilPendingIconColor).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)picExfilClosedIconColor).BeginInit();
             SuspendLayout();
             // 
             // tabLootFilter
@@ -471,6 +472,63 @@ namespace eft_dma_radar
             grpColors.TabIndex = 28;
             grpColors.TabStop = false;
             grpColors.Text = "Colors";
+            // 
+            // picExfilClosedIconColor
+            // 
+            picExfilClosedIconColor.BackColor = Color.Transparent;
+            picExfilClosedIconColor.Location = new Point(109, 444);
+            picExfilClosedIconColor.Name = "picExfilClosedIconColor";
+            picExfilClosedIconColor.Size = new Size(47, 18);
+            picExfilClosedIconColor.TabIndex = 51;
+            picExfilClosedIconColor.TabStop = false;
+            picExfilClosedIconColor.Click += picExfilClosedIconColor_Click;
+            // 
+            // lblExfilClosedIconColor
+            // 
+            lblExfilClosedIconColor.AutoSize = true;
+            lblExfilClosedIconColor.Location = new Point(8, 444);
+            lblExfilClosedIconColor.Name = "lblExfilClosedIconColor";
+            lblExfilClosedIconColor.Size = new Size(97, 15);
+            lblExfilClosedIconColor.TabIndex = 50;
+            lblExfilClosedIconColor.Text = "Exfil Closed Icon:";
+            // 
+            // picExfilPendingIconColor
+            // 
+            picExfilPendingIconColor.BackColor = Color.Transparent;
+            picExfilPendingIconColor.Location = new Point(108, 396);
+            picExfilPendingIconColor.Name = "picExfilPendingIconColor";
+            picExfilPendingIconColor.Size = new Size(47, 18);
+            picExfilPendingIconColor.TabIndex = 49;
+            picExfilPendingIconColor.TabStop = false;
+            picExfilPendingIconColor.Click += picExfilPendingIconColor_Click;
+            // 
+            // lblExfilPendingIconColor
+            // 
+            lblExfilPendingIconColor.AutoSize = true;
+            lblExfilPendingIconColor.Location = new Point(-1, 396);
+            lblExfilPendingIconColor.Name = "lblExfilPendingIconColor";
+            lblExfilPendingIconColor.Size = new Size(105, 15);
+            lblExfilPendingIconColor.TabIndex = 48;
+            lblExfilPendingIconColor.Text = "Exfil Pending Icon:";
+            // 
+            // picExfilActiveIconColor
+            // 
+            picExfilActiveIconColor.BackColor = Color.Transparent;
+            picExfilActiveIconColor.Location = new Point(108, 348);
+            picExfilActiveIconColor.Name = "picExfilActiveIconColor";
+            picExfilActiveIconColor.Size = new Size(47, 18);
+            picExfilActiveIconColor.TabIndex = 47;
+            picExfilActiveIconColor.TabStop = false;
+            picExfilActiveIconColor.Click += picExfilActiveIconColor_Click;
+            // 
+            // lblExfilActiveIconColor
+            // 
+            lblExfilActiveIconColor.AutoSize = true;
+            lblExfilActiveIconColor.Location = new Point(10, 348);
+            lblExfilActiveIconColor.Name = "lblExfilActiveIconColor";
+            lblExfilActiveIconColor.Size = new Size(94, 15);
+            lblExfilActiveIconColor.TabIndex = 46;
+            lblExfilActiveIconColor.Text = "Exfil Active Icon:";
             // 
             // picExfilClosedTextColor
             // 
@@ -1283,6 +1341,7 @@ namespace eft_dma_radar
             // 
             // grpGearFeatures
             // 
+            grpGearFeatures.Controls.Add(chkInstantADS);
             grpGearFeatures.Controls.Add(trkMagDrills);
             grpGearFeatures.Controls.Add(chkNoRecoilSway);
             grpGearFeatures.Controls.Add(chkMagDrills);
@@ -1296,6 +1355,19 @@ namespace eft_dma_radar
             grpGearFeatures.TabIndex = 34;
             grpGearFeatures.TabStop = false;
             grpGearFeatures.Text = "Gear Features";
+            // 
+            // chkInstantADS
+            // 
+            chkInstantADS.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            chkInstantADS.AutoSize = true;
+            chkInstantADS.Location = new Point(118, 47);
+            chkInstantADS.Name = "chkInstantADS";
+            chkInstantADS.Size = new Size(87, 19);
+            chkInstantADS.TabIndex = 34;
+            chkInstantADS.Text = "Instant ADS";
+            toolTip.SetToolTip(chkInstantADS, "Increases ADS speed to be near instantaneous");
+            chkInstantADS.UseVisualStyleBackColor = true;
+            chkInstantADS.CheckedChanged += chkInstantADS_CheckedChanged;
             // 
             // trkMagDrills
             // 
@@ -1622,63 +1694,6 @@ namespace eft_dma_radar
             // 
             colDialog.FullOpen = true;
             // 
-            // picExfilActiveIconColor
-            // 
-            picExfilActiveIconColor.BackColor = Color.Transparent;
-            picExfilActiveIconColor.Location = new Point(108, 348);
-            picExfilActiveIconColor.Name = "picExfilActiveIconColor";
-            picExfilActiveIconColor.Size = new Size(47, 18);
-            picExfilActiveIconColor.TabIndex = 47;
-            picExfilActiveIconColor.TabStop = false;
-            picExfilActiveIconColor.Click += picExfilActiveIconColor_Click;
-            // 
-            // lblExfilActiveIconColor
-            // 
-            lblExfilActiveIconColor.AutoSize = true;
-            lblExfilActiveIconColor.Location = new Point(10, 348);
-            lblExfilActiveIconColor.Name = "lblExfilActiveIconColor";
-            lblExfilActiveIconColor.Size = new Size(94, 15);
-            lblExfilActiveIconColor.TabIndex = 46;
-            lblExfilActiveIconColor.Text = "Exfil Active Icon:";
-            // 
-            // picExfilPendingIconColor
-            // 
-            picExfilPendingIconColor.BackColor = Color.Transparent;
-            picExfilPendingIconColor.Location = new Point(108, 396);
-            picExfilPendingIconColor.Name = "picExfilPendingIconColor";
-            picExfilPendingIconColor.Size = new Size(47, 18);
-            picExfilPendingIconColor.TabIndex = 49;
-            picExfilPendingIconColor.TabStop = false;
-            picExfilPendingIconColor.Click += picExfilPendingIconColor_Click;
-            // 
-            // lblExfilPendingIconColor
-            // 
-            lblExfilPendingIconColor.AutoSize = true;
-            lblExfilPendingIconColor.Location = new Point(-1, 396);
-            lblExfilPendingIconColor.Name = "lblExfilPendingIconColor";
-            lblExfilPendingIconColor.Size = new Size(105, 15);
-            lblExfilPendingIconColor.TabIndex = 48;
-            lblExfilPendingIconColor.Text = "Exfil Pending Icon:";
-            // 
-            // picExfilClosedIconColor
-            // 
-            picExfilClosedIconColor.BackColor = Color.Transparent;
-            picExfilClosedIconColor.Location = new Point(109, 444);
-            picExfilClosedIconColor.Name = "picExfilClosedIconColor";
-            picExfilClosedIconColor.Size = new Size(47, 18);
-            picExfilClosedIconColor.TabIndex = 51;
-            picExfilClosedIconColor.TabStop = false;
-            picExfilClosedIconColor.Click += picExfilClosedIconColor_Click;
-            // 
-            // lblExfilClosedIconColor
-            // 
-            lblExfilClosedIconColor.AutoSize = true;
-            lblExfilClosedIconColor.Location = new Point(8, 444);
-            lblExfilClosedIconColor.Name = "lblExfilClosedIconColor";
-            lblExfilClosedIconColor.Size = new Size(97, 15);
-            lblExfilClosedIconColor.TabIndex = 50;
-            lblExfilClosedIconColor.Text = "Exfil Closed Icon:";
-            // 
             // frmMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -1696,6 +1711,9 @@ namespace eft_dma_radar
             grpConfig.ResumeLayout(false);
             grpColors.ResumeLayout(false);
             grpColors.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picExfilClosedIconColor).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picExfilPendingIconColor).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picExfilActiveIconColor).EndInit();
             ((System.ComponentModel.ISupportInitialize)picExfilClosedTextColor).EndInit();
             ((System.ComponentModel.ISupportInitialize)picExfilPendingTextColor).EndInit();
             ((System.ComponentModel.ISupportInitialize)picExfilActiveTextColor).EndInit();
@@ -1742,9 +1760,6 @@ namespace eft_dma_radar
             grpMapSetup.ResumeLayout(false);
             grpMapSetup.PerformLayout();
             tabControl.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)picExfilActiveIconColor).EndInit();
-            ((System.ComponentModel.ISupportInitialize)picExfilPendingIconColor).EndInit();
-            ((System.ComponentModel.ISupportInitialize)picExfilClosedIconColor).EndInit();
             ResumeLayout(false);
         }
 
@@ -1885,6 +1900,7 @@ namespace eft_dma_radar
         private Label lblExfilPendingIconColor;
         private PictureBox picExfilClosedIconColor;
         private Label lblExfilClosedIconColor;
+        private CheckBox chkInstantADS;
     }
 }
 
