@@ -74,23 +74,24 @@ namespace eft_dma_radar.Source.Tarkov
         /// </summary>
         public void SetInstantADS(bool on)
         {
-            var aimingSpeed = Memory.ReadValue<float>(proceduralWeaponAnimationPtr + 0x1DC);
+            // temp bandaid for ads wigging out
+            Memory.WriteValue(proceduralWeaponAnimationPtr + 0x1DC, on ? 6f : 1f);
+            //var aimingSpeed = Memory.ReadValue<float>(proceduralWeaponAnimationPtr + 0x1DC);
 
-            if (OriginalValues["AimingSpeed"] == -1)
-            {
-                OriginalValues["AimingSpeed"] = aimingSpeed;
-            }
+            //if (OriginalValues["AimingSpeed"] == -1)
+            //{
+            //    OriginalValues["AimingSpeed"] = aimingSpeed;
+            //}
 
-            if (on && aimingSpeed != 6f)
-            {
-                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x1DC, 6f);
-            }
-            else if (!on && aimingSpeed != OriginalValues["AimingSpeed"])
-            {
-                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x1DC, OriginalValues["AimingSpeed"]);
-
-                OriginalValues["AimingSpeed"] = -1;
-            }
+            //if (on && aimingSpeed != 6f)
+            //{
+            //    Memory.WriteValue(proceduralWeaponAnimationPtr + 0x1DC, 6f);
+            //}
+            //else if (!on && aimingSpeed != OriginalValues["AimingSpeed"])
+            //{
+            //    Memory.WriteValue(proceduralWeaponAnimationPtr + 0x1DC, (float)OriginalValues["AimingSpeed"]);
+            //    OriginalValues["AimingSpeed"] = -1;
+            //}
         }
 
         /// <summary>
