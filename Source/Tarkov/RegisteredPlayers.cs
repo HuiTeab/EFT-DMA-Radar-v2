@@ -16,6 +16,7 @@ namespace eft_dma_radar
         private readonly Stopwatch _healthSw = new();
         private readonly Stopwatch _posSw = new();
         private readonly Stopwatch _gearSw = new();
+        private readonly Stopwatch _playerSw = new();
         private readonly ConcurrentDictionary<string, Player> _players =
             new(StringComparer.OrdinalIgnoreCase);
 
@@ -77,6 +78,7 @@ namespace eft_dma_radar
             _healthSw.Start();
             _posSw.Start();
             _gearSw.Start();
+            _playerSw.Start();
         }
         
         /// <summary>
@@ -306,12 +308,14 @@ namespace eft_dma_radar
                 bool checkHealth = _healthSw.ElapsedMilliseconds > 250; // every 250 ms
                 bool checkPos = _posSw.ElapsedMilliseconds > 10000 && players.Any(x => x.IsHumanActive); // every 10 sec & at least 1 active human player
                 bool checkGear = _isFirstRun || _gearSw.ElapsedMilliseconds > 5000; // every 5 sec
+                bool checkPlayer = _playerSw.ElapsedMilliseconds > 1000; // every 1 sec
                 var scatterMap = new ScatterReadMap(players.Length);
                 var round1 = scatterMap.AddRound();
                 var round3 = scatterMap.AddRound();
                 var round4 = scatterMap.AddRound();
                 var round5 = scatterMap.AddRound();
                 var round6 = scatterMap.AddRound();
+                var round7 = scatterMap.AddRound();
                 ScatterReadRound round2 = null;
                 if (checkPos) // allocate and add extra rounds to map
                 {
@@ -351,6 +355,13 @@ namespace eft_dma_radar
                             var containedItem = round4.AddEntry<MemPointer>(i, 10, headGear, null, Offsets.Slot.ContainedItem);
                             var itemTemplate = round5.AddEntry<MemPointer>(i, 11, containedItem, null, Offsets.LootItemBase.ItemTemplate);
                         }
+                        if (checkPlayer && player.Type == PlayerType.LocalPlayer)
+                        {
+                            var proceduralWeaponAnimation = round6.AddEntry<MemPointer>(i, 12, player.Base + 0x1A0);
+                            //isADS = Memory.ReadValue<bool>(proceduralWeaponAnimationPtr + 0x1BD);
+                            var isADS = round7.AddEntry<bool>(i, 13, proceduralWeaponAnimation, null, 0x1BD);
+                        }
+
                     }
                 }
                 scatterMap.Execute();
@@ -443,6 +454,22 @@ namespace eft_dma_radar
                                 }
                             }
 
+                            if (checkPlayer)
+                            {
+                                scatterMap.Results[i][13].TryGetResult<bool>(out var isADS);
+                                if (isADS)
+                                {
+                                    if (Program.Config.ThermalVisionEnabled)
+                                    {
+                                        Game.CameraManager.ThermalVision(false);
+                                        Game.CameraManager.OpticThermalVision(true);
+                                    }
+                                }else {
+                                    Game.CameraManager.ThermalVision(Program.Config.ThermalVisionEnabled);
+                                    Game.CameraManager.OpticThermalVision(false);
+                                }
+                            }
+
                             if (p1 && p2 && p3)
                                 player.ErrorCount = 0;
                             else
@@ -480,6 +507,7 @@ namespace eft_dma_radar
                 if (checkHealth)_healthSw.Restart();
                 if (checkPos)_posSw.Restart();
                 if (checkGear)_gearSw.Restart();
+                if (checkPlayer)_playerSw.Restart();
             }
             catch (Exception ex)
             {

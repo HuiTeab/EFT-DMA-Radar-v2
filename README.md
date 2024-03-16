@@ -2,8 +2,8 @@
 
 ## Description
 EFT DMA Radar is a radar tool designed for Escape from Tarkov that provides real-time tracking of players and items on a 2D map.
-![image](https://github.com/HuiTeab/EFT-DMA-Radar-v2/assets/63579245/3192b8a9-0019-4142-b987-8b7155e00ec6)
-![image](https://github.com/HuiTeab/EFT-DMA-Radar-v2/assets/63579245/5d9b29ed-01c2-4135-8e97-c227d63c8943)
+![image](https://github.com/HuiTeab/EFT-DMA-Radar-v2/assets/63579245/fefdd5de-0d7a-453e-9f0c-1ab650557723)
+![image](https://github.com/HuiTeab/EFT-DMA-Radar-v2/assets/63579245/eb89292d-1634-4d01-bc99-b0fcb44f8b8c)
 ![image](https://github.com/HuiTeab/EFT-DMA-Radar-v2/assets/63579245/4d7f5e97-8ee0-4666-aed3-742df6fafb11)
 
 
@@ -11,6 +11,7 @@ EFT DMA Radar is a radar tool designed for Escape from Tarkov that provides real
 ## Project Structure
 
 - **Maps**: Directory containing maps data.
+- **MonoSharp**: Directory containing MonoSharp library.
 - **Source**: Source code directory.
   - **Tarkov**: Directory for Tarkov-related files.
     - **ExfilManager.cs**: Manages extraction points.
@@ -21,13 +22,17 @@ EFT DMA Radar is a radar tool designed for Escape from Tarkov that provides real
     - **Player.cs**: Manages player-related functionalities. (Work in Progress)
     - **RegisteredPlayers.cs**: Manages registered players.
     - **TarkovDevAPIManager.cs**: Manages Tarkov market-related operations.
-    - **QuestManager.cs**: Quest stuff (Work in Progress)
+    - **QuestManager.cs**: Manages quest related functionality
+    - **PlayerManager.cs**: Manages localplayer operations.
+    - **CameraManager.cs**: Manages FPS / Optics camera functionality.
   - **Misc**: Directory for miscellaneous files.
     - **Extensions.cs**: Contains extension methods.
     - **Misc.cs**: Contains miscellaneous functionalities.
     - **Offsets.cs**: Contains memory offsets.
     - **SKPaints.cs**: Contains SKPaint configurations.
-    - **Quests.cs**: Quest stuff (OLD?)
+    - **Chams.cs**: Contains chams functionality.
+    - **Toolbox.cs**: Manages execution of memory writing operations.
+    
 
 ## Usage
 
@@ -42,7 +47,7 @@ EFT DMA Radar is a radar tool designed for Escape from Tarkov that provides real
 - leechcore.dll, vmm.dll, dbghelp.dll, symsrv.dll and vcruntime140.dll - https://github.com/ufrisk/MemProcFS/releases
 
 ## Contact
-For any inquiries or assistance, feel free to contact me on Discord: keeegi_10477
+For any inquiries or assistance, feel free to contact me on Discord: keeegi_10477 / x0m
 
 ## Note
 

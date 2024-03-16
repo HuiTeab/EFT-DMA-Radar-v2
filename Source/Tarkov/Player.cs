@@ -386,14 +386,7 @@ namespace eft_dma_radar
                             InventoryController = Memory.ReadPtr(playerBase + Offsets.Player.InventoryController);
                             var inventory = Memory.ReadPtr(InventoryController + Offsets.InventoryController.Inventory);
                             var equipment = Memory.ReadPtr(inventory + Offsets.Inventory.Equipment);
-                            InventorySlots = Memory.ReadPtr(equipment + Offsets.Equipment.Slots);
-
-                            _config = Program.Config;
-                            if (_config.ThermalVisionEnabled)
-                            {
-                                Game.CameraManager.ThermalVision(_config.ThermalVisionEnabled);
-                            }
-                            
+                            InventorySlots = Memory.ReadPtr(equipment + Offsets.Equipment.Slots);                     
                         }
                     } catch {}
                 } else if (baseClassName == "ObservedPlayerView") {

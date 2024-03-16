@@ -253,10 +253,6 @@ namespace eft_dma_radar
         private void chkThermalVision_CheckedChanged(object sender, EventArgs e)
         {
             _config.ThermalVisionEnabled = chkThermalVision.Checked;
-            if (Memory.LocalPlayer is not null)
-            {
-                Game.CameraManager.ThermalVision(chkThermalVision.Checked);
-            }
         }
 
         /// <summary>
