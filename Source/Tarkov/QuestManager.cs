@@ -70,7 +70,9 @@ namespace eft_dma_radar
                                             ID = zone.id,
                                             MapName = zone.map.name,
                                             Position = new Vector3((float)zone.position.x, (float)zone.position.y, (float)zone.position.z),
-                                            ObjectiveType = objective.Type
+                                            ObjectiveType = objective.Type,
+                                            Description = objective.Description,
+                                            TaskName = task.Name
                                         });
                                     }   
                                 }
@@ -81,6 +83,7 @@ namespace eft_dma_radar
                                         Name = objective.QuestItem.Name,
                                         ShortName = objective.QuestItem.ShortName,
                                         NormalizedName = objective.QuestItem.NormalizedName,
+                                        TaskName = task.Name,
                                         Description = objective.QuestItem.Description
                                     });
                                 }
@@ -92,8 +95,8 @@ namespace eft_dma_radar
                      Console.WriteLine($"Quest: {questID} is not in the list");
                 }
             }
-            QuestZone = new(questZone); // update readonly ref
-            QuestItem = new(questItem); // update readonly ref
+            this.QuestZone = new(questZone); // update readonly ref
+            this.QuestItem = new(questItem); // update readonly ref
         }
     }
 
@@ -102,6 +105,7 @@ namespace eft_dma_radar
         public string Name { get; set; }
         public string ShortName { get; set; }
         public string NormalizedName { get; set; }
+        public string TaskName { get; set; }
         public string Description { get; set; }
         public Vector3 Position {
             get;
@@ -113,6 +117,8 @@ namespace eft_dma_radar
     public class QuestZone {
         public string ID { get; set; }
         public string MapName { get; set; }
+        public string Description { get; set; }
+        public string TaskName { get; set; }
         public Vector3 Position {
             get;
             set;

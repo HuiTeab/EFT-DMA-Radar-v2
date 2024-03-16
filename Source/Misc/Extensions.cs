@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using Offsets;
+using SkiaSharp;
 
 namespace eft_dma_radar
 {
@@ -86,7 +87,7 @@ namespace eft_dma_radar
         /// <summary>
         /// Gets drawing paintbrush based on Player Type
         /// </summary>
-        public static SKPaint GetPaint(this Player player) {
+        public static SKPaint GetEntityPaint(this Player player) {
             SKPaint basePaint = SKPaints.PaintBase.Clone();
 
             basePaint.Color = player.Type switch {
@@ -109,12 +110,79 @@ namespace eft_dma_radar
         }
 
         /// <summary>
+        /// Determines the items paint color.
+        /// </summary>
+        public static SKPaint GetEntityPaint(DevLootItem item)
+        {
+            int value = TarkovDevAPIManager.GetItemValue(item.Item);
+            bool isImportant = (item.Important || value >= Program.Config.MinImportantLootValue);
+            bool isFiltered = Memory.Loot.LootFilterColors.ContainsKey(item.Item.id);
+
+            SKPaint paintToUse = SKPaints.PaintLoot.Clone();
+
+            if (isFiltered)
+            {
+                LootFilter.Colors col = Memory.Loot.LootFilterColors[item.Item.id];
+                paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
+            }
+            else if (isImportant)
+            {
+                paintToUse.Color = Extensions.SKColorFromPaintColor("ImportantLoot");
+            }
+            else
+            {
+                paintToUse.Color = Extensions.SKColorFromPaintColor("RegularLoot");
+            }
+
+            return paintToUse;
+        }
+
+        /// <summary>
+        /// Determines the quest items paint color.
+        /// </summary>
+        public static SKPaint GetEntityPaint(QuestItem item)
+        {
+            SKPaint paintToUse = SKPaints.PaintLoot.Clone();
+            paintToUse.Color = Extensions.SKColorFromPaintColor("QuestItem");
+            return paintToUse;
+        }
+
+        /// <summary>
+        /// Determines the quest zone paint color.
+        /// </summary>
+        public static SKPaint GetEntityPaint(QuestZone zone)
+        {
+            SKPaint paintToUse = SKPaints.PaintLoot.Clone();
+            paintToUse.Color = Extensions.SKColorFromPaintColor("QuestZone");
+            return paintToUse;
+        }
+
+        /// <summary>
+        /// Determines the exfil paint color.
+        /// </summary>
+        public static SKPaint GetEntityPaint(Exfil exfil)
+        {
+            SKPaint paintToUse = SKPaints.PaintLoot.Clone();
+            paintToUse.Color = exfil.Status switch
+            {
+                ExfilStatus.Open => SKColorFromPaintColor("ExfilActiveIcon"),
+                ExfilStatus.Pending => SKColorFromPaintColor("ExfilPendingIcon"),
+                ExfilStatus.Closed => SKColorFromPaintColor("ExfilClosedIcon"),
+                _ => SKColorFromPaintColor("ExfilClosedIcon"),
+            };
+
+            return paintToUse;
+        }
+
+        /// <summary>
         /// Gets text paintbrush based on Player Type
         /// </summary>
-        public static SKPaint GetText(this Player player) {
+        public static SKPaint GetTextPaint(this Player player)
+        {
             SKPaint baseText = SKPaints.TextBase.Clone();
 
-            baseText.Color = player.Type switch {
+            baseText.Color = player.Type switch
+            {
                 PlayerType.LocalPlayer => SKColorFromPaintColor("LocalPlayer"),
                 PlayerType.Teammate => SKColorFromPaintColor("Teammate"),
                 PlayerType.BEAR => SKColorFromPaintColor("BEAR"),
@@ -131,6 +199,71 @@ namespace eft_dma_radar
             };
 
             return baseText;
+        }
+
+        /// <summary>
+        /// Determines the loot items text color.
+        /// </summary>
+        public static SKPaint GetTextPaint(DevLootItem item)
+        {
+            int value = TarkovDevAPIManager.GetItemValue(item.Item);
+            bool isImportant = (item.Important || value >= Program.Config.MinImportantLootValue);
+            bool isFiltered = Memory.Loot.LootFilterColors.ContainsKey(item.Item.id);
+
+            SKPaint paintToUse = SKPaints.TextLoot.Clone();
+
+            if (isFiltered)
+            {
+                LootFilter.Colors col = Memory.Loot.LootFilterColors[item.Item.id];
+                paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
+            }
+            else if (isImportant)
+            {
+                paintToUse.Color = Extensions.SKColorFromPaintColor("ImportantLoot");
+            }
+            else
+            {
+                paintToUse.Color = Extensions.SKColorFromPaintColor("RegularLoot");
+            }
+
+            return paintToUse;
+        }
+
+        /// <summary>
+        /// Determines the quest items text color.
+        /// </summary>
+        public static SKPaint GetTextPaint(QuestItem item)
+        {
+            SKPaint paintToUse = SKPaints.TextLoot.Clone();
+            paintToUse.Color = Extensions.SKColorFromPaintColor("QuestItem");
+            return paintToUse;
+        }
+
+        /// <summary>
+        /// Determines the quest zones text color.
+        /// </summary>
+        public static SKPaint GetTextPaint(QuestZone zone)
+        {
+            SKPaint paintToUse = SKPaints.TextLoot.Clone();
+            paintToUse.Color = Extensions.SKColorFromPaintColor("QuestZone");
+            return paintToUse;
+        }
+
+        /// <summary>
+        /// Determines the exfil text color.
+        /// </summary>
+        public static SKPaint GetTextPaint(Exfil exfil)
+        {
+            SKPaint paintToUse = SKPaints.TextLoot.Clone();
+            paintToUse.Color = exfil.Status switch
+            {
+                ExfilStatus.Open => SKColorFromPaintColor("ExfilActiveText"),
+                ExfilStatus.Pending => SKColorFromPaintColor("ExfilPendingText"),
+                ExfilStatus.Closed => SKColorFromPaintColor("ExfilClosedText"),
+                _ => SKColorFromPaintColor("ExfilClosedText"),
+            };
+
+            return paintToUse;
         }
 
         /// <summary>

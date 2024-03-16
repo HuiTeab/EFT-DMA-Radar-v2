@@ -74,7 +74,7 @@ namespace eft_dma_radar.Source.Tarkov
             return await Task.Run(() => GetCamera());
         }
 
-        private void UpdateCamera()
+        public void UpdateCamera()
         {
             if (_unityBase == 0)
                 return;
@@ -108,22 +108,23 @@ namespace eft_dma_radar.Source.Tarkov
         /// </summary>
         public void ThermalVision(bool on)
         {
-            //UpdateCamera();
-            if (!this.IsReady)
-            {
+            if (!this.IsReady) {
                 UpdateCamera();
             }
-            var fpsThermalComponent = GetComponentFromGameObject(_fpsCamera, "ThermalVision");
-            var thermalOn = Memory.ReadValue<bool>(fpsThermalComponent + 0xE0);
-
-            if (on != thermalOn)
+            if (this.IsReady)
             {
-                Memory.WriteValue(fpsThermalComponent + 0xE0, !thermalOn);
-                Memory.WriteValue(fpsThermalComponent + 0xE1, thermalOn);
-                Memory.WriteValue(fpsThermalComponent + 0xE2, thermalOn);
-                Memory.WriteValue(fpsThermalComponent + 0xE3, thermalOn);
-                Memory.WriteValue(fpsThermalComponent + 0xE4, thermalOn);
-                Memory.WriteValue(fpsThermalComponent + 0xE5, thermalOn);
+                var fpsThermalComponent = GetComponentFromGameObject(_fpsCamera, "ThermalVision");
+                var thermalOn = Memory.ReadValue<bool>(fpsThermalComponent + 0xE0);
+
+                if (on != thermalOn)
+                {
+                    Memory.WriteValue(fpsThermalComponent + 0xE0, !thermalOn);
+                    Memory.WriteValue(fpsThermalComponent + 0xE1, thermalOn);
+                    Memory.WriteValue(fpsThermalComponent + 0xE2, thermalOn);
+                    Memory.WriteValue(fpsThermalComponent + 0xE3, thermalOn);
+                    Memory.WriteValue(fpsThermalComponent + 0xE4, thermalOn);
+                    Memory.WriteValue(fpsThermalComponent + 0xE5, thermalOn);
+                }
             }
         }
 
@@ -132,19 +133,19 @@ namespace eft_dma_radar.Source.Tarkov
         /// </summary>
         public void NightVision(bool on)
         {
-            //UpdateCamera();
-            if (!this.IsReady)
-            {
+            if (!this.IsReady) {
                 UpdateCamera();
             }
-            var nightVisionComponent = GetComponentFromGameObject(_fpsCamera, "NightVision");
-            var nightVisionOn = Memory.ReadValue<bool>(nightVisionComponent + 0xEC);
-
-            if (on != nightVisionOn)
+            if (this.IsReady)
             {
-                Memory.WriteValue(nightVisionComponent + 0xEC, !nightVisionOn);
+                var nightVisionComponent = GetComponentFromGameObject(_fpsCamera, "NightVision");
+                var nightVisionOn = Memory.ReadValue<bool>(nightVisionComponent + 0xEC);
+
+                if (on != nightVisionOn)
+                {
+                    Memory.WriteValue(nightVisionComponent + 0xEC, !nightVisionOn);
+                }
             }
-            //}
         }
 
         /// <summary>
@@ -152,18 +153,18 @@ namespace eft_dma_radar.Source.Tarkov
         /// </summary>
         public void VisorEffect(bool on)
         {
-            //UpdateCamera();
-            if (!this.IsReady)
-            {
+            if (!this.IsReady) {
                 UpdateCamera();
             }
-            var visorComponent = GetComponentFromGameObject(_fpsCamera, "VisorEffect");
-            bool visorDown = (Memory.ReadValue<float>(visorComponent + 0xC0) == 1.0f);
-            if (on == visorDown)
+            if (this.IsReady)
             {
-                Memory.WriteValue(visorComponent + 0xC0, (on ? 0.0f : 1.0f));
+                var visorComponent = GetComponentFromGameObject(_fpsCamera, "VisorEffect");
+                bool visorDown = (Memory.ReadValue<float>(visorComponent + 0xC0) == 1.0f);
+                if (on == visorDown)
+                {
+                    Memory.WriteValue(visorComponent + 0xC0, (on ? 0.0f : 1.0f));
+                }
             }
-            //}
         }
 
         /// <summary>
@@ -171,8 +172,10 @@ namespace eft_dma_radar.Source.Tarkov
         /// </summary>
         public void OpticThermalVision(bool on)
         {
-            //UpdateCamera();
-            if (_opticCamera != 0)
+            if (!this.IsReady) {
+                UpdateCamera();
+            }
+            if (this.IsReady)
             {
                 ulong opticComponent = 0;
                 ulong opticThermalVision = 0;

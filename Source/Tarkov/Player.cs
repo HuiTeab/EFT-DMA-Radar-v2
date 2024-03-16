@@ -13,8 +13,6 @@ namespace eft_dma_radar
     /// </summary>
     public class Player
     {
-
-        private readonly Config _config;
         private static readonly FileSystemWatcher _watchlistMonitor;
         private static readonly object _watchlistLock = new();
         private static readonly ConcurrentStack<PlayerHistoryEntry> _history = new();
@@ -25,6 +23,7 @@ namespace eft_dma_radar
         private readonly object _posLock = new(); // sync access to this.Position (non-atomic)
         private readonly GearManager _gearManager;
         private Transform _transform;
+        private Config _config;
 
         #region PlayerProperties
         /// <summary>
@@ -77,6 +76,10 @@ namespace eft_dma_radar
         public int Health { get; private set; } = -1;
         
         public ulong HealthController { get; }
+
+        public ulong InventoryController { get; }
+
+        public ulong InventorySlots { get; }
 
         private Vector3 _pos = new Vector3(0, 0, 0); // backing field
         /// <summary>
@@ -379,10 +382,16 @@ namespace eft_dma_radar
                             Type = PlayerType.LocalPlayer;
                             IsLocalPlayer = true;
                             IsPmc = true;
-                            _config = Program.Config; // get ref to config
-                            if (_config.NoSwayEnabled)
+
+                            InventoryController = Memory.ReadPtr(playerBase + Offsets.Player.InventoryController);
+                            var inventory = Memory.ReadPtr(InventoryController + Offsets.InventoryController.Inventory);
+                            var equipment = Memory.ReadPtr(inventory + Offsets.Inventory.Equipment);
+                            InventorySlots = Memory.ReadPtr(equipment + Offsets.Equipment.Slots);
+
+                            _config = Program.Config;
+                            if (_config.ThermalVisionEnabled)
                             {
-                                Memory.PlayerManager.SetNoRecoilAndSway(true);
+                                Game.CameraManager.ThermalVision(_config.ThermalVisionEnabled);
                             }
                             
                         }
@@ -399,6 +408,12 @@ namespace eft_dma_radar
                     Info = ObservedPlayerView;
                     var playerSide = GetNextObservedPlayerSide();
                     var playerIsAI = GetNextObservedPlayerIsAI();
+                    
+                    AccountID = Memory.ReadUnityString(Memory.ReadPtr(ObservedPlayerView + 0x50));
+
+                    //[40] string_0x40 : String //ProfileID
+                    //[48] string_0x48 : String //NickName
+                    //[50] string_0x50 : String //AccountID
 
                     if (Helpers.NameTranslations.ContainsKey(Name)) {
                         Name = Helpers.NameTranslations[Name];
@@ -730,87 +745,6 @@ namespace eft_dma_radar
                 default: return PlayerType.AIScav;
             }
         }
-        #endregion
-
-        #region XP Table
-        private static readonly Dictionary<int, int> _expTable = new Dictionary<int, int>
-        {
-            {0, 1},
-            {1000, 2},
-            {4017, 3},
-            {8432, 4},
-            {14256, 5},
-            {21477, 6},
-            {30023, 7},
-            {39936, 8},
-            {51204, 9},
-            {63723, 10},
-            {77563, 11},
-            {92713, 12},
-            {111881, 13},
-            {134674, 14},
-            {161139, 15},
-            {191417, 16},
-            {225194, 17},
-            {262366, 18},
-            {302484, 19},
-            {345751, 20},
-            {391649, 21},
-            {440444, 22},
-            {492366, 23},
-            {547896, 24},
-            {609066, 25},
-            {675913, 26},
-            {748474, 27},
-            {826786, 28},
-            {910885, 29},
-            {1000809, 30},
-            {1096593, 31},
-            {1198275, 32},
-            {1309251, 33},
-            {1429580, 34},
-            {1559321, 35},
-            {1698532, 36},
-            {1847272, 37},
-            {2005600, 38},
-            {2173575, 39},
-            {2351255, 40},
-            {2538699, 41},
-            {2735966, 42},
-            {2946585, 43},
-            {3170637, 44},
-            {3408202, 45},
-            {3659361, 46},
-            {3924195, 47},
-            {4202784, 48},
-            {4495210, 49},
-            {4801553, 50},
-            {5121894, 51},
-            {5456314, 52},
-            {5809667, 53},
-            {6182063, 54},
-            {6573613, 55},
-            {6984426, 56},
-            {7414613, 57},
-            {7864284, 58},
-            {8333549, 59},
-            {8831052, 60},
-            {9360623, 61},
-            {9928578, 62},
-            {10541848, 63},
-            {11206300, 64},
-            {11946977, 65},
-            {12789143, 66},
-            {13820522, 67},
-            {15229487, 68},
-            {17206065, 69},
-            {19706065, 70},
-            {22706065, 71},
-            {26206065, 72},
-            {30206065, 73},
-            {34706065, 74},
-            {39706065, 75},
-        };
         #endregion
     }
 }

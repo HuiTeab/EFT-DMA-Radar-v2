@@ -46,6 +46,7 @@ namespace eft_dma_radar
                 {
                     var exfilAddr = Memory.ReadPtr(exfilPoints + Offsets.UnityListBase.Start + (i * 0x08));
                     var exfil = new Exfil(exfilAddr);
+                    exfil.UpdateName("test");
                     list.Add(exfil);
                 }
             }else {
@@ -71,6 +72,10 @@ namespace eft_dma_radar
                         if (entryPointString.ToLower() == localPlayerEntryPointString.ToLower())
                         {
                             var exfil = new Exfil(exfilAddr);
+                            var exfilSettings = Memory.ReadPtr(exfilAddr + Offsets.Exfil.Settings);
+                            var exfilName = Memory.ReadPtr(exfilSettings + Offsets.Exfil.Name);
+                            var exfilUnityName = Memory.ReadUnityString(exfilName);
+                            exfil.UpdateName(exfilUnityName);
                             list.Add(exfil);
                             break;
                         }
@@ -126,6 +131,7 @@ namespace eft_dma_radar
         public ulong BaseAddr { get; }
         public Vector3 Position { get; }
         public ExfilStatus Status { get; private set; } = ExfilStatus.Closed;
+        public string Name { get; private set; } = "?";
 
         public Exfil(ulong baseAddr)
         {
@@ -162,6 +168,11 @@ namespace eft_dma_radar
                 default:
                     break;
             }
+        }
+
+        public void UpdateName(string name)
+        {
+            this.Name = name.Replace("_", "-");
         }
     }
 

@@ -15,6 +15,7 @@ namespace eft_dma_radar
         private readonly Stopwatch _regSw = new();
         private readonly Stopwatch _healthSw = new();
         private readonly Stopwatch _posSw = new();
+        private readonly Stopwatch _gearSw = new();
         private readonly ConcurrentDictionary<string, Player> _players =
             new(StringComparer.OrdinalIgnoreCase);
 
@@ -25,6 +26,10 @@ namespace eft_dma_radar
             get => Memory.InHideout;
         }
 
+        private bool _isFirstRun = true;
+        private string _savedHeadGearId;
+        private string _currentHeadGearId;
+        private Config _config;
         #region Getters
         public ReadOnlyDictionary<string, Player> Players { get; }
         public int PlayerCount => GetPlayerCountAsync().GetAwaiter().GetResult();
@@ -71,6 +76,7 @@ namespace eft_dma_radar
             _regSw.Start();
             _healthSw.Start();
             _posSw.Start();
+            _gearSw.Start();
         }
         
         /// <summary>
@@ -278,6 +284,7 @@ namespace eft_dma_radar
             {
                 return;
             }
+            _config = Program.Config;
             try
             {
                 var players = _players
@@ -298,8 +305,13 @@ namespace eft_dma_radar
                 }
                 bool checkHealth = _healthSw.ElapsedMilliseconds > 250; // every 250 ms
                 bool checkPos = _posSw.ElapsedMilliseconds > 10000 && players.Any(x => x.IsHumanActive); // every 10 sec & at least 1 active human player
+                bool checkGear = _isFirstRun || _gearSw.ElapsedMilliseconds > 5000; // every 5 sec
                 var scatterMap = new ScatterReadMap(players.Length);
                 var round1 = scatterMap.AddRound();
+                var round3 = scatterMap.AddRound();
+                var round4 = scatterMap.AddRound();
+                var round5 = scatterMap.AddRound();
+                var round6 = scatterMap.AddRound();
                 ScatterReadRound round2 = null;
                 if (checkPos) // allocate and add extra rounds to map
                 {
@@ -332,6 +344,12 @@ namespace eft_dma_radar
                         }
                         if (checkHealth && player.IsHostileActive) {
                             var health = round1.AddEntry<int>(i, 7, player.HealthController + 0xD8);
+                        }
+                        if (checkGear && player.Type == PlayerType.LocalPlayer)
+                        {
+                            var headGear = round3.AddEntry<MemPointer>(i, 9, player.InventorySlots + Offsets.UnityListBase.Start + (5 * 0x8));
+                            var containedItem = round4.AddEntry<MemPointer>(i, 10, headGear, null, Offsets.Slot.ContainedItem);
+                            var itemTemplate = round5.AddEntry<MemPointer>(i, 11, containedItem, null, Offsets.LootItemBase.ItemTemplate);
                         }
                     }
                 }
@@ -401,6 +419,30 @@ namespace eft_dma_radar
                             {
                                 p3 = player.SetPosition(posBufs);
                             }
+
+                            if (checkGear)
+                            {
+                                var headGear = scatterMap.Results[i][9].TryGetResult<MemPointer>(out var hg);
+                                var containedItem = scatterMap.Results[i][10].TryGetResult<MemPointer>(out var ci);
+                                if (ci != 0 && containedItem) {
+                                    var itemTemplate = scatterMap.Results[i][11].TryGetResult<MemPointer>(out var it);
+                                    
+                                    var idPtr = Memory.ReadPtr(it + Offsets.ItemTemplate.BsgId);
+                                    var id = Memory.ReadUnityString(idPtr);
+                                    _currentHeadGearId = id;
+                                    if (_isFirstRun)
+                                    {
+                                        _savedHeadGearId = id;
+                                        _isFirstRun = false;
+                                    }
+                                    if (_savedHeadGearId != _currentHeadGearId)
+                                    {
+                                        Game.CameraManager.VisorEffect(_config.NoVisorEnabled);
+                                        _savedHeadGearId = _currentHeadGearId;
+                                    }
+                                }
+                            }
+
                             if (p1 && p2 && p3)
                                 player.ErrorCount = 0;
                             else
@@ -437,14 +479,13 @@ namespace eft_dma_radar
                 }
                 if (checkHealth)_healthSw.Restart();
                 if (checkPos)_posSw.Restart();
+                if (checkGear)_gearSw.Restart();
             }
-            
             catch (Exception ex)
             {
                 Program.Log($"CRITICAL ERROR - UpdateAllPlayers Loop FAILED: {ex}");
             }
         }
-
         #endregion
     }
 }

@@ -44,6 +44,8 @@
     public struct Exfil
     {
         public const uint Status = 0xA8; // int32
+        public const uint Settings = 0x58; // to ExitTriggerSettings
+        public const uint Name = 0x10; // String
     }
 
     public struct UnityClass

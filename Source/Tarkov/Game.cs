@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using eft_dma_radar.Source.MonoSharp;
 using eft_dma_radar.Source.Tarkov;
 
 namespace eft_dma_radar
@@ -17,6 +18,7 @@ namespace eft_dma_radar
         private PlayerManager _playerManager;
         private Config _config;
         private static CameraManager _cameraManager;
+        private QuestManager _questManager;
         private ulong _localGameWorld;
         private readonly ulong _unityBase;
         private bool _inHideout = false;
@@ -25,7 +27,6 @@ namespace eft_dma_radar
         private volatile bool _refreshLoot = false;
         private volatile string _mapName = string.Empty;
         private volatile bool _isScav = false;
-        private QuestManager _questManager;
         
         #region Getters
         public bool InGame
@@ -387,6 +388,27 @@ namespace eft_dma_radar
             return false; // Indicate failure after maximum retries
         }
 
+        public static void SetDoorAndLootDistance(bool enabled)
+        {
+            var hardSettings = MonoSharp.GetStaticFieldDataOfClass("Assembly-CSharp", "EFTHardSettings");
+            //[210] LOOT_RAYCAST_DISTANCE : Single
+            //[214] DOOR_RAYCAST_DISTANCE : Single
+            var currentLootRaycastDistance = Memory.ReadValue<float>(hardSettings + 0x210);
+            Console.WriteLine($"Current Loot Raycast Distance: {currentLootRaycastDistance}");
+            var currentDoorRaycastDistance = Memory.ReadValue<float>(hardSettings + 0x214);
+            Console.WriteLine($"Current Door Raycast Distance: {currentDoorRaycastDistance}");
+            if (enabled)
+            {
+                Memory.WriteValue<float>(hardSettings + 0x210, 1.8f);
+                Memory.WriteValue<float>(hardSettings + 0x214, 1.8f);
+            }
+            else
+            {
+                Memory.WriteValue<float>(hardSettings + 0x210, 1.3f);
+                Memory.WriteValue<float>(hardSettings + 0x214, 1f);
+            }
+        }
+
         /// <summary>
         /// Loot, grenades, exfils,etc.
         /// </summary>
@@ -416,7 +438,7 @@ namespace eft_dma_radar
                     if (_lootManager is null)
                     {
                         // wait for loot to be loaded
-                        Thread.Sleep(5000);
+                        Thread.Sleep(10000);
                     }
                     try
                     {
@@ -459,6 +481,18 @@ namespace eft_dma_radar
                 } catch (Exception ex)
                 {
                     Program.Log($"ERROR loading PlayerManager: {ex}");
+                }
+            }
+            if (_questManager is null)
+            {
+                try
+                {
+                    var questManager = new QuestManager(_localGameWorld);
+                    _questManager = questManager;
+                }
+                catch (Exception ex)
+                {
+                    Program.Log($"ERROR loading QuestManager: {ex}");
                 }
             }
             if (_grenadeManager is null)
