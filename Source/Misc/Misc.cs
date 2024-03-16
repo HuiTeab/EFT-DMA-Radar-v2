@@ -11,6 +11,7 @@ using Offsets;
 using System.Numerics;
 using static System.Net.Mime.MediaTypeNames;
 using System.IO;
+using static System.Windows.Forms.LinkLabel;
 
 namespace eft_dma_radar
 {
@@ -243,6 +244,12 @@ namespace eft_dma_radar
         public bool HideExfilNames { get; set; }
 
         /// <summary>
+        /// Enables / disables text outlines.
+        /// </summary>
+        [JsonPropertyName("hideTextOutline")]
+        public bool HideTextOutline { get; set; }
+
+        /// <summary>
         /// Allows storage of multiple loot filters.
         /// </summary>
         [JsonPropertyName("LootFilters")]
@@ -299,7 +306,8 @@ namespace eft_dma_radar
                 ["ExfilPendingText"] = new PaintColor.Colors { A = 255, R = 255, G = 255, B = 255 },
                 ["ExfilPendingIcon"] = new PaintColor.Colors { A = 255, R = 255, G = 255, B = 0 },
                 ["ExfilClosedText"] = new PaintColor.Colors { A = 255, R = 255, G = 255, B = 255 },
-                ["ExfilClosedIcon"] = new PaintColor.Colors { A = 255, R = 255, G = 0, B = 0 }
+                ["ExfilClosedIcon"] = new PaintColor.Colors { A = 255, R = 255, G = 0, B = 0 },
+                ["TextOutline"] = new PaintColor.Colors { A = 255, R = 0, G = 0, B = 0 }
             };
 
             NightVisionEnabled = false;
@@ -316,6 +324,7 @@ namespace eft_dma_radar
             IncreaseMaxWeightEnabled = false;
             InstantADSEnabled = false;
             HideExfilNames = false;
+            HideTextOutline = false;
         }
 
         /// <summary>
@@ -382,8 +391,6 @@ namespace eft_dma_radar
         /// </summary>
         public float Height = 0;
 
-        private SKRect _backerRect = new SKRect();
-
         /// <summary>
         /// Get exact player location (with optional X,Y offsets).
         /// </summary>
@@ -399,7 +406,6 @@ namespace eft_dma_radar
             aimlineLength *= UIScale;
             return new SKPoint((float)(this.X + Math.Cos(radians) * aimlineLength), (float)(this.Y + Math.Sin(radians) * aimlineLength));
         }
-
         /// <summary>
         /// Gets up arrow where loot is. IDisposable. Applies UI Scaling internally.
         /// </summary>
@@ -414,7 +420,6 @@ namespace eft_dma_radar
 
             return path;
         }
-
         /// <summary>
         /// Gets down arrow where loot is. IDisposable. Applies UI Scaling internally.
         /// </summary>
@@ -443,27 +448,36 @@ namespace eft_dma_radar
         /// </summary>
         public void DrawExfil(SKCanvas canvas, Exfil exfil, float localPlayerHeight)
         {
+            var paint = Extensions.GetEntityPaint(exfil);
+            var text = Extensions.GetTextPaint(exfil);
             var heightDiff = this.Height - localPlayerHeight;
             if (heightDiff > 1.85) // exfil is above player
             {
                 using var path = this.GetUpArrow(5);
-                canvas.DrawPath(path, exfil.Status.GetPaint());
+                canvas.DrawPath(path, paint);
             }
             else if (heightDiff < -1.85) // exfil is below player
             {
                 using var path = this.GetDownArrow(5);
-                canvas.DrawPath(path, exfil.Status.GetPaint());
+                canvas.DrawPath(path, paint);
             }
             else // exfil is level with player
             {
-                canvas.DrawCircle(this.GetPoint(), 4 * UIScale, exfil.Status.GetPaint());
+                canvas.DrawCircle(this.GetPoint(), 4 * UIScale, paint);
             }
 
             if (!Program.Config.HideExfilNames)
             {
-                SKPoint center = this.GetPoint();
-                var textWidth = SKPaints.TextBase.MeasureText(exfil.Name);
-                canvas.DrawText(exfil.Name, (center.X - textWidth / 2) * UIScale, (center.Y - SKPaints.TextBase.TextSize / 2 - 3) * UIScale, Extensions.GetTextPaint(exfil));
+                var coords = this.GetPoint();
+                var textWidth = text.MeasureText(exfil.Name);
+
+                coords.X = (coords.X - textWidth / 2);
+                coords.Y = (coords.Y - text.TextSize / 2) - 3;
+
+                if (!Program.Config.HideTextOutline)
+                    canvas.DrawText(exfil.Name, coords, Extensions.GetTextOutlinePaint());
+
+                canvas.DrawText(exfil.Name, coords, text);
             }
         }
         /// <summary>
@@ -496,7 +510,11 @@ namespace eft_dma_radar
             {
                 canvas.DrawCircle(this.GetPoint(), 5 * UIScale, paint);
             }
-            canvas.DrawText(label, this.GetPoint(7 * UIScale, 3 * UIScale), text);
+
+            var coords = this.GetPoint(7 * UIScale, 3 * UIScale);
+            if (!Program.Config.HideTextOutline)
+                canvas.DrawText(label, coords, Extensions.GetTextOutlinePaint());
+            canvas.DrawText(label, coords, text);
         }
         /// <summary>
         /// Draws a Quest Item on this location.
@@ -521,19 +539,16 @@ namespace eft_dma_radar
             {
                 canvas.DrawCircle(this.GetPoint(), 5 * UIScale, paint);
             }
-            canvas.DrawText(label, this.GetPoint(7 * UIScale, 3 * UIScale), text);
-        }
-        /// <summary>
-        /// Draws task zone on this location.
-        /// </summary>
-        public void DrawTaskZone(SKCanvas canvas, float heightDiff, QuestZone zone)
-        {
-            
+
+            var coords = this.GetPoint(7 * UIScale, 3 * UIScale);
+            if (!Program.Config.HideTextOutline)
+                canvas.DrawText(label, coords, Extensions.GetTextOutlinePaint());
+            canvas.DrawText(label, coords, text);
         }
         /// <summary>
         /// Draws a quest zone on this location.
         /// </summary>
-        public void DrawZoneTask(SKCanvas canvas, QuestZone zone, float heightDiff)
+        public void DrawTaskZone(SKCanvas canvas, QuestZone zone, float heightDiff)
         {
             var label = zone.ObjectiveType;
             SKPaint paint = Extensions.GetEntityPaint(zone);
@@ -553,7 +568,11 @@ namespace eft_dma_radar
             {
                 canvas.DrawCircle(this.GetPoint(), 5 * UIScale, paint);
             }
-            canvas.DrawText(label, this.GetPoint(7 * UIScale, 3 * UIScale), text);
+
+            var coords = this.GetPoint(7 * UIScale, 3 * UIScale);
+            if (!Program.Config.HideTextOutline)
+                canvas.DrawText(label, coords, Extensions.GetTextOutlinePaint());
+            canvas.DrawText(label, coords, text);
         }
         /// <summary>
         /// Draws a Player Marker on this location.
@@ -591,7 +610,11 @@ namespace eft_dma_radar
             float spacing = 3 * UIScale;
             foreach (var line in lines)
             {
-                canvas.DrawText(line, this.GetPoint(9 * UIScale, spacing), text); // draw line text
+                var coords = this.GetPoint(9 * UIScale, spacing);
+
+                if (!Program.Config.HideTextOutline)
+                    canvas.DrawText(line, coords, Extensions.GetTextOutlinePaint());
+                canvas.DrawText(line, coords, text);
                 spacing += 12 * UIScale;
             }
         }

@@ -2,6 +2,7 @@ using Offsets;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Numerics;
+using System.Text.RegularExpressions;
 
 namespace eft_dma_radar
 {
@@ -66,6 +67,9 @@ namespace eft_dma_radar
                                     continue;
                                 }
                                 var zones = objective.Zones;
+                                var objectiveType = Regex.Replace(objective.Type, "(\\B[A-Z])", " $1");
+                                objectiveType = objectiveType[0].ToString().ToUpper() + objectiveType.Substring(1);
+
                                 if (zones != null)
                                 {
                                     foreach (var zone in zones)
@@ -75,7 +79,7 @@ namespace eft_dma_radar
                                             ID = zone.id,
                                             MapName = zone.map.name,
                                             Position = new Vector3((float)zone.position.x, (float)zone.position.y, (float)zone.position.z),
-                                            ObjectiveType = objective.Type,
+                                            ObjectiveType = objectiveType,
                                             Description = objective.Description,
                                             TaskName = task.Name
                                         });
@@ -109,33 +113,27 @@ namespace eft_dma_radar
         }
     }
 
-    public class QuestItem {
+    public class QuestItem
+    {
         public string Id { get; set; }
         public string Name { get; set; }
         public string ShortName { get; set; }
         public string NormalizedName { get; set; }
         public string TaskName { get; set; }
         public string Description { get; set; }
-        public Vector3 Position {
-            get;
-            set;
-        }
+        public Vector3 Position { get; set; }
         public Vector2 ZoomedPosition { get; set; } = new();
     }
 
-    public class QuestZone {
+    public class QuestZone
+    {
         public string ID { get; set; }
         public string MapName { get; set; }
         public string Description { get; set; }
         public string TaskName { get; set; }
-        public Vector3 Position {
-            get;
-            set;
-        }
-
+        public Vector3 Position { get; set; }
         public Vector2 ZoomedPosition { get; set; } = new();
         public string ObjectiveType { get; internal set; }
-
     }
 
 }

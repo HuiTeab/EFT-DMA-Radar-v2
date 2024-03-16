@@ -66,7 +66,16 @@ namespace eft_dma_radar.Source.Tarkov
         /// </summary>
         public void SetNoRecoilSway(bool on)
         {
-            Memory.WriteValue(proceduralWeaponAnimationPtr + 0x138, on ? 0 : (int)OriginalValues["Mask"]);
+            var mask = Memory.ReadValue<int>(proceduralWeaponAnimationPtr + 0x138);
+
+            if (on && mask != 0)
+            {
+                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x138, 0);
+            }
+            else if (!on && mask == 0)
+            {
+                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x138, OriginalValues["Mask"]);
+            }
         }
 
         /// <summary>
@@ -74,24 +83,16 @@ namespace eft_dma_radar.Source.Tarkov
         /// </summary>
         public void SetInstantADS(bool on)
         {
-            // temp bandaid for ads wigging out
-            Memory.WriteValue(proceduralWeaponAnimationPtr + 0x1DC, on ? 6f : 1f);
-            //var aimingSpeed = Memory.ReadValue<float>(proceduralWeaponAnimationPtr + 0x1DC);
+            var aimingSpeed = Memory.ReadValue<float>(proceduralWeaponAnimationPtr + 0x1DC);
 
-            //if (OriginalValues["AimingSpeed"] == -1)
-            //{
-            //    OriginalValues["AimingSpeed"] = aimingSpeed;
-            //}
-
-            //if (on && aimingSpeed != 6f)
-            //{
-            //    Memory.WriteValue(proceduralWeaponAnimationPtr + 0x1DC, 6f);
-            //}
-            //else if (!on && aimingSpeed != OriginalValues["AimingSpeed"])
-            //{
-            //    Memory.WriteValue(proceduralWeaponAnimationPtr + 0x1DC, (float)OriginalValues["AimingSpeed"]);
-            //    OriginalValues["AimingSpeed"] = -1;
-            //}
+            if (on && aimingSpeed != 7)
+            {
+                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x1DC, 7f);
+                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x2A4, 0f);
+            } else if (!on && aimingSpeed != 1) {
+                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x1DC, 1f);
+                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x2A4, 0.2f);
+            }
         }
 
         /// <summary>

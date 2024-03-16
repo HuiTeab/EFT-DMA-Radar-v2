@@ -389,6 +389,11 @@ namespace eft_dma_radar
             UpdatePaintColorByName("ExfilClosedIcon", picExfilClosedIconColor);
         }
 
+        private void chkHideTextOutline_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.HideTextOutline = chkHideTextOutline.Checked;
+        }
+
         /// <summary>
         /// Fired when Chams checkbox has been adjusted
         /// </summary>
@@ -522,16 +527,17 @@ namespace eft_dma_radar
             _uiScale = (.01f * trkUIScale.Value);
             lblUIScale.Text = $"UI Scale {_uiScale.ToString("n2")}";
             #region UpdatePaints
-            SKPaints.PaintMouseoverGroup.StrokeWidth = 3 * _uiScale;
             SKPaints.TextMouseoverGroup.TextSize = 12 * _uiScale;
-            SKPaints.PaintBase.StrokeWidth = 3 * _uiScale;
             SKPaints.TextBase.TextSize = 12 * _uiScale;
+            SKPaints.TextLoot.TextSize = 13 * _uiScale;
+            SKPaints.TextBaseOutline.TextSize = 13 * _uiScale;
+            SKPaints.TextRadarStatus.TextSize = 48 * _uiScale;
+            SKPaints.PaintBase.StrokeWidth = 3 * _uiScale;
+            SKPaints.PaintMouseoverGroup.StrokeWidth = 3 * _uiScale;
             SKPaints.PaintDeathMarker.StrokeWidth = 3 * _uiScale;
             SKPaints.PaintLoot.StrokeWidth = 3 * _uiScale;
-            SKPaints.TextLoot.TextSize = 13 * _uiScale;
             SKPaints.PaintTransparentBacker.StrokeWidth = 1 * _uiScale;
             SKPaints.PaintAimviewCrosshair.StrokeWidth = 1 * _uiScale;
-            SKPaints.TextRadarStatus.TextSize = 48 * _uiScale;
             SKPaints.PaintGrenades.StrokeWidth = 3 * _uiScale;
             SKPaints.PaintExfilOpen.StrokeWidth = 1 * _uiScale;
             SKPaints.PaintExfilPending.StrokeWidth = 1 * _uiScale;
@@ -1267,6 +1273,16 @@ namespace eft_dma_radar
         {
             _config.ShowHoverArmor = chkShowHoverArmor.Checked;
         }
+
+        private void chkInstantADS_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.InstantADSEnabled = chkInstantADS.Checked;
+        }
+
+        private void picTextOutlineColor_Click(object sender, EventArgs e)
+        {
+            UpdatePaintColorByName("TextOutline", picTextOutlineColor);
+        }
         #endregion
 
         #region Methods
@@ -1599,6 +1615,7 @@ namespace eft_dma_radar
             setColor(picExfilPendingIconColor, "ExfilPendingIcon");
             setColor(picExfilClosedTextColor, "ExfilClosedText");
             setColor(picExfilClosedIconColor, "ExfilClosedIcon");
+            setColor(picTextOutlineColor, "TextOutline");
         }
 
         /// <summary>
@@ -1982,7 +1999,7 @@ namespace eft_dma_radar
                                                 Y = questZoneZoomedPos.Y
                                             };
 
-                                            questZoneZoomedPos.DrawZoneTask(
+                                            questZoneZoomedPos.DrawTaskZone(
                                                 canvas,
                                                 zone,
                                                 position
@@ -2174,6 +2191,7 @@ namespace eft_dma_radar
                     var myRotation = sourcePlayer.Rotation;
                     canvas.DrawRect(drawingLocation, SKPaints.PaintTransparentBacker); // draw backer
 
+                    // draw aimview players
                     if (aimviewPlayers is not null)
                     {
                         var normalizedDirection = -myRotation.X;
@@ -2261,6 +2279,7 @@ namespace eft_dma_radar
                             );
                         }
                     }
+
                     // draw crosshair at end
                     canvas.DrawLine(
                         drawingLocation.Left,
@@ -2385,11 +2404,6 @@ namespace eft_dma_radar
             }
 
             base.OnMouseWheel(e);
-        }
-
-        private void chkInstantADS_CheckedChanged(object sender, EventArgs e)
-        {
-            _config.InstantADSEnabled = chkInstantADS.Checked;
         }
     }
     #endregion

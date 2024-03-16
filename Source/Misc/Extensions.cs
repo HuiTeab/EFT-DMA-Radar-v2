@@ -180,7 +180,6 @@ namespace eft_dma_radar
         public static SKPaint GetTextPaint(this Player player)
         {
             SKPaint baseText = SKPaints.TextBase.Clone();
-
             baseText.Color = player.Type switch
             {
                 PlayerType.LocalPlayer => SKColorFromPaintColor("LocalPlayer"),
@@ -263,6 +262,16 @@ namespace eft_dma_radar
                 _ => SKColorFromPaintColor("ExfilClosedText"),
             };
 
+            return paintToUse;
+        }
+
+        /// <summary>
+        /// Determines the text outline color.
+        /// </summary>
+        public static SKPaint GetTextOutlinePaint()
+        {
+            SKPaint paintToUse = SKPaints.TextBaseOutline.Clone();
+            paintToUse.Color = Extensions.SKColorFromPaintColor("TextOutline");
             return paintToUse;
         }
 

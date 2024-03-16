@@ -53,6 +53,8 @@ namespace eft_dma_radar
             tabSettings = new TabPage();
             grpConfig = new GroupBox();
             grpColors = new GroupBox();
+            picTextOutlineColor = new PictureBox();
+            lblTextOutlineColor = new Label();
             picExfilClosedIconColor = new PictureBox();
             lblExfilClosedIconColor = new Label();
             picExfilPendingIconColor = new PictureBox();
@@ -116,6 +118,7 @@ namespace eft_dma_radar
             chkHideLootValue = new CheckBox();
             chkImportantLootOnly = new CheckBox();
             grpUserInterface = new GroupBox();
+            chkHideTextOutline = new CheckBox();
             chkHideExfilNames = new CheckBox();
             chkQuestHelper = new CheckBox();
             chkShowHoverArmor = new CheckBox();
@@ -171,6 +174,7 @@ namespace eft_dma_radar
             tabSettings.SuspendLayout();
             grpConfig.SuspendLayout();
             grpColors.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picTextOutlineColor).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picExfilClosedIconColor).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picExfilPendingIconColor).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picExfilActiveIconColor).BeginInit();
@@ -428,6 +432,8 @@ namespace eft_dma_radar
             // 
             // grpColors
             // 
+            grpColors.Controls.Add(picTextOutlineColor);
+            grpColors.Controls.Add(lblTextOutlineColor);
             grpColors.Controls.Add(picExfilClosedIconColor);
             grpColors.Controls.Add(lblExfilClosedIconColor);
             grpColors.Controls.Add(picExfilPendingIconColor);
@@ -468,10 +474,29 @@ namespace eft_dma_radar
             grpColors.Controls.Add(lblAIScavColor);
             grpColors.Location = new Point(888, 22);
             grpColors.Name = "grpColors";
-            grpColors.Size = new Size(162, 467);
+            grpColors.Size = new Size(162, 510);
             grpColors.TabIndex = 28;
             grpColors.TabStop = false;
             grpColors.Text = "Colors";
+            // 
+            // picTextOutlineColor
+            // 
+            picTextOutlineColor.BackColor = Color.Transparent;
+            picTextOutlineColor.Location = new Point(108, 468);
+            picTextOutlineColor.Name = "picTextOutlineColor";
+            picTextOutlineColor.Size = new Size(47, 18);
+            picTextOutlineColor.TabIndex = 53;
+            picTextOutlineColor.TabStop = false;
+            picTextOutlineColor.Click += picTextOutlineColor_Click;
+            // 
+            // lblTextOutlineColor
+            // 
+            lblTextOutlineColor.AutoSize = true;
+            lblTextOutlineColor.Location = new Point(29, 466);
+            lblTextOutlineColor.Name = "lblTextOutlineColor";
+            lblTextOutlineColor.Size = new Size(73, 15);
+            lblTextOutlineColor.TabIndex = 52;
+            lblTextOutlineColor.Text = "Text Outline:";
             // 
             // picExfilClosedIconColor
             // 
@@ -1110,6 +1135,7 @@ namespace eft_dma_radar
             // 
             // grpUserInterface
             // 
+            grpUserInterface.Controls.Add(chkHideTextOutline);
             grpUserInterface.Controls.Add(chkHideExfilNames);
             grpUserInterface.Controls.Add(chkQuestHelper);
             grpUserInterface.Controls.Add(chkShowHoverArmor);
@@ -1130,6 +1156,18 @@ namespace eft_dma_radar
             grpUserInterface.TabIndex = 26;
             grpUserInterface.TabStop = false;
             grpUserInterface.Text = "UI";
+            // 
+            // chkHideTextOutline
+            // 
+            chkHideTextOutline.AutoSize = true;
+            chkHideTextOutline.Location = new Point(250, 47);
+            chkHideTextOutline.Name = "chkHideTextOutline";
+            chkHideTextOutline.Size = new Size(117, 19);
+            chkHideTextOutline.TabIndex = 32;
+            chkHideTextOutline.Text = "Hide Text Outline";
+            toolTip.SetToolTip(chkHideTextOutline, "Removes the outline from text on the radar");
+            chkHideTextOutline.UseVisualStyleBackColor = true;
+            chkHideTextOutline.CheckedChanged += chkHideTextOutline_CheckedChanged;
             // 
             // chkHideExfilNames
             // 
@@ -1711,6 +1749,7 @@ namespace eft_dma_radar
             grpConfig.ResumeLayout(false);
             grpColors.ResumeLayout(false);
             grpColors.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picTextOutlineColor).EndInit();
             ((System.ComponentModel.ISupportInitialize)picExfilClosedIconColor).EndInit();
             ((System.ComponentModel.ISupportInitialize)picExfilPendingIconColor).EndInit();
             ((System.ComponentModel.ISupportInitialize)picExfilActiveIconColor).EndInit();
@@ -1901,6 +1940,9 @@ namespace eft_dma_radar
         private PictureBox picExfilClosedIconColor;
         private Label lblExfilClosedIconColor;
         private CheckBox chkInstantADS;
+        private PictureBox picTextOutlineColor;
+        private Label lblTextOutlineColor;
+        private CheckBox chkHideTextOutline;
     }
 }
 
