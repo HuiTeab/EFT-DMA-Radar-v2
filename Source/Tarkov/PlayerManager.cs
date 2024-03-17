@@ -162,5 +162,41 @@ namespace eft_dma_radar.Source.Tarkov
                 throw new Exception($"ERROR Setting Max Skill: #{skill} {e.Message}");
             }
         }
+        
+        public void SetMovementState(bool enabled)
+        {
+            var movementContext = Memory.ReadPtr(playerBase + Offsets.Player.MovementContext);
+            var currentBaseMovementState = Memory.ReadPtr(movementContext + 0xD0);
+            if (enabled)
+            {
+                if (Memory.ReadValue<byte>(currentBaseMovementState + 0x21) == 5)
+                {
+                    Memory.WriteValue<byte>(currentBaseMovementState + 0x21, 6);
+                }
+            }
+            else
+            {
+                if (Memory.ReadValue<byte>(currentBaseMovementState + 0x21) == 6)
+                {
+                    Memory.WriteValue<byte>(currentBaseMovementState + 0x21, 5);
+                }
+            }
+        }
+
+        public void SetMaxStamina()
+        {
+            var physical = Memory.ReadPtr(playerBase + 0x598);
+            var stamina = Memory.ReadPtr(physical + 0x38);
+            var handsStamina = Memory.ReadPtr(physical + 0x40);
+            float staminaCapacity = Memory.ReadValue<float>(physical + 0xC0);
+            float handsStaminaCapacity = Memory.ReadValue<float>(physical + 0xC8);
+            Memory.WriteValue<float>(stamina + 0x48, staminaCapacity);
+            Memory.WriteValue<float>(handsStamina + 0x48, handsStaminaCapacity);
+
+            //[B0] Fatigue : Single
+            //var fatigue = Memory.ReadValue<float>(physical + 0xB0);
+            //Console.WriteLine($"Fatigue: {fatigue}");
+            
+        }
     }
 }

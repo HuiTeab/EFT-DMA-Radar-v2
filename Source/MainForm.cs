@@ -235,6 +235,12 @@ namespace eft_dma_radar
             this.Loot?.ApplyFilter();
         }
 
+        private void chkInfStamina_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.MaxStaminaEnabled = chkInfStamina.Checked;
+            Memory.PlayerManager.SetMovementState(chkInfStamina.Checked);
+        }
+
         /// <summary>
         /// Fired when NightVision checkbox has been adjusted
         /// </summary>
@@ -338,6 +344,43 @@ namespace eft_dma_radar
                 Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsLoad);
                 Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsUnload);
             }
+        }
+        private void chkMemoryWrite_CheckedChanged(object sender, EventArgs e)
+        {
+            //disable all features if memory write is disabled and hide checkboxes and sliders
+            if (chkMemoryWrite.Checked)
+            {
+                chkNightVision.Enabled = true;
+                chkThermalVision.Enabled = true;
+                chkOpticThermalVision.Enabled = true;
+                chkNoVisor.Enabled = true;
+                chkNoRecoilSway.Enabled = true;
+                chkJumpPower.Enabled = true;
+                chkThrowPower.Enabled = true;
+                chkMagDrills.Enabled = true;
+                chkChams.Enabled = true;
+                chkLootAndDoor.Enabled = true;
+                chkIncreaseMaxWeight.Enabled = true;
+                chkDoubleSearch.Enabled = true;
+                chkMemoryWrite.Text = "Memory Write: Enabled";
+            }
+            else
+            {
+                chkNightVision.Enabled = false;
+                chkThermalVision.Enabled = false;
+                chkOpticThermalVision.Enabled = false;
+                chkNoVisor.Enabled = false;
+                chkNoRecoilSway.Enabled = false;
+                chkJumpPower.Enabled = false;
+                chkThrowPower.Enabled = false;
+                chkMagDrills.Enabled = false;
+                chkChams.Enabled = false;
+                chkLootAndDoor.Enabled = false;
+                chkIncreaseMaxWeight.Enabled = false;
+                chkDoubleSearch.Enabled = false;
+                chkMemoryWrite.Text = "Memory Write: Disabled";
+            }
+
         }
 
         private void chkLootAndDoor_CheckedChanged(object sender, EventArgs e)
@@ -2401,7 +2444,6 @@ namespace eft_dma_radar
 
             base.OnMouseWheel(e);
         }
-
     }
     #endregion
 }

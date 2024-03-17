@@ -316,6 +316,8 @@ namespace eft_dma_radar
                 var round5 = scatterMap.AddRound();
                 var round6 = scatterMap.AddRound();
                 var round7 = scatterMap.AddRound();
+                var round8 = scatterMap.AddRound();
+                var round9 = scatterMap.AddRound();
                 ScatterReadRound round2 = null;
                 if (checkPos) // allocate and add extra rounds to map
                 {
@@ -360,6 +362,11 @@ namespace eft_dma_radar
                             var proceduralWeaponAnimation = round6.AddEntry<MemPointer>(i, 12, player.Base + 0x1A0);
                             //isADS = Memory.ReadValue<bool>(proceduralWeaponAnimationPtr + 0x1BD);
                             var isADS = round7.AddEntry<bool>(i, 13, proceduralWeaponAnimation, null, 0x1BD);
+
+                            //stamina
+                            //var currentBaseMovementState = Memory.ReadPtr(movementContext + 0xD0);
+                            var movementContext = round8.AddEntry<MemPointer>(i, 14, player.MovementContext, null, 0xD0);
+                            var currentStateName = round9.AddEntry<byte>(i, 15, movementContext, null, 0x21);
                         }
 
                     }
@@ -467,6 +474,24 @@ namespace eft_dma_radar
                                 }else {
                                     Game.CameraManager.ThermalVision(Program.Config.ThermalVisionEnabled);
                                     Game.CameraManager.OpticThermalVision(false);
+                                }
+                                scatterMap.Results[i][15].TryGetResult<byte>(out var currentStateName);
+                                if (Program.Config.MaxStaminaEnabled)
+                                {
+                                    if (currentStateName == 5)
+                                    {
+                                        Memory.PlayerManager.SetMovementState(true);
+                                    }
+                                    if (currentStateName == 6)
+                                    {
+                                        Memory.PlayerManager.SetMaxStamina();
+                                    }
+                                }
+                                else {
+                                    if (currentStateName == 6)
+                                    {
+                                        Memory.PlayerManager.SetMovementState(false);
+                                    }
                                 }
                             }
 
