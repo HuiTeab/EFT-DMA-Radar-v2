@@ -12,20 +12,24 @@ using eft_dma_radar.Source.Misc;
 using SkiaSharp;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace eft_dma_radar {
-    public class LootManager {
+namespace eft_dma_radar
+{
+    public class LootManager
+    {
         private readonly Config _config;
         /// <summary>
         /// Filtered loot ready for display by GUI.
         /// </summary>
-        public ReadOnlyCollection<DevLootItem> Filter {
+        public ReadOnlyCollection<DevLootItem> Filter
+        {
             get;
             private set;
         }
         /// <summary>
         /// All tracked loot/corpses in Local Game World.
         /// </summary>
-        public ReadOnlyCollection<DevLootItem> Loot {
+        public ReadOnlyCollection<DevLootItem> Loot
+        {
             get;
         }
 
@@ -36,7 +40,7 @@ namespace eft_dma_radar {
         /// <summary>
         /// key,value pair of filtered item ids (key) and their filtered color (value)
         /// </summary>
-        public Dictionary<string, LootFilter.Colors> LootFilterColors {get;private set; } 
+        public Dictionary<string, LootFilter.Colors> LootFilterColors { get; private set; }
         #region Constructor
         /// <summary>
         /// Initializes a new instance of the <see cref="LootManager"/> class.
@@ -44,7 +48,8 @@ namespace eft_dma_radar {
         /// <param name="localGameWorld"></param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         ///
-        public LootManager(ulong localGameWorld) {
+        public LootManager(ulong localGameWorld)
+        {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start(); // Start timing
             Program.Log("Parsing loot...");
@@ -52,10 +57,10 @@ namespace eft_dma_radar {
             _config = Program.Config;
             var lootlistPtr = Memory.ReadPtr(localGameWorld + Offsets.LocalGameWorld.LootList);
             var lootListEntity = Memory.ReadPtr(lootlistPtr + Offsets.UnityList.Base);
-            var countLootListObjects = Memory.ReadValue < int > (lootListEntity + Offsets.UnityList.Count);
+            var countLootListObjects = Memory.ReadValue<int>(lootListEntity + Offsets.UnityList.Count);
             if (countLootListObjects < 0 || countLootListObjects > 4096) throw new ArgumentOutOfRangeException("countLootListObjects"); // Loot list sanity check
-            var loot = new List < DevLootItem > (countLootListObjects);
-            
+            var loot = new List<DevLootItem>(countLootListObjects);
+
             var scatterMap = new ScatterReadMap(countLootListObjects);
             var round1 = scatterMap.AddRound();
             var round2 = scatterMap.AddRound();
@@ -69,7 +74,8 @@ namespace eft_dma_radar {
             var round10 = scatterMap.AddRound();
             var round11 = scatterMap.AddRound();
 
-            for (int i = 0; i < countLootListObjects; i++) {
+            for (int i = 0; i < countLootListObjects; i++)
+            {
                 var p1 = round1.AddEntry<MemPointer>(i, 0, lootListEntity + Offsets.UnityListBase.Start + (uint)(i * 0x8));
                 var p2 = round2.AddEntry<MemPointer>(i, 1, p1, null, Offsets.LootListItem.LootUnknownPtr);
                 var p3 = round3.AddEntry<MemPointer>(i, 2, p2, null, Offsets.LootUnknownPtr.LootInteractiveClass);
@@ -85,7 +91,8 @@ namespace eft_dma_radar {
             }
             scatterMap.Execute();
             Parallel.For(0, countLootListObjects, i => {
-                try {
+                try
+                {
                     var result1 = scatterMap.Results[i][0].TryGetResult<MemPointer>(out var lootObjectsEntity);
                     var result2 = scatterMap.Results[i][1].TryGetResult<MemPointer>(out var unknownPtr);
                     if (!scatterMap.Results[i][2].TryGetResult<MemPointer>(out var interactiveClass))
@@ -110,15 +117,17 @@ namespace eft_dma_radar {
                         TarkovDevAPIManager.AllLootContainers.TryGetValue(containerID, out var container);
                         if (container != null)
                         {
-                            try {
+                            try
+                            {
                                 var itemOwner = Memory.ReadPtr(interactiveClass + Offsets.LootInteractiveClass.ContainerItemOwner);
                                 var itemBase = Memory.ReadPtr(itemOwner + 0xC0); //Offsets.ContainerItemOwner.LootItemBase);
                                 var grids = Memory.ReadPtr(itemBase + Offsets.LootItemBase.Grids);
                                 GetItemsInGrid(grids, name, pos, loot, true, container.Name, name);
                             }
-                            catch{}
+                            catch { }
                         }
-                        else {
+                        else
+                        {
                             Program.Log($"Container: {name} {containerID} is not in the list");
                         }
                     }
@@ -132,16 +141,19 @@ namespace eft_dma_radar {
                         var objectClass = Memory.ReadPtr(gameObject + Offsets.GameObject.ObjectClass);
                         var transformInternal = Memory.ReadPtrChain(objectClass, Offsets.LootGameObjectClass.To_TransformInternal);
                         var pos = new Transform(transformInternal).GetPosition();
-                        foreach(var slot in slotsArray.Data) 
+                        foreach (var slot in slotsArray.Data)
                         {
-                            try {
+                            try
+                            {
                                 var namePtr = Memory.ReadPtr(slot + Offsets.Slot.Name);
                                 var slotName = Memory.ReadUnityString(namePtr);
                                 var containedItem = Memory.ReadPtr(slot + 0x40);
-                                if (containedItem == 0x0){
+                                if (containedItem == 0x0)
+                                {
                                     continue;
                                 }
-                                if (slotName == "SecuredContainer"){
+                                if (slotName == "SecuredContainer")
+                                {
                                     continue;
                                 }
                                 var itemTemplate = Memory.ReadPtr(containedItem + Offsets.LootItemBase.ItemTemplate); //EFT.InventoryLogic.ItemTemplate
@@ -152,11 +164,14 @@ namespace eft_dma_radar {
                                 var grids = Memory.ReadPtr(containedItem + Offsets.LootItemBase.Grids);
                                 //var containerName = slotName;
                                 var containerName = "Corpse";
-                                if (grids == 0x0){
+                                if (grids == 0x0)
+                                {
                                     //The loot item we found does not have any grids so it's weapon slot?
                                     if (TarkovDevAPIManager.AllItems.TryGetValue(id, out
-                                            var entry)) {
-                                        loot.Add(new DevLootItem {
+                                            var entry))
+                                    {
+                                        loot.Add(new DevLootItem
+                                        {
                                             Label = entry.Label,
                                             AlwaysShow = entry.AlwaysShow,
                                             Important = entry.Important,
@@ -168,8 +183,9 @@ namespace eft_dma_radar {
                                     }
                                 };
                                 GetItemsInGrid(grids, id, pos, loot, true, containerName);
-                            } 
-                            catch {
+                            }
+                            catch
+                            {
                                 continue;
                             }
 
@@ -180,43 +196,42 @@ namespace eft_dma_radar {
                         //Loose loot
                         var item = Memory.ReadPtr(interactiveClass + 0xB0); //EFT.InventoryLogic.Item
                         var itemTemplate = Memory.ReadPtr(item + Offsets.LootItemBase.ItemTemplate); //EFT.InventoryLogic.ItemTemplate
-                        bool questItem = Memory.ReadValue < bool > (itemTemplate + Offsets.ItemTemplate.IsQuestItem);
+                        bool questItem = Memory.ReadValue<bool>(itemTemplate + Offsets.ItemTemplate.IsQuestItem);
                         var objectClass = Memory.ReadPtr(gameObject + Offsets.GameObject.ObjectClass);
                         var transformInternal = Memory.ReadPtrChain(objectClass, Offsets.LootGameObjectClass.To_TransformInternal);
                         var pos = new Transform(transformInternal).GetPosition();
                         var BSGIdPtr = Memory.ReadPtr(itemTemplate + Offsets.ItemTemplate.BsgId);
                         var id = Memory.ReadUnityString(BSGIdPtr);
                         if (id == null) return;
-                        if (!questItem) {
-                            try {
-                                var grids = Memory.ReadPtr(item + Offsets.LootItemBase.Grids);
-                                var count = new MemArray(grids).Count;
-                                GetItemsInGrid(grids, id, pos, loot, false , "Loose Loot");
-                            } 
-                            catch {
-                                    //The loot item we found does not have any grids so it's basically like a keycard or a ledx etc. Therefore add it to our loot dictionary.
-                                    if (TarkovDevAPIManager.AllItems.TryGetValue(id, out
-                                            var entry)) {
-                                        loot.Add(new DevLootItem {
-                                            Label = entry.Label,
-                                            AlwaysShow = entry.AlwaysShow,
-                                            Important = entry.Important,
-                                            Position = pos,
-                                            Item = entry.Item
-                                        });
-                                    }
+                        if (!questItem)
+                        {
+                            if (TarkovDevAPIManager.AllItems.TryGetValue(id, out
+                                    var entry))
+                            {
+                                loot.Add(new DevLootItem
+                                {
+                                    Label = entry.Label,
+                                    AlwaysShow = entry.AlwaysShow,
+                                    Important = entry.Important,
+                                    Position = pos,
+                                    Item = entry.Item
+                                });
                             }
                         }
-                        else {
+                        else
+                        {
                             var questItemTest = this.QuestItems.Where(x => x.Id == id).FirstOrDefault();
-                            if (questItemTest != null) {
+                            if (questItemTest != null)
+                            {
                                 //update position
                                 questItemTest.Position = pos;
                             }
                         }
                     }
 
-                }catch{
+                }
+                catch
+                {
                     Program.Log($"Error reading loot item {i}");
                 }
             });
@@ -235,7 +250,8 @@ namespace eft_dma_radar {
         /// <summary>
         /// Applies loot filter
         /// </summary>
-        public void ApplyFilter() {
+        public void ApplyFilter()
+        {
             var loot = this.Loot;
             var activeFilters = _config.Filters.Where(f => f.IsActive).ToList();
             var minValueLootItems = loot.Where(x => x.AlwaysShow || TarkovDevAPIManager.GetItemValue(x.Item) > _config.MinLootValue).ToList();
@@ -261,7 +277,8 @@ namespace eft_dma_radar {
             var orderedIds = orderedItems.Select(x => x.ItemId).ToList();
 
             //ghetto way to prevent overriding DevLootItems in the original loot list
-            var lootCopy = loot.Select(l => new DevLootItem {
+            var lootCopy = loot.Select(l => new DevLootItem
+            {
                 Label = l.Label,
                 Important = l.Important,
                 Position = l.Position,
@@ -273,18 +290,21 @@ namespace eft_dma_radar {
             }).ToList();
 
             var filteredLoot = from l in lootCopy
-                                join id in orderedItems on l.Item.id equals id.ItemId
-                                select l;
+                               join id in orderedItems on l.Item.id equals id.ItemId
+                               select l;
 
             // ghetto quickfix lmao
             filteredLoot = filteredLoot.ToList();
 
-            foreach (var lootItem in filteredLoot) {
+            foreach (var lootItem in filteredLoot)
+            {
                 lootItem.Important = true;
             }
 
-            foreach (var lootItem in minValueLootItems) {
-                if (TarkovDevAPIManager.GetItemValue(lootItem.Item) >= _config.MinImportantLootValue) {
+            foreach (var lootItem in minValueLootItems)
+            {
+                if (TarkovDevAPIManager.GetItemValue(lootItem.Item) >= _config.MinImportantLootValue)
+                {
                     lootItem.Important = true;
                 }
             }
@@ -309,7 +329,8 @@ namespace eft_dma_radar {
         /// Removes an item from the loot filter list
         /// </summary>
         /// <param name="itemToRemove">The item to remove</param>
-        public void RemoveFilterItem(DevLootItem itemToRemove) {
+        public void RemoveFilterItem(DevLootItem itemToRemove)
+        {
             var filter = this.Filter.ToList();
             filter.Remove(itemToRemove);
 
@@ -324,40 +345,54 @@ namespace eft_dma_radar {
         ///The Blackrock has 11 grid arrays (not to be confused with slots!! - a grid array contains slots. Look at the blackrock and you'll see it has 20 slots but 11 grids).
         ///In one of those grid arrays is a pistol. This method would recursively search through each item it finds
         ///To Do: add slot logic, so we can recursively search through the pistols slots...maybe it has a high value scope or something.
-        private void GetItemsInGrid(ulong gridsArrayPtr, string id, Vector3 pos, List < DevLootItem > loot, bool isContainer = false, string containerName = "", string realContainerName = "") {
-            var gridsArray = new MemArray(gridsArrayPtr);
-
+        private void GetItemsInGrid(ulong gridsArrayPtr, string id, Vector3 pos, List<DevLootItem> loot, bool isContainer = false, string containerName = "", string realContainerName = "")
+        {
             //write console which item is in which container
             //Console.WriteLine($"{id} in {containerName} - {realContainerName}");
 
             if (TarkovDevAPIManager.AllItems.TryGetValue(id, out
-                    var entry)) {
-                loot.Add(new DevLootItem {
-                        Label = entry.Label,
-                        AlwaysShow = entry.AlwaysShow,
-                        Important = entry.Important,
-                        Position = pos,
-                        Item = entry.Item,
-                        Container = isContainer,
-                        ContainerName = containerName,
+                    var entry))
+            {
+                loot.Add(new DevLootItem
+                {
+                    Label = entry.Label,
+                    AlwaysShow = entry.AlwaysShow,
+                    Important = entry.Important,
+                    Position = pos,
+                    Item = entry.Item,
+                    Container = isContainer,
+                    ContainerName = containerName,
                 });
             }
+
+            if (gridsArrayPtr == 0x0)
+            {
+                return;
+            }
+
+            var gridsArray = new MemArray(gridsArrayPtr);
+
             // Check all sections of the container
-            foreach(var grid in gridsArray.Data) {
+            foreach (var grid in gridsArray.Data)
+            {
                 var gridEnumerableClass = Memory.ReadPtr(grid + Offsets.Grids.GridsEnumerableClass); // -.GClass178A->gClass1797_0x40 // Offset: 0x0040 (Type: -.GClass1797)
                 var itemListPtr = Memory.ReadPtr(gridEnumerableClass + 0x18); // -.GClass1797->list_0x18 // Offset: 0x0018 (Type: System.Collections.Generic.List<Item>)
                 var itemList = new MemList(itemListPtr);
 
-                foreach(var childItem in itemList.Data) {
-                    try {
+                foreach (var childItem in itemList.Data)
+                {
+                    try
+                    {
                         var childItemTemplate = Memory.ReadPtr(childItem + Offsets.LootItemBase.ItemTemplate); // EFT.InventoryLogic.Item->_template // Offset: 0x0038 (Type: EFT.InventoryLogic.ItemTemplate)
                         var childItemIdPtr = Memory.ReadPtr(childItemTemplate + Offsets.ItemTemplate.BsgId);
                         var childItemIdStr = Memory.ReadUnityString(childItemIdPtr).Replace("\\0", "");
                         //Set important and always show if quest item using ID
                         // Check to see if the child item has children
-                        var childGridsArrayPtr = Memory.ReadPtr(childItem + Offsets.LootItemBase.Grids); // -.GClassXXXX->Grids // Offset: 0x0068 (Type: -.GClass1497[])
+                        var childGridsArrayPtr = Memory.ReadPtrNullable(childItem + Offsets.LootItemBase.Grids); // -.GClassXXXX->Grids // Offset: 0x0068 (Type: -.GClass1497[])
                         GetItemsInGrid(childGridsArrayPtr, childItemIdStr, pos, loot, true, containerName, realContainerName); // Recursively add children to the entity
-                    } catch  {
+                    }
+                    catch
+                    {
                         //Program.Log("Error reading child item");
                         //Program.Log($"Child item: {childItem} in {id}");
                     }
@@ -369,35 +404,41 @@ namespace eft_dma_radar {
 
     #region Classes
     //Helper class or struct
-    public class MemArray {
-        public ulong Address {
+    public class MemArray
+    {
+        public ulong Address
+        {
             get;
         }
-        public int Count {
+        public int Count
+        {
             get;
         }
-        public ulong[] Data {
+        public ulong[] Data
+        {
             get;
         }
 
-        public MemArray(ulong address) {
-            var type = typeof (ulong);
+        public MemArray(ulong address)
+        {
+            var type = typeof(ulong);
 
             Address = address;
-            Count = Memory.ReadValue < int > (address + Offsets.UnityList.Count);
+            Count = Memory.ReadValue<int>(address + Offsets.UnityList.Count);
             var arrayBase = address + Offsets.UnityListBase.Start;
-            var tSize = (uint) Marshal.SizeOf(type);
+            var tSize = (uint)Marshal.SizeOf(type);
 
             // Rudimentary sanity check
             if (Count > 4096 || Count < 0)
                 Count = 0;
 
             var retArray = new ulong[Count];
-            var buf = Memory.ReadBuffer(arrayBase, Count * (int) tSize);
+            var buf = Memory.ReadBuffer(arrayBase, Count * (int)tSize);
 
-            for (uint i = 0; i < Count; i++) {
+            for (uint i = 0; i < Count; i++)
+            {
                 var index = i * tSize;
-                var t = MemoryMarshal.Read < ulong > (buf.Slice((int) index, (int) tSize));
+                var t = MemoryMarshal.Read<ulong>(buf.Slice((int)index, (int)tSize));
                 if (t == 0x0) throw new NullPtrException();
                 retArray[i] = t;
             }
@@ -407,36 +448,42 @@ namespace eft_dma_radar {
     }
 
     //Helper class or struct
-    public class MemList {
-        public ulong Address {
+    public class MemList
+    {
+        public ulong Address
+        {
             get;
         }
 
-        public int Count {
+        public int Count
+        {
             get;
         }
 
-        public List < ulong > Data {
+        public List<ulong> Data
+        {
             get;
         }
 
-        public MemList(ulong address) {
-            var type = typeof (ulong);
+        public MemList(ulong address)
+        {
+            var type = typeof(ulong);
 
             Address = address;
-            Count = Memory.ReadValue < int > (address + Offsets.UnityList.Count);
+            Count = Memory.ReadValue<int>(address + Offsets.UnityList.Count);
 
             if (Count > 4096 || Count < 0)
                 Count = 0;
 
             var arrayBase = Memory.ReadPtr(address + Offsets.UnityList.Base) + Offsets.UnityListBase.Start;
-            var tSize = (uint) Marshal.SizeOf(type);
-            var retList = new List < ulong > (Count);
-            var buf = Memory.ReadBuffer(arrayBase, Count * (int) tSize);
+            var tSize = (uint)Marshal.SizeOf(type);
+            var retList = new List<ulong>(Count);
+            var buf = Memory.ReadBuffer(arrayBase, Count * (int)tSize);
 
-            for (uint i = 0; i < Count; i++) {
+            for (uint i = 0; i < Count; i++)
+            {
                 var index = i * tSize;
-                var t = MemoryMarshal.Read < ulong > (buf.Slice((int) index, (int) tSize));
+                var t = MemoryMarshal.Read<ulong>(buf.Slice((int)index, (int)tSize));
                 if (t == 0x0) throw new NullPtrException();
                 retList.Add(t);
             }
@@ -445,36 +492,45 @@ namespace eft_dma_radar {
         }
     }
 
-    public class DevLootItem {
-        public string Label {
+    public class DevLootItem
+    {
+        public string Label
+        {
             get;
             init;
         }
-        public bool Important {
+        public bool Important
+        {
             get;
             set;
         } = false;
-        public Vector3 Position {
+        public Vector3 Position
+        {
             get;
             init;
         }
-        public bool AlwaysShow {
+        public bool AlwaysShow
+        {
             get;
             init;
         } = false;
-        public string BsgId {
+        public string BsgId
+        {
             get;
             init;
         }
-        public bool Container {
+        public bool Container
+        {
             get;
             init;
         } = false;
-        public string ContainerName {
+        public string ContainerName
+        {
             get;
             init;
         }
-        public TarkovItem Item {
+        public TarkovItem Item
+        {
             get;
             init;
         } = new();
@@ -487,35 +543,42 @@ namespace eft_dma_radar {
         /// <summary>
         /// Gets the formatted the items value
         /// </summary>
-        public string GetFormattedValue() {
+        public string GetFormattedValue()
+        {
             return TarkovDevAPIManager.FormatNumber(TarkovDevAPIManager.GetItemValue(this.Item));
         }
 
         /// <summary>
         /// Gets the formatted item value + name
         /// </summary>
-        public string GetFormattedValueName() {
+        public string GetFormattedValueName()
+        {
             return (this.AlwaysShow || this.Item.shortName is not null) ? $"[{this.GetFormattedValue()}] {this.Item.name}" : "null";
         }
 
         /// <summary>
         /// Gets the formatted item value + name
         /// </summary>
-        public string GetFormattedValueShortName() {
+        public string GetFormattedValueShortName()
+        {
             return (this.AlwaysShow || this.Item.shortName is not null) ? $"[{this.GetFormattedValue()}] {this.Item.shortName}" : "null";
         }
     }
 
-    public class LootContainers {
-        public string Name {
+    public class LootContainers
+    {
+        public string Name
+        {
             get;
             init;
         }
-        public string ID {
+        public string ID
+        {
             get;
             init;
         }
-        public string NormalizedName {
+        public string NormalizedName
+        {
             get;
             init;
         }
@@ -524,14 +587,16 @@ namespace eft_dma_radar {
     /// <summary>
     /// Class to help handle filter lists/profiles for the loot filter
     /// </summary>
-    public class LootFilter {
+    public class LootFilter
+    {
         public List<string>? Items { get; set; }
         public Colors Color { get; set; }
         public bool IsActive { get; set; }
         public int Order { get; set; }
         public string Name { get; set; }
 
-        public struct Colors {
+        public struct Colors
+        {
             public byte A { get; set; }
             public byte R { get; set; }
             public byte G { get; set; }

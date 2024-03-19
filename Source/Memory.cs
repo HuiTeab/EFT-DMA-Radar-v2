@@ -445,6 +445,15 @@ namespace eft_dma_radar
         }
 
         /// <summary>
+        /// Resolves a pointer and returns the memory address it points to.
+        /// </summary>
+        public static ulong ReadPtrNullable(ulong ptr)
+        {
+            var addr = ReadValue<ulong>(ptr);
+            return addr;
+        }
+
+        /// <summary>
         /// Read value type/struct from specified address.
         /// </summary>
         /// <typeparam name="T">Specified Value Type.</typeparam>
