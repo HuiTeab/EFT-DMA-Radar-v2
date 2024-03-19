@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
-using eft_dma_radar.Source.MonoSharp;
 using eft_dma_radar.Source.Tarkov;
+using eft_dma_radar.Source.MonoSharp;
 
 namespace eft_dma_radar
 {
@@ -9,14 +9,14 @@ namespace eft_dma_radar
     /// Class containing Game (Raid) instance.
     /// </summary>
     public class Game
-    { 
+    {
         private GameObjectManager _gom;
         private LootManager _lootManager;
         private RegisteredPlayers _rgtPlayers;
         private GrenadeManager _grenadeManager;
         private ExfilManager _exfilManager;
         private PlayerManager _playerManager;
-        private Config _config;
+        private Config _config { get => Program.Config; }
         private static CameraManager _cameraManager;
         private QuestManager _questManager;
         private ulong _localGameWorld;
@@ -27,7 +27,7 @@ namespace eft_dma_radar
         private volatile bool _refreshLoot = false;
         private volatile string _mapName = string.Empty;
         private volatile bool _isScav = false;
-        
+
         #region Getters
         public bool InGame
         {
@@ -70,15 +70,17 @@ namespace eft_dma_radar
         {
             get => _exfilManager?.Exfils;
         }
-        public static CameraManager CameraManager {
+        public static CameraManager CameraManager
+        {
             get => _cameraManager;
         }
         public PlayerManager PlayerManager
         {
             get => _playerManager;
         }
-        public QuestManager QuestManager {
-        
+        public QuestManager QuestManager
+        {
+
             get => _questManager;
         }
         #endregion
@@ -109,7 +111,7 @@ namespace eft_dma_radar
                     throw new RaidEnded();
                 }
                 // Update game environment elements such as loot and exfils
-                if (_inGame && !InHideout )
+                if (_inGame && !InHideout)
                 {
                     UpdateGameEnvironment();
                 }
@@ -139,8 +141,9 @@ namespace eft_dma_radar
         {
             // Update the list of registered players
             //_rgtPlayers.UpdateList();
-            
-            if ( _inGame && !InHideout ) {
+
+            if (_inGame && !InHideout)
+            {
                 await _rgtPlayers.UpdateListAsync();
                 // Update the state of each player (e.g., location, health)
                 _rgtPlayers.UpdateAllPlayers();
@@ -162,11 +165,14 @@ namespace eft_dma_radar
 
             var classNamePtr = Memory.ReadPtrChain(_localGameWorld, Offsets.UnityClass.Name);
             var classNameString = Memory.ReadString(classNamePtr, 64).Replace("\0", string.Empty);
-            if (classNameString == "ClientLocalGameWorld") {
+            if (classNameString == "ClientLocalGameWorld")
+            {
                 var mapNamePrt = Memory.ReadPtrChain(_localGameWorld, new uint[] { 0x148, 0x550 });
                 var mapName = Memory.ReadUnityString(mapNamePrt);
                 _mapName = mapName;
-            } else {
+            }
+            else
+            {
                 var mapNamePrt = Memory.ReadPtr(_localGameWorld + 0x40);
                 var mapName = Memory.ReadUnityString(mapNamePrt);
                 _mapName = mapName;
@@ -196,9 +202,10 @@ namespace eft_dma_radar
         /// Handles the scenario when the raid ends.
         /// </summary>
         /// <param name="e">The RaidEnded exception instance containing details about the raid end.</param>
-        private void HandleRaidEnded(RaidEnded e) {
+        private void HandleRaidEnded(RaidEnded e)
+        {
             Program.Log("Raid has ended!");
-            
+
             //wait for game to end
             Thread.Sleep(15000);
             _cameraManager = null;
@@ -334,7 +341,7 @@ namespace eft_dma_radar
                         continue;
                     }
                     var localPlayer = Memory.ReadPtr(_localGameWorld + Offsets.LocalGameWorld.MainPlayer);
-                    var playerInfoPtr = Memory.ReadPtrChain(localPlayer, new uint[] {0x588, 0x28});
+                    var playerInfoPtr = Memory.ReadPtrChain(localPlayer, new uint[] { 0x588, 0x28 });
                     var localPlayerSide = Memory.ReadValue<int>(playerInfoPtr + Offsets.PlayerInfo.PlayerSide);
                     _isScav = localPlayerSide == 4;
                     var localGameWorldClassnamePtr = Memory.ReadPtrChain(_localGameWorld, Offsets.UnityClass.Name);
@@ -365,7 +372,8 @@ namespace eft_dma_radar
                         _rgtPlayers = rgtPlayers;
                         return true; // Successful exit
                     }
-                    else {
+                    else
+                    {
                         await Task.Delay(retryInterval);
                         retryCount++;
                         continue;
@@ -388,7 +396,11 @@ namespace eft_dma_radar
             return false; // Indicate failure after maximum retries
         }
 
-        public static void SetDoorAndLootDistance(bool enabled)
+        /// <summary>
+        /// Sets the maximum loot/door interaction distance
+        /// </summary>
+        /// <param name="enabled"></param>
+        public static void SetDoorLootInteractDistance(bool enabled)
         {
             var hardSettings = MonoSharp.GetStaticFieldDataOfClass("Assembly-CSharp", "EFTHardSettings");
             //[210] LOOT_RAYCAST_DISTANCE : Single
@@ -414,21 +426,19 @@ namespace eft_dma_radar
         /// </summary>
         private void UpdateMisc()
         {
-            _config = Program.Config;
-            
             if (_questManager is null)
             {
                 try
                 {
                     var questManager = new QuestManager(_localGameWorld);
-                     _questManager = questManager; // update ref
+                    _questManager = questManager; // update ref
                 }
                 catch (Exception ex)
                 {
                     Program.Log($"ERROR loading QuestManager: {ex}");
                 }
             }
-            
+
             //if show loot is enabled, load loot
             if (_config.LootEnabled)
             {
@@ -464,11 +474,15 @@ namespace eft_dma_radar
                     Program.Log($"ERROR getting map name: {ex}");
                 }
             }
-            if (_cameraManager is null) {
-                try {
+            if (_cameraManager is null)
+            {
+                try
+                {
                     var cameraManager = new CameraManager(_unityBase);
                     _cameraManager = cameraManager; // update ref
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     Program.Log($"ERROR loading CameraManager: {ex}");
                 }
             }
@@ -478,7 +492,8 @@ namespace eft_dma_radar
                 {
                     var playerManager = new PlayerManager(_localGameWorld);
                     _playerManager = playerManager;
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Program.Log($"ERROR loading PlayerManager: {ex}");
                 }

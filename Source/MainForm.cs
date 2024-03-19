@@ -235,12 +235,6 @@ namespace eft_dma_radar
             this.Loot?.ApplyFilter();
         }
 
-        private void chkInfStamina_CheckedChanged(object sender, EventArgs e)
-        {
-            _config.MaxStaminaEnabled = chkInfStamina.Checked;
-            Memory.PlayerManager.SetMovementState(chkInfStamina.Checked);
-        }
-
         /// <summary>
         /// Fired when NightVision checkbox has been adjusted
         /// </summary>
@@ -293,7 +287,7 @@ namespace eft_dma_radar
             _config.NoRecoilSwayEnabled = chkNoRecoilSway.Checked;
             if (Memory.LocalPlayer is not null)
             {
-                Memory.PlayerManager.SetNoRecoilAndSway(chkNoRecoilSway.Checked);
+                Memory.PlayerManager.SetNoRecoilSway(chkNoRecoilSway.Checked);
             }
         }
 
@@ -344,48 +338,6 @@ namespace eft_dma_radar
                 Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsLoad);
                 Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsUnload);
             }
-        }
-        private void chkMemoryWrite_CheckedChanged(object sender, EventArgs e)
-        {
-            //disable all features if memory write is disabled and hide checkboxes and sliders
-            if (chkMemoryWrite.Checked)
-            {
-                chkNightVision.Enabled = true;
-                chkThermalVision.Enabled = true;
-                chkOpticThermalVision.Enabled = true;
-                chkNoVisor.Enabled = true;
-                chkNoRecoilSway.Enabled = true;
-                chkJumpPower.Enabled = true;
-                chkThrowPower.Enabled = true;
-                chkMagDrills.Enabled = true;
-                chkChams.Enabled = true;
-                chkLootAndDoor.Enabled = true;
-                chkIncreaseMaxWeight.Enabled = true;
-                chkDoubleSearch.Enabled = true;
-                chkMemoryWrite.Text = "Memory Write: Enabled";
-            }
-            else
-            {
-                chkNightVision.Enabled = false;
-                chkThermalVision.Enabled = false;
-                chkOpticThermalVision.Enabled = false;
-                chkNoVisor.Enabled = false;
-                chkNoRecoilSway.Enabled = false;
-                chkJumpPower.Enabled = false;
-                chkThrowPower.Enabled = false;
-                chkMagDrills.Enabled = false;
-                chkChams.Enabled = false;
-                chkLootAndDoor.Enabled = false;
-                chkIncreaseMaxWeight.Enabled = false;
-                chkDoubleSearch.Enabled = false;
-                chkMemoryWrite.Text = "Memory Write: Disabled";
-            }
-
-        }
-
-        private void chkLootAndDoor_CheckedChanged(object sender, EventArgs e)
-        {
-            Game.SetDoorAndLootDistance(chkLootAndDoor.Checked);
         }
 
         private void chkIncreaseMaxWeight_CheckedChanged(object sender, EventArgs e)
@@ -451,6 +403,105 @@ namespace eft_dma_radar
         private void picExfilClosedIconColor_Click(object sender, EventArgs e)
         {
             UpdatePaintColorByName("ExfilClosedIcon", picExfilClosedIconColor);
+        }
+
+        private void chkHideTextOutline_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.HideTextOutline = chkHideTextOutline.Checked;
+        }
+
+        private void chkInfiniteStamina_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.MaxStaminaEnabled = chkInfiniteStamina.Checked;
+            Memory.PlayerManager.SetMovementState(chkInfiniteStamina.Checked);
+        }
+
+        private void chkMemoryMasterSwitch_CheckedChanged(object sender, EventArgs e)
+        {
+            bool enabled = chkMemoryMasterSwitch.Checked;
+            grpGlobalFeatures.Enabled = enabled;
+            grpGearFeatures.Enabled = enabled;
+            grpPhysicalFeatures.Enabled = enabled;
+        }
+
+        private void chkExtendedInteract_CheckedChanged(object sender, EventArgs e)
+        {
+            Game.SetDoorLootInteractDistance(chkExtendedInteract.Checked);
+        }
+
+        private void picAIScavColor_Click(object sender, EventArgs e)
+        {
+            UpdatePaintColorByName("AIScav", picAIScavColor);
+        }
+
+        private void picPScavColor_Click(object sender, EventArgs e)
+        {
+            UpdatePaintColorByName("PScav", picPScavColor);
+        }
+
+        private void picAIRaiderColor_Click(object sender, EventArgs e)
+        {
+            UpdatePaintColorByName("AIRaider", picAIRaiderColor);
+        }
+
+        private void picBossColor_Click(object sender, EventArgs e)
+        {
+            UpdatePaintColorByName("Boss", picBossColor);
+        }
+
+        private void picBEARColor_Click(object sender, EventArgs e)
+        {
+            UpdatePaintColorByName("BEAR", picBEARColor);
+        }
+
+        private void picUSECColor_Click(object sender, EventArgs e)
+        {
+            UpdatePaintColorByName("USEC", picUSECColor);
+        }
+
+        private void picLocalPlayerColor_Click(object sender, EventArgs e)
+        {
+            UpdatePaintColorByName("LocalPlayer", picLocalPlayerColor);
+        }
+
+        private void picTeammateColor_Click(object sender, EventArgs e)
+        {
+            UpdatePaintColorByName("AIScav", picTeammateColor);
+        }
+
+        private void picTeamHoverColor_Click(object sender, EventArgs e)
+        {
+            UpdatePaintColorByName("TeamHover", picTeamHoverColor);
+        }
+
+        private void picRegularLootColor_Click(object sender, EventArgs e)
+        {
+            UpdatePaintColorByName("RegularLoot", picRegularLootColor);
+        }
+
+        private void picImportantLootColor_Click(object sender, EventArgs e)
+        {
+            UpdatePaintColorByName("ImportantLoot", picImportantLootColor);
+        }
+
+        private void chkHideLootValue_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.HideLootValue = chkHideLootValue.Checked;
+        }
+
+        private void chkShowHoverArmor_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.ShowHoverArmor = chkShowHoverArmor.Checked;
+        }
+
+        private void chkInstantADS_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.InstantADSEnabled = chkInstantADS.Checked;
+        }
+
+        private void picTextOutlineColor_Click(object sender, EventArgs e)
+        {
+            UpdatePaintColorByName("TextOutline", picTextOutlineColor);
         }
 
         /// <summary>
@@ -643,10 +694,10 @@ namespace eft_dma_radar
                     .Where(x => x.Type is not PlayerType.LocalPlayer && !x.HasExfild); // Get all players except LocalPlayer & Exfil'd Players
 
                 var loot = this.Loot?.Filter?.Select(x => x);
-                var tasksItems = this.QuestManager.QuestItem?.Select(x => x);
-                var tasksZones = this.QuestManager.QuestZone?.Select(x => x);
+                var tasksItems = this.QuestManager.QuestItems?.Select(x => x);
+                var tasksZones = this.QuestManager.QuestZones?.Select(x => x);
 
-                if ((players is not null && players.Any()) || (loot is not null && loot.Any()))
+                if ((players is not null && players.Any()) || (loot is not null && loot.Any()) || (tasksItems is not null && tasksItems.Any()) || (tasksZones is not null && tasksZones.Any()))
                 {
                     var mouse = new Vector2(e.X, e.Y); // Get current mouse position in control
 
@@ -1265,71 +1316,6 @@ namespace eft_dma_radar
                     }
                 }
             }
-        }
-
-        private void picAIScavColor_Click(object sender, EventArgs e)
-        {
-            UpdatePaintColorByName("AIScav", picAIScavColor);
-        }
-
-        private void picPScavColor_Click(object sender, EventArgs e)
-        {
-            UpdatePaintColorByName("PScav", picPScavColor);
-        }
-
-        private void picAIRaiderColor_Click(object sender, EventArgs e)
-        {
-            UpdatePaintColorByName("AIRaider", picAIRaiderColor);
-        }
-
-        private void picBossColor_Click(object sender, EventArgs e)
-        {
-            UpdatePaintColorByName("Boss", picBossColor);
-        }
-
-        private void picBEARColor_Click(object sender, EventArgs e)
-        {
-            UpdatePaintColorByName("BEAR", picBEARColor);
-        }
-
-        private void picUSECColor_Click(object sender, EventArgs e)
-        {
-            UpdatePaintColorByName("USEC", picUSECColor);
-        }
-
-        private void picLocalPlayerColor_Click(object sender, EventArgs e)
-        {
-            UpdatePaintColorByName("LocalPlayer", picLocalPlayerColor);
-        }
-
-        private void picTeammateColor_Click(object sender, EventArgs e)
-        {
-            UpdatePaintColorByName("AIScav", picTeammateColor);
-        }
-
-        private void picTeamHoverColor_Click(object sender, EventArgs e)
-        {
-            UpdatePaintColorByName("TeamHover", picTeamHoverColor);
-        }
-
-        private void picRegularLootColor_Click(object sender, EventArgs e)
-        {
-            UpdatePaintColorByName("RegularLoot", picRegularLootColor);
-        }
-
-        private void picImportantLootColor_Click(object sender, EventArgs e)
-        {
-            UpdatePaintColorByName("ImportantLoot", picImportantLootColor);
-        }
-
-        private void chkHideLootValue_CheckedChanged(object sender, EventArgs e)
-        {
-            _config.HideLootValue = chkHideLootValue.Checked;
-        }
-
-        private void chkShowHoverArmor_CheckedChanged(object sender, EventArgs e)
-        {
-            _config.ShowHoverArmor = chkShowHoverArmor.Checked;
         }
         #endregion
 
@@ -1998,7 +1984,7 @@ namespace eft_dma_radar
                             }
                             if (chkQuestHelper.Checked && !Memory.IsScav) // Draw quest items (if enabled)
                             {
-                                var questItems = this.QuestManager.QuestItem; // cache ref
+                                var questItems = this.QuestManager.QuestItems; // cache ref
                                 if (questItems is not null)
                                 {
                                     foreach (var item in questItems)
@@ -2026,7 +2012,7 @@ namespace eft_dma_radar
                                     }
                                 }
 
-                                var questZones = this.QuestManager.QuestZone; // cache ref
+                                var questZones = this.QuestManager.QuestZones; // cache ref
                                 if (questZones is not null)
                                 {
                                     foreach (var zone in questZones)
@@ -2045,7 +2031,7 @@ namespace eft_dma_radar
                                                 Y = questZoneZoomedPos.Y
                                             };
 
-                                            questZoneZoomedPos.DrawZoneTask(
+                                            questZoneZoomedPos.DrawTaskZone(
                                                 canvas,
                                                 zone,
                                                 position

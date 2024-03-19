@@ -6,7 +6,8 @@ namespace eft_dma_radar
     internal static class SKPaints
     {
         #region Radar Paints
-        public static readonly SKPaint PaintBase = new SKPaint() {
+        public static readonly SKPaint PaintBase = new SKPaint()
+        {
             Color = SKColors.White,
             StrokeWidth = 3,
             Style = SKPaintStyle.Stroke,
@@ -14,7 +15,8 @@ namespace eft_dma_radar
             FilterQuality = SKFilterQuality.High
         };
 
-        public static readonly SKPaint TextBase2 = new SKPaint() {
+        public static readonly SKPaint TextBase = new SKPaint()
+        {
             Color = SKColors.White,
             IsStroke = false,
             TextSize = 12,
@@ -24,10 +26,11 @@ namespace eft_dma_radar
             FilterQuality = SKFilterQuality.High
         };
 
-        public static readonly SKPaint TextBase = new SKPaint()
+        public static readonly SKPaint TextBaseOutline = new SKPaint()
         {
-            Color = SKColors.White,
-            IsStroke = false,
+            Color = SKColors.Black,
+            IsStroke = true,
+            StrokeWidth = 2,
             TextSize = 12,
             TextEncoding = SKTextEncoding.Utf8,
             IsAntialias = true,
@@ -43,6 +46,7 @@ namespace eft_dma_radar
             IsAntialias = true,
             FilterQuality = SKFilterQuality.High
         };
+
         public static readonly SKPaint TextMouseoverGroup = new SKPaint()
         {
             Color = SKColors.LawnGreen,
@@ -53,6 +57,7 @@ namespace eft_dma_radar
             Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold),
             FilterQuality = SKFilterQuality.High
         };
+
         public static readonly SKPaint PaintDeathMarker = new SKPaint()
         {
             Color = SKColors.Red,
@@ -150,13 +155,15 @@ namespace eft_dma_radar
             FilterQuality = SKFilterQuality.High,
         };
         #endregion
-}
+    }
 
-public class PaintColor {
+    public class PaintColor
+    {
         public Colors Color { get; set; }
         public string Name { get; set; }
 
-        public struct Colors {
+        public struct Colors
+        {
             public byte A { get; set; }
             public byte R { get; set; }
             public byte G { get; set; }

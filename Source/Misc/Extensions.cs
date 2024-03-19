@@ -79,7 +79,8 @@ namespace eft_dma_radar
         /// <summary>
         /// Ghetto helper method to get the Color from a PaintColor object by Key & return a new SKColor object based on it
         /// </summary>
-        public static SKColor SKColorFromPaintColor(string key) {
+        public static SKColor SKColorFromPaintColor(string key)
+        {
             var col = Program.Config.PaintColors[key];
             return new SKColor(col.R, col.G, col.B, col.A);
         }
@@ -87,10 +88,12 @@ namespace eft_dma_radar
         /// <summary>
         /// Gets drawing paintbrush based on Player Type
         /// </summary>
-        public static SKPaint GetEntityPaint(this Player player) {
+        public static SKPaint GetEntityPaint(this Player player)
+        {
             SKPaint basePaint = SKPaints.PaintBase.Clone();
 
-            basePaint.Color = player.Type switch {
+            basePaint.Color = player.Type switch
+            {
                 PlayerType.LocalPlayer => SKColorFromPaintColor("LocalPlayer"),
                 PlayerType.Teammate => SKColorFromPaintColor("Teammate"),
                 PlayerType.BEAR => SKColorFromPaintColor("BEAR"),
@@ -180,7 +183,6 @@ namespace eft_dma_radar
         public static SKPaint GetTextPaint(this Player player)
         {
             SKPaint baseText = SKPaints.TextBase.Clone();
-
             baseText.Color = player.Type switch
             {
                 PlayerType.LocalPlayer => SKColorFromPaintColor("LocalPlayer"),
@@ -267,6 +269,16 @@ namespace eft_dma_radar
         }
 
         /// <summary>
+        /// Determines the text outline color.
+        /// </summary>
+        public static SKPaint GetTextOutlinePaint()
+        {
+            SKPaint paintToUse = SKPaints.TextBaseOutline.Clone();
+            paintToUse.Color = Extensions.SKColorFromPaintColor("TextOutline");
+            return paintToUse;
+        }
+
+        /// <summary>
         /// Gets Aimview drawing paintbrush based on Player Type.
         /// </summary>
         public static SKPaint GetAimviewPaint(this Player player)
@@ -275,7 +287,8 @@ namespace eft_dma_radar
             basePaint.StrokeWidth = 1;
             basePaint.Style = SKPaintStyle.Fill;
 
-            basePaint.Color = player.Type switch {
+            basePaint.Color = player.Type switch
+            {
                 PlayerType.LocalPlayer => SKColorFromPaintColor("LocalPlayer"),
                 PlayerType.Teammate => SKColorFromPaintColor("Teammate"),
                 PlayerType.BEAR => SKColorFromPaintColor("BEAR"),

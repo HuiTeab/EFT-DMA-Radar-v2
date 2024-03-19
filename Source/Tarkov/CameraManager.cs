@@ -20,6 +20,8 @@ namespace eft_dma_radar.Source.Tarkov
         public CameraManager(ulong unityBase)
         {
             _unityBase = unityBase;
+
+            this.GetCamera();
         }
 
         private bool GetCamera()
@@ -108,9 +110,6 @@ namespace eft_dma_radar.Source.Tarkov
         /// </summary>
         public void ThermalVision(bool on)
         {
-            if (!this.IsReady) {
-                UpdateCamera();
-            }
             if (this.IsReady)
             {
                 var fpsThermalComponent = GetComponentFromGameObject(_fpsCamera, "ThermalVision");
@@ -133,9 +132,6 @@ namespace eft_dma_radar.Source.Tarkov
         /// </summary>
         public void NightVision(bool on)
         {
-            if (!this.IsReady) {
-                UpdateCamera();
-            }
             if (this.IsReady)
             {
                 var nightVisionComponent = GetComponentFromGameObject(_fpsCamera, "NightVision");
@@ -153,9 +149,6 @@ namespace eft_dma_radar.Source.Tarkov
         /// </summary>
         public void VisorEffect(bool on)
         {
-            if (!this.IsReady) {
-                UpdateCamera();
-            }
             if (this.IsReady)
             {
                 var visorComponent = GetComponentFromGameObject(_fpsCamera, "VisorEffect");
@@ -172,9 +165,6 @@ namespace eft_dma_radar.Source.Tarkov
         /// </summary>
         public void OpticThermalVision(bool on)
         {
-            if (!this.IsReady) {
-                UpdateCamera();
-            }
             if (this.IsReady)
             {
                 ulong opticComponent = 0;

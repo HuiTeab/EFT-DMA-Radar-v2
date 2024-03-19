@@ -53,6 +53,8 @@ namespace eft_dma_radar
             tabSettings = new TabPage();
             grpConfig = new GroupBox();
             grpColors = new GroupBox();
+            picTextOutlineColor = new PictureBox();
+            lblTextOutlineColor = new Label();
             picExfilClosedIconColor = new PictureBox();
             lblExfilClosedIconColor = new Label();
             picExfilPendingIconColor = new PictureBox();
@@ -116,6 +118,7 @@ namespace eft_dma_radar
             chkHideLootValue = new CheckBox();
             chkImportantLootOnly = new CheckBox();
             grpUserInterface = new GroupBox();
+            chkHideTextOutline = new CheckBox();
             chkHideExfilNames = new CheckBox();
             chkQuestHelper = new CheckBox();
             chkShowHoverArmor = new CheckBox();
@@ -131,11 +134,13 @@ namespace eft_dma_radar
             chkShowAimview = new CheckBox();
             chkHideNames = new CheckBox();
             grpMemoryWriting = new GroupBox();
+            chkMemoryMasterSwitch = new CheckBox();
             grpGlobalFeatures = new GroupBox();
-            chkLootAndDoor = new CheckBox();
+            chkExtendedInteract = new CheckBox();
             chkChams = new CheckBox();
             chkDoubleSearch = new CheckBox();
             grpGearFeatures = new GroupBox();
+            chkInstantADS = new CheckBox();
             trkMagDrills = new TrackBar();
             chkNoRecoilSway = new CheckBox();
             chkMagDrills = new CheckBox();
@@ -144,13 +149,13 @@ namespace eft_dma_radar
             chkOpticThermalVision = new CheckBox();
             chkThermalVision = new CheckBox();
             grpPhysicalFeatures = new GroupBox();
+            chkInfiniteStamina = new CheckBox();
             chkIncreaseMaxWeight = new CheckBox();
             trkThrowPower = new TrackBar();
             trkJumpPower = new TrackBar();
             chkThrowPower = new CheckBox();
             chkJumpPower = new CheckBox();
             grpRadar = new GroupBox();
-            chkMemoryWrite = new CheckBox();
             btnRestartRadar = new Button();
             chkShowMapSetup = new CheckBox();
             btnToggleMap = new Button();
@@ -166,13 +171,13 @@ namespace eft_dma_radar
             tabControl = new TabControl();
             colDialog = new ColorDialog();
             toolTip = new ToolTip(components);
-            chkInfStamina = new CheckBox();
             tabLootFilter.SuspendLayout();
             tabPlayerHistory.SuspendLayout();
             tabPlayerLoadouts.SuspendLayout();
             tabSettings.SuspendLayout();
             grpConfig.SuspendLayout();
             grpColors.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picTextOutlineColor).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picExfilClosedIconColor).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picExfilPendingIconColor).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picExfilActiveIconColor).BeginInit();
@@ -430,6 +435,8 @@ namespace eft_dma_radar
             // 
             // grpColors
             // 
+            grpColors.Controls.Add(picTextOutlineColor);
+            grpColors.Controls.Add(lblTextOutlineColor);
             grpColors.Controls.Add(picExfilClosedIconColor);
             grpColors.Controls.Add(lblExfilClosedIconColor);
             grpColors.Controls.Add(picExfilPendingIconColor);
@@ -470,10 +477,29 @@ namespace eft_dma_radar
             grpColors.Controls.Add(lblAIScavColor);
             grpColors.Location = new Point(888, 22);
             grpColors.Name = "grpColors";
-            grpColors.Size = new Size(162, 467);
+            grpColors.Size = new Size(162, 510);
             grpColors.TabIndex = 28;
             grpColors.TabStop = false;
             grpColors.Text = "Colors";
+            // 
+            // picTextOutlineColor
+            // 
+            picTextOutlineColor.BackColor = Color.Transparent;
+            picTextOutlineColor.Location = new Point(108, 468);
+            picTextOutlineColor.Name = "picTextOutlineColor";
+            picTextOutlineColor.Size = new Size(47, 18);
+            picTextOutlineColor.TabIndex = 53;
+            picTextOutlineColor.TabStop = false;
+            picTextOutlineColor.Click += picTextOutlineColor_Click;
+            // 
+            // lblTextOutlineColor
+            // 
+            lblTextOutlineColor.AutoSize = true;
+            lblTextOutlineColor.Location = new Point(29, 466);
+            lblTextOutlineColor.Name = "lblTextOutlineColor";
+            lblTextOutlineColor.Size = new Size(73, 15);
+            lblTextOutlineColor.TabIndex = 52;
+            lblTextOutlineColor.Text = "Text Outline:";
             // 
             // picExfilClosedIconColor
             // 
@@ -1112,6 +1138,7 @@ namespace eft_dma_radar
             // 
             // grpUserInterface
             // 
+            grpUserInterface.Controls.Add(chkHideTextOutline);
             grpUserInterface.Controls.Add(chkHideExfilNames);
             grpUserInterface.Controls.Add(chkQuestHelper);
             grpUserInterface.Controls.Add(chkShowHoverArmor);
@@ -1132,6 +1159,18 @@ namespace eft_dma_radar
             grpUserInterface.TabIndex = 26;
             grpUserInterface.TabStop = false;
             grpUserInterface.Text = "UI";
+            // 
+            // chkHideTextOutline
+            // 
+            chkHideTextOutline.AutoSize = true;
+            chkHideTextOutline.Location = new Point(250, 47);
+            chkHideTextOutline.Name = "chkHideTextOutline";
+            chkHideTextOutline.Size = new Size(117, 19);
+            chkHideTextOutline.TabIndex = 32;
+            chkHideTextOutline.Text = "Hide Text Outline";
+            toolTip.SetToolTip(chkHideTextOutline, "Removes the outline from text on the radar");
+            chkHideTextOutline.UseVisualStyleBackColor = true;
+            chkHideTextOutline.CheckedChanged += chkHideTextOutline_CheckedChanged;
             // 
             // chkHideExfilNames
             // 
@@ -1295,6 +1334,7 @@ namespace eft_dma_radar
             // 
             // grpMemoryWriting
             // 
+            grpMemoryWriting.Controls.Add(chkMemoryMasterSwitch);
             grpMemoryWriting.Controls.Add(grpGlobalFeatures);
             grpMemoryWriting.Controls.Add(grpGearFeatures);
             grpMemoryWriting.Controls.Add(grpPhysicalFeatures);
@@ -1305,11 +1345,24 @@ namespace eft_dma_radar
             grpMemoryWriting.TabStop = false;
             grpMemoryWriting.Text = "Memory Writing [RISKY]";
             // 
+            // chkMemoryMasterSwitch
+            // 
+            chkMemoryMasterSwitch.AutoSize = true;
+            chkMemoryMasterSwitch.Location = new Point(362, 11);
+            chkMemoryMasterSwitch.Name = "chkMemoryMasterSwitch";
+            chkMemoryMasterSwitch.Size = new Size(100, 19);
+            chkMemoryMasterSwitch.TabIndex = 19;
+            chkMemoryMasterSwitch.Text = "Master Switch";
+            toolTip.SetToolTip(chkMemoryMasterSwitch, "Toggles memory writing functionality");
+            chkMemoryMasterSwitch.UseVisualStyleBackColor = true;
+            chkMemoryMasterSwitch.CheckedChanged += chkMemoryMasterSwitch_CheckedChanged;
+            // 
             // grpGlobalFeatures
             // 
-            grpGlobalFeatures.Controls.Add(chkLootAndDoor);
+            grpGlobalFeatures.Controls.Add(chkExtendedInteract);
             grpGlobalFeatures.Controls.Add(chkChams);
             grpGlobalFeatures.Controls.Add(chkDoubleSearch);
+            grpGlobalFeatures.Enabled = false;
             grpGlobalFeatures.Location = new Point(6, 22);
             grpGlobalFeatures.Name = "grpGlobalFeatures";
             grpGlobalFeatures.Size = new Size(450, 82);
@@ -1317,16 +1370,17 @@ namespace eft_dma_radar
             grpGlobalFeatures.TabStop = false;
             grpGlobalFeatures.Text = "Global Features";
             // 
-            // chkLootAndDoor
+            // chkExtendedInteract
             // 
-            chkLootAndDoor.AutoSize = true;
-            chkLootAndDoor.Location = new Point(151, 47);
-            chkLootAndDoor.Name = "chkLootAndDoor";
-            chkLootAndDoor.Size = new Size(98, 19);
-            chkLootAndDoor.TabIndex = 23;
-            chkLootAndDoor.Text = "LootAndDoor";
-            chkLootAndDoor.UseVisualStyleBackColor = true;
-            chkLootAndDoor.CheckedChanged += chkLootAndDoor_CheckedChanged;
+            chkExtendedInteract.AutoSize = true;
+            chkExtendedInteract.Location = new Point(151, 47);
+            chkExtendedInteract.Name = "chkExtendedInteract";
+            chkExtendedInteract.Size = new Size(118, 19);
+            chkExtendedInteract.TabIndex = 23;
+            chkExtendedInteract.Text = "Extended Interact";
+            toolTip.SetToolTip(chkExtendedInteract, "Increases maximum door/loot interaction distance");
+            chkExtendedInteract.UseVisualStyleBackColor = true;
+            chkExtendedInteract.CheckedChanged += chkExtendedInteract_CheckedChanged;
             // 
             // chkChams
             // 
@@ -1355,6 +1409,7 @@ namespace eft_dma_radar
             // 
             // grpGearFeatures
             // 
+            grpGearFeatures.Controls.Add(chkInstantADS);
             grpGearFeatures.Controls.Add(trkMagDrills);
             grpGearFeatures.Controls.Add(chkNoRecoilSway);
             grpGearFeatures.Controls.Add(chkMagDrills);
@@ -1362,12 +1417,26 @@ namespace eft_dma_radar
             grpGearFeatures.Controls.Add(chkNightVision);
             grpGearFeatures.Controls.Add(chkOpticThermalVision);
             grpGearFeatures.Controls.Add(chkThermalVision);
+            grpGearFeatures.Enabled = false;
             grpGearFeatures.Location = new Point(6, 110);
             grpGearFeatures.Name = "grpGearFeatures";
             grpGearFeatures.Size = new Size(207, 180);
             grpGearFeatures.TabIndex = 34;
             grpGearFeatures.TabStop = false;
             grpGearFeatures.Text = "Gear Features";
+            // 
+            // chkInstantADS
+            // 
+            chkInstantADS.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            chkInstantADS.AutoSize = true;
+            chkInstantADS.Location = new Point(118, 47);
+            chkInstantADS.Name = "chkInstantADS";
+            chkInstantADS.Size = new Size(87, 19);
+            chkInstantADS.TabIndex = 34;
+            chkInstantADS.Text = "Instant ADS";
+            toolTip.SetToolTip(chkInstantADS, "Increases ADS speed to be near instantaneous");
+            chkInstantADS.UseVisualStyleBackColor = true;
+            chkInstantADS.CheckedChanged += chkInstantADS_CheckedChanged;
             // 
             // trkMagDrills
             // 
@@ -1463,18 +1532,31 @@ namespace eft_dma_radar
             // 
             // grpPhysicalFeatures
             // 
-            grpPhysicalFeatures.Controls.Add(chkInfStamina);
+            grpPhysicalFeatures.Controls.Add(chkInfiniteStamina);
             grpPhysicalFeatures.Controls.Add(chkIncreaseMaxWeight);
             grpPhysicalFeatures.Controls.Add(trkThrowPower);
             grpPhysicalFeatures.Controls.Add(trkJumpPower);
             grpPhysicalFeatures.Controls.Add(chkThrowPower);
             grpPhysicalFeatures.Controls.Add(chkJumpPower);
+            grpPhysicalFeatures.Enabled = false;
             grpPhysicalFeatures.Location = new Point(226, 110);
             grpPhysicalFeatures.Name = "grpPhysicalFeatures";
             grpPhysicalFeatures.Size = new Size(230, 180);
             grpPhysicalFeatures.TabIndex = 26;
             grpPhysicalFeatures.TabStop = false;
             grpPhysicalFeatures.Text = "Physical Features";
+            // 
+            // chkInfiniteStamina
+            // 
+            chkInfiniteStamina.AutoSize = true;
+            chkInfiniteStamina.Location = new Point(6, 97);
+            chkInfiniteStamina.Name = "chkInfiniteStamina";
+            chkInfiniteStamina.Size = new Size(109, 19);
+            chkInfiniteStamina.TabIndex = 32;
+            chkInfiniteStamina.Text = "Infinite Stamina";
+            toolTip.SetToolTip(chkInfiniteStamina, "Allows you to run forever");
+            chkInfiniteStamina.UseVisualStyleBackColor = true;
+            chkInfiniteStamina.CheckedChanged += chkInfiniteStamina_CheckedChanged;
             // 
             // chkIncreaseMaxWeight
             // 
@@ -1542,7 +1624,6 @@ namespace eft_dma_radar
             // 
             // grpRadar
             // 
-            grpRadar.Controls.Add(chkMemoryWrite);
             grpRadar.Controls.Add(btnRestartRadar);
             grpRadar.Controls.Add(chkShowMapSetup);
             grpRadar.Controls.Add(btnToggleMap);
@@ -1552,18 +1633,6 @@ namespace eft_dma_radar
             grpRadar.TabIndex = 26;
             grpRadar.TabStop = false;
             grpRadar.Text = "Radar";
-            // 
-            // chkMemoryWrite
-            // 
-            chkMemoryWrite.AutoSize = true;
-            chkMemoryWrite.Location = new Point(6, 53);
-            chkMemoryWrite.Name = "chkMemoryWrite";
-            chkMemoryWrite.Size = new Size(102, 19);
-            chkMemoryWrite.TabIndex = 19;
-            chkMemoryWrite.Text = "Memory Write";
-            toolTip.SetToolTip(chkMemoryWrite, "Shows the 'Map Setup' panel");
-            chkMemoryWrite.UseVisualStyleBackColor = true;
-            chkMemoryWrite.CheckedChanged += chkMemoryWrite_CheckedChanged;
             // 
             // btnRestartRadar
             // 
@@ -1708,17 +1777,6 @@ namespace eft_dma_radar
             // 
             colDialog.FullOpen = true;
             // 
-            // chkInfStamina
-            // 
-            chkInfStamina.AutoSize = true;
-            chkInfStamina.Location = new Point(6, 122);
-            chkInfStamina.Name = "chkInfStamina";
-            chkInfStamina.Size = new Size(86, 19);
-            chkInfStamina.TabIndex = 32;
-            chkInfStamina.Text = "Inf Stamina";
-            chkInfStamina.UseVisualStyleBackColor = true;
-            chkInfStamina.CheckedChanged += chkInfStamina_CheckedChanged;
-            // 
             // frmMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -1736,6 +1794,7 @@ namespace eft_dma_radar
             grpConfig.ResumeLayout(false);
             grpColors.ResumeLayout(false);
             grpColors.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picTextOutlineColor).EndInit();
             ((System.ComponentModel.ISupportInitialize)picExfilClosedIconColor).EndInit();
             ((System.ComponentModel.ISupportInitialize)picExfilPendingIconColor).EndInit();
             ((System.ComponentModel.ISupportInitialize)picExfilActiveIconColor).EndInit();
@@ -1770,6 +1829,7 @@ namespace eft_dma_radar
             ((System.ComponentModel.ISupportInitialize)trkZoom).EndInit();
             ((System.ComponentModel.ISupportInitialize)trkUIScale).EndInit();
             grpMemoryWriting.ResumeLayout(false);
+            grpMemoryWriting.PerformLayout();
             grpGlobalFeatures.ResumeLayout(false);
             grpGlobalFeatures.PerformLayout();
             grpGearFeatures.ResumeLayout(false);
@@ -1896,11 +1956,16 @@ namespace eft_dma_radar
         private CheckBox chkShowHoverArmor;
         private Button button1;
         private GroupBox grpPhysicalFeatures;
+        private CheckBox chkThrowPower;
+        private CheckBox chkJumpPower;
+        private CheckBox chkDoubleSearch;
         private TrackBar trkJumpPower;
         private TrackBar trkThrowPower;
+        private CheckBox chkMagDrills;
         private TrackBar trkMagDrills;
         private GroupBox grpGearFeatures;
         private GroupBox grpGlobalFeatures;
+        private CheckBox chkIncreaseMaxWeight;
         private CheckBox chkQuestHelper;
         private PictureBox picQuestItemsColor;
         private Label lblQuestItemsColor;
@@ -1920,14 +1985,12 @@ namespace eft_dma_radar
         private Label lblExfilPendingIconColor;
         private PictureBox picExfilClosedIconColor;
         private Label lblExfilClosedIconColor;
-        private CheckBox chkLootAndDoor;
-        private CheckBox chkDoubleSearch;
-        private CheckBox chkMagDrills;
-        private CheckBox chkIncreaseMaxWeight;
-        private CheckBox chkThrowPower;
-        private CheckBox chkJumpPower;
-        private CheckBox chkMemoryWrite;
-        private CheckBox chkInfStamina;
+        private CheckBox chkInstantADS;
+        private PictureBox picTextOutlineColor;
+        private Label lblTextOutlineColor;
+        private CheckBox chkHideTextOutline;
+        private CheckBox chkExtendedInteract;
+        private CheckBox chkMemoryMasterSwitch;
+        private CheckBox chkInfiniteStamina;
     }
 }
-

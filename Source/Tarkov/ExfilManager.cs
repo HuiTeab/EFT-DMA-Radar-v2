@@ -37,7 +37,8 @@ namespace eft_dma_radar
             var exfilController = Memory.ReadPtr(localGameWorld + Offsets.LocalGameWorld.ExfilController);
 
             ulong exfilPoints;
-            if (IsScav) {
+            if (IsScav)
+            {
                 exfilPoints = Memory.ReadPtr(exfilController + 0x28);
 
                 var count = Memory.ReadValue<int>(exfilPoints + Offsets.ExfilController.ExfilCount);
@@ -46,16 +47,20 @@ namespace eft_dma_radar
                 {
                     var exfilAddr = Memory.ReadPtr(exfilPoints + Offsets.UnityListBase.Start + (i * 0x08));
                     var exfil = new Exfil(exfilAddr);
-                    exfil.UpdateName("test");
+                    var exfilSettings = Memory.ReadPtr(exfilAddr + Offsets.Exfil.Settings);
+                    var exfilName = Memory.ReadPtr(exfilSettings + Offsets.Exfil.Name);
+                    var exfilUnityName = Memory.ReadUnityString(exfilName);
+                    exfil.UpdateName(exfilUnityName);
                     list.Add(exfil);
                 }
-            }else {
+            }
+            else
+            {
                 var localPlayer = Memory.ReadPtr(localGameWorld + Offsets.LocalGameWorld.MainPlayer);
                 var localPlayerProfile = Memory.ReadPtr(localPlayer + Offsets.Player.Profile);
                 var localPlayerInfo = Memory.ReadPtr(localPlayerProfile + Offsets.Profile.PlayerInfo);
                 var localPlayerEntryPoint = Memory.ReadPtr(localPlayerInfo + 0x30);
                 var localPlayerEntryPointString = Memory.ReadUnityString(localPlayerEntryPoint);
-
 
                 exfilPoints = Memory.ReadPtr(exfilController + Offsets.ExfilController.ExfilList);
                 var count = Memory.ReadValue<int>(exfilPoints + Offsets.ExfilController.ExfilCount);
@@ -102,7 +107,8 @@ namespace eft_dma_radar
         /// </summary>
         private void UpdateExfils()
         {
-            try {
+            try
+            {
                 var scatterMap = new ScatterReadMap(Exfils.Count);
                 var round1 = scatterMap.AddRound();
                 for (int i = 0; i < Exfils.Count; i++)
@@ -112,16 +118,17 @@ namespace eft_dma_radar
                 scatterMap.Execute();
                 for (int i = 0; i < Exfils.Count; i++)
                 {
-                    try {
+                    try
+                    {
                         var status = scatterMap.Results[i][0].TryGetResult<int>(out var stat);
                         Exfils[i].UpdateStatus(stat);
                     }
-                    catch{}
+                    catch { }
 
                 }
             }
-            catch{}
-            
+            catch { }
+
         }
     }
 
@@ -132,6 +139,31 @@ namespace eft_dma_radar
         public Vector3 Position { get; }
         public ExfilStatus Status { get; private set; } = ExfilStatus.Closed;
         public string Name { get; private set; } = "?";
+
+        private Dictionary<string, string> streetsExfilNames = new Dictionary<string, string>
+        {
+            // pmc extracts
+            ["E1"] = "Stylobate Building Elevator",
+            ["E2"] = "Sewer River",
+            ["E3"] = "Damaged House",
+            ["E4"] = "Crash Site",
+            ["E5"] = "Collapsed Crane",
+            ["E7"] = "Expo Checkpoint",
+            ["E7-car"] = "Primorsky Ave Taxi",
+            ["E8-yard"] = "Courtyard",
+            ["E9-sniper"] = "Klimov Street",
+            ["Exit-E10-coop"] = "Pinewood Basement",
+
+            //scav extracts
+            ["scav-e1"] = "Basement Descent",
+            ["scav-e2"] = "Entrance to Catacombs",
+            ["scav-e3"] = "Ventilation Shaft",
+            ["scav-e4"] = "Sewer Manhole",
+            ["scav-e5"] = "Near Kamchatskaya Arch",
+            ["scav-e7"] = "Cardinal Apartment Complex Parking",
+            ["scav-e8"] = "Klimov Shopping Mall",
+            ["Exit-E10-coop"] = "Pinewood Basement"
+        };
 
         public Exfil(ulong baseAddr)
         {
@@ -173,6 +205,11 @@ namespace eft_dma_radar
         public void UpdateName(string name)
         {
             this.Name = name.Replace("_", "-");
+
+            if (Memory.MapName == "TarkovStreets")
+            {
+                this.Name = streetsExfilNames[this.Name];
+            }
         }
     }
 

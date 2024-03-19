@@ -23,7 +23,6 @@ namespace eft_dma_radar
         private readonly object _posLock = new(); // sync access to this.Position (non-atomic)
         private readonly GearManager _gearManager;
         private Transform _transform;
-        private Config _config;
 
         #region PlayerProperties
         /// <summary>
@@ -74,7 +73,7 @@ namespace eft_dma_radar
         /// Player's current health (sum of all 7 body parts).
         /// </summary>
         public int Health { get; private set; } = -1;
-        
+
         public ulong HealthController { get; }
 
         public ulong InventoryController { get; }
@@ -140,7 +139,7 @@ namespace eft_dma_radar
         /// Contains history of Enemy Players (human-controlled) that are allocated during program runtime.
         /// </summary>
         /// 
-        
+
         public static ListViewItem[] History
         {
             get => _history.Select(x => x.View).ToArray();
@@ -161,7 +160,7 @@ namespace eft_dma_radar
                 Type is PlayerType.Teammate ||
                 Type is PlayerType.PMC ||
                 Type is PlayerType.SpecialPlayer ||
-                Type is PlayerType.PScav||
+                Type is PlayerType.PScav ||
                 Type is PlayerType.BEAR ||
                 Type is PlayerType.USEC);
         }
@@ -174,7 +173,7 @@ namespace eft_dma_radar
                 Type is PlayerType.Teammate ||
                 Type is PlayerType.PMC ||
                 Type is PlayerType.SpecialPlayer ||
-                Type is PlayerType.PScav||
+                Type is PlayerType.PScav ||
                 Type is PlayerType.BEAR ||
                 Type is PlayerType.USEC) && IsActive && IsAlive;
         }
@@ -202,7 +201,8 @@ namespace eft_dma_radar
         /// <summary>
         /// Player is AI & boss, rogue, raider etc.
         /// </summary>
-        public bool IsBossRaider {
+        public bool IsBossRaider
+        {
             get => (
                 Type is PlayerType.AIRaider ||
                 Type is PlayerType.AIBossFollower ||
@@ -249,12 +249,16 @@ namespace eft_dma_radar
         /// Gets value of player.
         /// </summary>
         /// 
-        public int PlayerValue {
-            get {
+        public int PlayerValue
+        {
+            get
+            {
                 var total = 0;
 
-                if (this.Gear != null) {
-                    foreach (var gearItem in this.Gear) {
+                if (this.Gear != null)
+                {
+                    foreach (var gearItem in this.Gear)
+                    {
                         var id = gearItem.Value.id;
                         var item = TarkovDevAPIManager.AllItems[id].Item;
                         var price = TarkovDevAPIManager.GetItemValue(item);
@@ -342,10 +346,13 @@ namespace eft_dma_radar
                 if (baseClassName is null)
                 {
                     return;
-                } else {
+                }
+                else
+                {
                     //Debug.WriteLine($"Base Class Name: {baseClassName}");
                 }
-                if (baseClassName == "ClientPlayer" || baseClassName == "LocalPlayer" || baseClassName == "HideoutPlayer") {
+                if (baseClassName == "ClientPlayer" || baseClassName == "LocalPlayer" || baseClassName == "HideoutPlayer")
+                {
                     ulong localPlayerInfoOffset = playerProfile + Offsets.Profile.PlayerInfo;
                     Info = Memory.ReadPtr(localPlayerInfoOffset);
                     MovementContext = Memory.ReadPtr(playerBase + Offsets.Player.MovementContext);
@@ -354,7 +361,8 @@ namespace eft_dma_radar
                     var namePtr = Memory.ReadPtr(Info + Offsets.PlayerInfo.Nickname);
                     Name = Memory.ReadUnityString(namePtr);
 
-                    try {
+                    try
+                    {
                         var gameVersionPtr = Memory.ReadPtr(Info + Offsets.PlayerInfo.GameVersion);
                         var gameVersion = Memory.ReadUnityString(gameVersionPtr);
 
@@ -372,7 +380,7 @@ namespace eft_dma_radar
                             Type = PlayerType.AIOfflineScav;
                             IsLocalPlayer = false;
                             IsPmc = false;
-                            Name =  Helpers.TransliterateCyrillic(Name); //Misc.TransliterateCyrillic(Name);
+                            Name = Helpers.TransliterateCyrillic(Name); //Misc.TransliterateCyrillic(Name);
                             HealthController = Memory.ReadPtrChain(playerBase, new uint[] { 0x80, 0xF0 });
                             //Type = GetPlayerType(roleFlag);
 
@@ -386,10 +394,13 @@ namespace eft_dma_radar
                             InventoryController = Memory.ReadPtr(playerBase + Offsets.Player.InventoryController);
                             var inventory = Memory.ReadPtr(InventoryController + Offsets.InventoryController.Inventory);
                             var equipment = Memory.ReadPtr(inventory + Offsets.Inventory.Equipment);
-                            InventorySlots = Memory.ReadPtr(equipment + Offsets.Equipment.Slots);                     
+                            InventorySlots = Memory.ReadPtr(equipment + Offsets.Equipment.Slots);
                         }
-                    } catch {}
-                } else if (baseClassName == "ObservedPlayerView") {
+                    }
+                    catch { }
+                }
+                else if (baseClassName == "ObservedPlayerView")
+                {
                     IsLocalPlayer = false;
                     //Debug.WriteLine("Processing PMC Player.");
                     var ObservedPlayerView = playerBase;
@@ -397,42 +408,52 @@ namespace eft_dma_radar
                     TransformInternal = Memory.ReadPtrChain(ObservedPlayerView, Offsets.ObservedPlayerView.To_TransformInternal);
                     _transform = new Transform(TransformInternal, true);
                     Name = Memory.ReadUnityString(Memory.ReadPtr(ObservedPlayerView + Offsets.ObservedPlayerView.NickName));
-                    Name =  Helpers.TransliterateCyrillic(Name);
+                    Name = Helpers.TransliterateCyrillic(Name);
                     Info = ObservedPlayerView;
                     var playerSide = GetNextObservedPlayerSide();
                     var playerIsAI = GetNextObservedPlayerIsAI();
-                    
-                    AccountID = Memory.ReadUnityString(Memory.ReadPtr(ObservedPlayerView + 0x50));
 
+                    AccountID = Memory.ReadUnityString(Memory.ReadPtr(ObservedPlayerView + 0x50));
                     //[40] string_0x40 : String //ProfileID
                     //[48] string_0x48 : String //NickName
                     //[50] string_0x50 : String //AccountID
 
-                    if (Helpers.NameTranslations.ContainsKey(Name)) {
+                    if (Helpers.NameTranslations.ContainsKey(Name))
+                    {
                         Name = Helpers.NameTranslations[Name];
                     }
-                    
+
                     try { _gearManager = new GearManager(playerBase, true, false); } catch { }
                     GroupID = GetObservedPlayerGroupID();
                     HealthController = Memory.ReadPtrChain(playerBase, new uint[] { 0x80, 0xF0 });
 
-                    if ((playerSide == 1 || playerSide == 2) && !playerIsAI) {
+                    if ((playerSide == 1 || playerSide == 2) && !playerIsAI)
+                    {
                         IsPmc = true;
-                        //var healthContoller = Memory.ReadPtrChain(playerBase, new uint[] { 0x80, 0xF0});
                         Type = (playerSide == 1 ? PlayerType.USEC : PlayerType.BEAR);
-                    } else if (playerSide == 4 && !playerIsAI) {
+                    }
+                    else if (playerSide == 4 && !playerIsAI)
+                    {
                         Type = PlayerType.PScav;
-                    } else if (playerSide == 4 && playerIsAI) {
-                        if (Helpers.NameTranslations.ContainsValue(Name)) {
+                    }
+                    else if (playerSide == 4 && playerIsAI)
+                    {
+                        if (Helpers.NameTranslations.ContainsValue(Name))
+                        {
                             Type = PlayerType.AIBoss;
-                        } else if (Helpers.RaiderGuardRogueNames.Contains(Name)) {
+                        }
+                        else if (Helpers.RaiderGuardRogueNames.Contains(Name))
+                        {
                             Type = PlayerType.AIRaider;
-                        } else {
+                        }
+                        else
+                        {
                             Type = PlayerType.AIScav;
                         }
                     }
 
-                } else throw new ArgumentOutOfRangeException("classNameString");
+                }
+                else throw new ArgumentOutOfRangeException("classNameString");
 
                 FinishAlloc(); // Finish allocation (check watchlist, member type,etc.)
             }
@@ -462,7 +483,8 @@ namespace eft_dma_radar
             try
             {
                 float totalHealth;
-                switch (ETagStatus){
+                switch (ETagStatus)
+                {
                     case 1024:
                         totalHealth = 100;
                         break;
@@ -572,7 +594,7 @@ namespace eft_dma_radar
                 return questItemIds.Contains(itemId);
             }
         }
-        
+
         private void FinishAlloc()
         {
             if (IsHumanHostile) // Hostile Human Controlled Players
@@ -703,8 +725,10 @@ namespace eft_dma_radar
             }
         }
 
-        private PlayerType GetPlayerType(int roleFlag) {
-            switch (roleFlag) {
+        private PlayerType GetPlayerType(int roleFlag)
+        {
+            switch (roleFlag)
+            {
                 case 0: return PlayerType.AISniperScav;
                 case 1: return PlayerType.AIOfflineScav;
                 case 2: return PlayerType.AIBossGuard; // unknown

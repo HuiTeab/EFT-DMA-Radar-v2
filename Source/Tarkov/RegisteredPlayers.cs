@@ -17,8 +17,7 @@ namespace eft_dma_radar
         private readonly Stopwatch _posSw = new();
         private readonly Stopwatch _gearSw = new();
         private readonly Stopwatch _playerSw = new();
-        private readonly ConcurrentDictionary<string, Player> _players =
-            new(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, Player> _players = new(StringComparer.OrdinalIgnoreCase);
 
         private int _localPlayerGroup = -100;
 
@@ -30,7 +29,8 @@ namespace eft_dma_radar
         private bool _isFirstRun = true;
         private string _savedHeadGearId;
         private string _currentHeadGearId;
-        private Config _config;
+        private Config _config { get => Program.Config; }
+
         #region Getters
         public ReadOnlyDictionary<string, Player> Players { get; }
         public int PlayerCount => GetPlayerCountAsync().GetAwaiter().GetResult();
@@ -80,7 +80,7 @@ namespace eft_dma_radar
             _gearSw.Start();
             _playerSw.Start();
         }
-        
+
         /// <summary>
         /// Get player ID from player base
         /// </summary>
@@ -124,7 +124,7 @@ namespace eft_dma_radar
 
         private void ProcessPlayer(int index, ScatterReadMap scatterMap, HashSet<string> registered)
         {
-           try
+            try
             {
                 if (!scatterMap.Results[index][0].TryGetResult<MemPointer>(out var playerBase)) return;
                 var playerProfile = 0ul;
@@ -205,7 +205,8 @@ namespace eft_dma_radar
         {
             foreach (var player in _players)
             {
-                if (player.Value.Type is PlayerType.LocalPlayer) {
+                if (player.Value.Type is PlayerType.LocalPlayer)
+                {
                     if (!registered.Contains(player.Key))
                     {
                         player.Value.LastUpdate = true;
@@ -229,7 +230,8 @@ namespace eft_dma_radar
         {
             var scatterMap = new ScatterReadMap(count);
             var round1 = scatterMap.AddRound();
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++)
+            {
                 round1.AddEntry<MemPointer>(i, 0, _listBase + Offsets.UnityListBase.Start + (uint)(i * 0x8));
             }
             scatterMap.Execute();
@@ -286,7 +288,6 @@ namespace eft_dma_radar
             {
                 return;
             }
-            _config = Program.Config;
             try
             {
                 var players = _players
@@ -322,18 +323,20 @@ namespace eft_dma_radar
                 if (checkPos) // allocate and add extra rounds to map
                 {
                     round2 = scatterMap.AddRound();
-                    
+
                 }
                 for (int i = 0; i < players.Length; i++)
                 {
                     var player = players[i];
                     if (player.LastUpdate) // player may be dead/exfil'd
                     {
-                        if (player.Type == PlayerType.LocalPlayer) {
+                        if (player.Type == PlayerType.LocalPlayer)
+                        {
                             var corpse = round1.AddEntry<MemPointer>(i, 6, player.CorpsePtr);
                         }
-                    } 
-                    else {
+                    }
+                    else
+                    {
                         var rotation = round1.AddEntry<Vector2>(i, 0,
                             (player.Type == PlayerType.LocalPlayer || player.Type == PlayerType.AIOfflineScav) ?
                                 player.MovementContext + Offsets.MovementContext.Rotation :
@@ -343,32 +346,37 @@ namespace eft_dma_radar
                         var indices = round1.AddEntry<List<int>>(i, 1, posAddr.Item1, posAddr.Item2 * 4);
                         var vertices = round1.AddEntry<List<Vector128<float>>>(i, 2, posAddr.Item3, posAddr.Item4 * 16);
 
-                        if (checkPos) {
+                        if (checkPos)
+                        {
                             var hierarchy = round1.AddEntry<MemPointer>(i, 3, player.TransformInternal, null, Offsets.TransformInternal.Hierarchy);
                             var indicesAddr = round2?.AddEntry<MemPointer>(i, 4, hierarchy, null, Offsets.TransformHierarchy.Indices);
                             var verticesAddr = round2?.AddEntry<MemPointer>(i, 5, hierarchy, null, Offsets.TransformHierarchy.Vertices);
                         }
-                        if (checkHealth && player.IsHostileActive) {
+                        if (checkHealth && player.IsHostileActive)
+                        {
                             var health = round1.AddEntry<int>(i, 7, player.HealthController + 0xD8);
                         }
-                        if (checkGear && player.Type == PlayerType.LocalPlayer)
+                        if (player.Type == PlayerType.LocalPlayer)
                         {
-                            var headGear = round3.AddEntry<MemPointer>(i, 9, player.InventorySlots + Offsets.UnityListBase.Start + (5 * 0x8));
-                            var containedItem = round4.AddEntry<MemPointer>(i, 10, headGear, null, Offsets.Slot.ContainedItem);
-                            var itemTemplate = round5.AddEntry<MemPointer>(i, 11, containedItem, null, Offsets.LootItemBase.ItemTemplate);
-                        }
-                        if (checkPlayer && player.Type == PlayerType.LocalPlayer)
-                        {
-                            var proceduralWeaponAnimation = round6.AddEntry<MemPointer>(i, 12, player.Base + 0x1A0);
-                            //isADS = Memory.ReadValue<bool>(proceduralWeaponAnimationPtr + 0x1BD);
-                            var isADS = round7.AddEntry<bool>(i, 13, proceduralWeaponAnimation, null, 0x1BD);
+                            if (checkGear)
+                            {
+                                var headGear = round3.AddEntry<MemPointer>(i, 9, player.InventorySlots + Offsets.UnityListBase.Start + (5 * 0x8));
+                                var containedItem = round4.AddEntry<MemPointer>(i, 10, headGear, null, Offsets.Slot.ContainedItem);
+                                var itemTemplate = round5.AddEntry<MemPointer>(i, 11, containedItem, null, Offsets.LootItemBase.ItemTemplate);
+                            }
 
-                            //stamina
-                            //var currentBaseMovementState = Memory.ReadPtr(movementContext + 0xD0);
-                            var movementContext = round8.AddEntry<MemPointer>(i, 14, player.MovementContext, null, 0xD0);
-                            var currentStateName = round9.AddEntry<byte>(i, 15, movementContext, null, 0x21);
-                        }
+                            if (checkPlayer)
+                            {
+                                var proceduralWeaponAnimation = round6.AddEntry<MemPointer>(i, 12, player.Base + 0x1A0);
+                                var isADS = round7.AddEntry<bool>(i, 13, proceduralWeaponAnimation, null, 0x1BD);
+                                var animationMask = round7.AddEntry<int>(i, 14, proceduralWeaponAnimation, null, 0x138);
 
+                                //stamina
+                                var movementContext = round8.AddEntry<MemPointer>(i, 15, player.MovementContext, null, 0xD0);
+                                var currentStateName = round9.AddEntry<byte>(i, 16, movementContext, null, 0x21);
+                            }
+
+                        }
                     }
                 }
                 scatterMap.Execute();
@@ -376,7 +384,8 @@ namespace eft_dma_radar
                 {
                     var player = players[i];
 
-                    if (_localPlayerGroup != -100 && player.GroupID != -1 && player.IsHumanHostile) { // Teammate check
+                    if (_localPlayerGroup != -100 && player.GroupID != -1 && player.IsHumanHostile)
+                    { // Teammate check
                         if (player.GroupID == _localPlayerGroup)
                             player.Type = PlayerType.Teammate;
                     }
@@ -442,9 +451,10 @@ namespace eft_dma_radar
                             {
                                 var headGear = scatterMap.Results[i][9].TryGetResult<MemPointer>(out var hg);
                                 var containedItem = scatterMap.Results[i][10].TryGetResult<MemPointer>(out var ci);
-                                if (ci != 0 && containedItem) {
+                                if (ci != 0 && containedItem)
+                                {
                                     var itemTemplate = scatterMap.Results[i][11].TryGetResult<MemPointer>(out var it);
-                                    
+
                                     var idPtr = Memory.ReadPtr(it + Offsets.ItemTemplate.BsgId);
                                     var id = Memory.ReadUnityString(idPtr);
                                     _currentHeadGearId = id;
@@ -464,19 +474,36 @@ namespace eft_dma_radar
                             if (checkPlayer)
                             {
                                 scatterMap.Results[i][13].TryGetResult<bool>(out var isADS);
+                                scatterMap.Results[i][14].TryGetResult<int>(out var animationMask);
+                                scatterMap.Results[i][16].TryGetResult<byte>(out var currentStateName);
+
+                                // No Recoil/Sway
+                                if (_config.NoRecoilSwayEnabled && animationMask != 0)
+                                {
+                                    Memory.PlayerManager.SetNoRecoilSway(true);
+                                }
+                                else if (!_config.NoRecoilSwayEnabled && animationMask == 0)
+                                {
+                                    Memory.PlayerManager.SetNoRecoilSway(false);
+                                }
+
+                                // Thermal Vision / Optical Thermal
                                 if (isADS)
                                 {
-                                    if (Program.Config.ThermalVisionEnabled)
+                                    if (_config.OpticThermalVisionEnabled)
                                     {
                                         Game.CameraManager.ThermalVision(false);
                                         Game.CameraManager.OpticThermalVision(true);
                                     }
-                                }else {
-                                    Game.CameraManager.ThermalVision(Program.Config.ThermalVisionEnabled);
+                                }
+                                else
+                                {
+                                    Game.CameraManager.ThermalVision(_config.ThermalVisionEnabled);
                                     Game.CameraManager.OpticThermalVision(false);
                                 }
-                                scatterMap.Results[i][15].TryGetResult<byte>(out var currentStateName);
-                                if (Program.Config.MaxStaminaEnabled)
+
+                                // infinite stamina
+                                if (_config.MaxStaminaEnabled)
                                 {
                                     if (currentStateName == 5)
                                     {
@@ -487,7 +514,8 @@ namespace eft_dma_radar
                                         Memory.PlayerManager.SetMaxStamina();
                                     }
                                 }
-                                else {
+                                else
+                                {
                                     if (currentStateName == 6)
                                     {
                                         Memory.PlayerManager.SetMovementState(false);
@@ -500,7 +528,8 @@ namespace eft_dma_radar
                             else
                                 player.ErrorCount++;
                         }
-                        else {
+                        else
+                        {
                             var rotation = scatterMap.Results[i][0].TryGetResult<Vector2>(out var rot);
                             bool p2 = player.SetRotation(rot);
 
@@ -527,18 +556,20 @@ namespace eft_dma_radar
                                 player.ErrorCount++;
                         }
                     }
-                    
+
                 }
-                if (checkHealth)_healthSw.Restart();
-                if (checkPos)_posSw.Restart();
-                if (checkGear)_gearSw.Restart();
-                if (checkPlayer)_playerSw.Restart();
+                if (checkHealth) _healthSw.Restart();
+                if (checkPos) _posSw.Restart();
+                if (checkGear) _gearSw.Restart();
+                if (checkPlayer) _playerSw.Restart();
             }
+
             catch (Exception ex)
             {
                 Program.Log($"CRITICAL ERROR - UpdateAllPlayers Loop FAILED: {ex}");
             }
         }
+
         #endregion
     }
 }

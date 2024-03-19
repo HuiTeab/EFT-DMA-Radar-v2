@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using OpenTK.Graphics.ES11;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,8 +21,6 @@ namespace eft_dma_radar.Source.Tarkov
         public Dictionary<string, float> OriginalValues { get; }
         public ulong proceduralWeaponAnimationPtr { get; set; }
         public bool isADS { get; set; }
-
-        private int originalProceduralWeaponAnimationMask;
 
         /// <summary>
         /// Stores the different skills that can be modified
@@ -58,26 +57,34 @@ namespace eft_dma_radar.Source.Tarkov
                 ["ThrowStrength"] = -1,
                 ["SearchDouble"] = -1,
                 ["Mask"] = 125,
-                // TO DO:
-                // 1f -> 7f safe?
-                ["ADSModifier"] = -1
+                ["AimingSpeed"] = -1
             };
         }
 
         /// <summary>
         /// Enables / disables weapon recoil & sway
         /// </summary>
-        public void SetNoRecoilAndSway(bool enabled) {
-            var mask = Memory.ReadValue<int>(proceduralWeaponAnimationPtr + 0x138);
-            if (mask == 0)
+        public void SetNoRecoilSway(bool on)
+        {
+            Memory.WriteValue(proceduralWeaponAnimationPtr + 0x138, on ? 0 : (int)OriginalValues["Mask"]);
+        }
+
+        /// <summary>
+        /// Enables / disables instant ads, changes per weapon
+        /// </summary>
+        public void SetInstantADS(bool on)
+        {
+            var aimingSpeed = Memory.ReadValue<float>(proceduralWeaponAnimationPtr + 0x1DC);
+
+            if (on && aimingSpeed != 7)
             {
-                mask = 125;
+                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x1DC, 7f);
+                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x2A4, 0f);
             }
-            if (enabled) {
-                originalProceduralWeaponAnimationMask = mask;
-                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x138, 0);
-            } else {
-                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x138, originalProceduralWeaponAnimationMask);
+            else if (!on && aimingSpeed != 1)
+            {
+                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x1DC, 1f);
+                Memory.WriteValue(proceduralWeaponAnimationPtr + 0x2A4, 0.2f);
             }
         }
 
@@ -144,7 +151,6 @@ namespace eft_dma_radar.Source.Tarkov
                                 OriginalValues["ThrowStrength"] = Memory.ReadValue<float>(throwStrength + 0x30);
                             }
 
-                            // value between 0.035f & 1f
                             Memory.WriteValue<float>(throwStrength + 0x30, (revert ? OriginalValues["ThrowStrength"] : Program.Config.ThrowPowerStrength / 10));
                             break;
                         }
@@ -159,10 +165,13 @@ namespace eft_dma_radar.Source.Tarkov
             }
             catch (Exception e)
             {
-                throw new Exception($"ERROR Setting Max Skill: #{skill} {e.Message}");
+                throw new Exception($"ERROR Setting Max Skill: #{skill}");
             }
         }
-        
+
+        /// <summary>
+        /// Changes player movement state
+        /// </summary>
         public void SetMovementState(bool enabled)
         {
             var movementContext = Memory.ReadPtr(playerBase + Offsets.Player.MovementContext);
@@ -183,6 +192,9 @@ namespace eft_dma_radar.Source.Tarkov
             }
         }
 
+        /// <summary>
+        /// Sets maximum stamina based on current stamina
+        /// </summary>
         public void SetMaxStamina()
         {
             var physical = Memory.ReadPtr(playerBase + 0x598);
@@ -196,7 +208,7 @@ namespace eft_dma_radar.Source.Tarkov
             //[B0] Fatigue : Single
             //var fatigue = Memory.ReadValue<float>(physical + 0xB0);
             //Console.WriteLine($"Fatigue: {fatigue}");
-            
+
         }
     }
 }
