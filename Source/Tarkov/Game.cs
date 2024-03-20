@@ -403,12 +403,8 @@ namespace eft_dma_radar
         public static void SetDoorLootInteractDistance(bool enabled)
         {
             var hardSettings = MonoSharp.GetStaticFieldDataOfClass("Assembly-CSharp", "EFTHardSettings");
-            //[210] LOOT_RAYCAST_DISTANCE : Single
-            //[214] DOOR_RAYCAST_DISTANCE : Single
-            var currentLootRaycastDistance = Memory.ReadValue<float>(hardSettings + 0x210);
-            Console.WriteLine($"Current Loot Raycast Distance: {currentLootRaycastDistance}");
-            var currentDoorRaycastDistance = Memory.ReadValue<float>(hardSettings + 0x214);
-            Console.WriteLine($"Current Door Raycast Distance: {currentDoorRaycastDistance}");
+            //var currentLootRaycastDistance = Memory.ReadValue<float>(hardSettings + 0x210);
+            //var currentDoorRaycastDistance = Memory.ReadValue<float>(hardSettings + 0x214);
             if (enabled)
             {
                 Memory.WriteValue<float>(hardSettings + 0x210, 1.8f);
@@ -426,16 +422,19 @@ namespace eft_dma_radar
         /// </summary>
         private void UpdateMisc()
         {
-            if (_questManager is null)
+            if (_config.QuestHelperEnabled)
             {
-                try
+                if (_questManager is null)
                 {
-                    var questManager = new QuestManager(_localGameWorld);
-                    _questManager = questManager; // update ref
-                }
-                catch (Exception ex)
-                {
-                    Program.Log($"ERROR loading QuestManager: {ex}");
+                    try
+                    {
+                        var questManager = new QuestManager(_localGameWorld);
+                        _questManager = questManager; // update ref
+                    }
+                    catch (Exception ex)
+                    {
+                        Program.Log($"ERROR loading QuestManager: {ex}");
+                    }
                 }
             }
 
@@ -474,40 +473,31 @@ namespace eft_dma_radar
                     Program.Log($"ERROR getting map name: {ex}");
                 }
             }
-            if (_cameraManager is null)
+            if (_config.MemoryMasterSwitch)
             {
-                try
+                if (_cameraManager is null)
                 {
-                    var cameraManager = new CameraManager(_unityBase);
-                    _cameraManager = cameraManager; // update ref
+                    try
+                    {
+                        var cameraManager = new CameraManager(_unityBase);
+                        _cameraManager = cameraManager; // update ref
+                    }
+                    catch (Exception ex)
+                    {
+                        Program.Log($"ERROR loading CameraManager: {ex}");
+                    }
                 }
-                catch (Exception ex)
+                if (_playerManager is null)
                 {
-                    Program.Log($"ERROR loading CameraManager: {ex}");
-                }
-            }
-            if (_playerManager is null)
-            {
-                try
-                {
-                    var playerManager = new PlayerManager(_localGameWorld);
-                    _playerManager = playerManager;
-                }
-                catch (Exception ex)
-                {
-                    Program.Log($"ERROR loading PlayerManager: {ex}");
-                }
-            }
-            if (_questManager is null)
-            {
-                try
-                {
-                    var questManager = new QuestManager(_localGameWorld);
-                    _questManager = questManager;
-                }
-                catch (Exception ex)
-                {
-                    Program.Log($"ERROR loading QuestManager: {ex}");
+                    try
+                    {
+                        var playerManager = new PlayerManager(_localGameWorld);
+                        _playerManager = playerManager;
+                    }
+                    catch (Exception ex)
+                    {
+                        Program.Log($"ERROR loading PlayerManager: {ex}");
+                    }
                 }
             }
             if (_grenadeManager is null)

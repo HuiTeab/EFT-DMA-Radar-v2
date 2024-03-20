@@ -262,6 +262,12 @@ namespace eft_dma_radar
         //public List<PaintColor> PaintColors { get; set; }
         public Dictionary<string, PaintColor.Colors> PaintColors { get; set; }
 
+        /// <summary> 
+        /// Enables / disables all memory writing features.
+        /// </summary>
+        [JsonPropertyName("memoryMasterSwitch")]
+        public bool MemoryMasterSwitch { get; set; }
+
         public Config()
         {
             Vsync = true;
@@ -325,6 +331,8 @@ namespace eft_dma_radar
             InstantADSEnabled = false;
             HideExfilNames = false;
             HideTextOutline = false;
+            
+            MemoryMasterSwitch = false;
         }
 
         /// <summary>

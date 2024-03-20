@@ -241,10 +241,6 @@ namespace eft_dma_radar
         private void chkNightVision_CheckedChanged(object sender, EventArgs e)
         {
             _config.NightVisionEnabled = chkNightVision.Checked;
-            if (Memory.LocalPlayer is not null)
-            {
-                Game.CameraManager.NightVision(chkNightVision.Checked);
-            }
         }
 
         /// <summary>
@@ -261,10 +257,6 @@ namespace eft_dma_radar
         private void chkOpticThermalVision_CheckedChanged(object sender, EventArgs e)
         {
             _config.OpticThermalVisionEnabled = chkOpticThermalVision.Checked;
-            if (Memory.LocalPlayer is not null)
-            {
-                Game.CameraManager.OpticThermalVision(chkOpticThermalVision.Checked);
-            }
         }
 
         /// <summary>
@@ -273,10 +265,6 @@ namespace eft_dma_radar
         private void chkNoVisor_CheckedChanged(object sender, EventArgs e)
         {
             _config.NoVisorEnabled = chkNoVisor.Checked;
-            if (Memory.LocalPlayer is not null)
-            {
-                Game.CameraManager.VisorEffect(chkNoVisor.Checked);
-            }
         }
 
         /// <summary>
@@ -285,10 +273,6 @@ namespace eft_dma_radar
         private void chkNoRecoilSway_CheckedChanged(object sender, EventArgs e)
         {
             _config.NoRecoilSwayEnabled = chkNoRecoilSway.Checked;
-            if (Memory.LocalPlayer is not null)
-            {
-                Memory.PlayerManager.SetNoRecoilSway(chkNoRecoilSway.Checked);
-            }
         }
 
         private void chkJumpPower_CheckedChanged(object sender, EventArgs e)
@@ -413,12 +397,12 @@ namespace eft_dma_radar
         private void chkInfiniteStamina_CheckedChanged(object sender, EventArgs e)
         {
             _config.MaxStaminaEnabled = chkInfiniteStamina.Checked;
-            Memory.PlayerManager.SetMovementState(chkInfiniteStamina.Checked);
         }
 
         private void chkMemoryMasterSwitch_CheckedChanged(object sender, EventArgs e)
         {
             bool enabled = chkMemoryMasterSwitch.Checked;
+            _config.MemoryMasterSwitch = enabled;
             grpGlobalFeatures.Enabled = enabled;
             grpGearFeatures.Enabled = enabled;
             grpPhysicalFeatures.Enabled = enabled;
@@ -694,8 +678,8 @@ namespace eft_dma_radar
                     .Where(x => x.Type is not PlayerType.LocalPlayer && !x.HasExfild); // Get all players except LocalPlayer & Exfil'd Players
 
                 var loot = this.Loot?.Filter?.Select(x => x);
-                var tasksItems = this.QuestManager.QuestItems?.Select(x => x);
-                var tasksZones = this.QuestManager.QuestZones?.Select(x => x);
+                var tasksItems = this.QuestManager?.QuestItems?.Select(x => x);
+                var tasksZones = this.QuestManager?.QuestZones?.Select(x => x);
 
                 if ((players is not null && players.Any()) || (loot is not null && loot.Any()) || (tasksItems is not null && tasksItems.Any()) || (tasksZones is not null && tasksZones.Any()))
                 {

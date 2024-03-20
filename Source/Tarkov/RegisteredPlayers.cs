@@ -356,7 +356,7 @@ namespace eft_dma_radar
                         {
                             var health = round1.AddEntry<int>(i, 7, player.HealthController + 0xD8);
                         }
-                        if (player.Type == PlayerType.LocalPlayer)
+                        if (player.Type == PlayerType.LocalPlayer && _config.MemoryMasterSwitch)
                         {
                             if (checkGear)
                             {
@@ -446,87 +446,90 @@ namespace eft_dma_radar
                             {
                                 p3 = player.SetPosition(posBufs);
                             }
-
-                            if (checkGear)
-                            {
-                                var headGear = scatterMap.Results[i][9].TryGetResult<MemPointer>(out var hg);
-                                var containedItem = scatterMap.Results[i][10].TryGetResult<MemPointer>(out var ci);
-                                if (ci != 0 && containedItem)
-                                {
-                                    var itemTemplate = scatterMap.Results[i][11].TryGetResult<MemPointer>(out var it);
-
-                                    var idPtr = Memory.ReadPtr(it + Offsets.ItemTemplate.BsgId);
-                                    var id = Memory.ReadUnityString(idPtr);
-                                    _currentHeadGearId = id;
-                                    if (_isFirstRun)
-                                    {
-                                        _savedHeadGearId = id;
-                                        _isFirstRun = false;
-                                    }
-                                    if (_savedHeadGearId != _currentHeadGearId)
-                                    {
-                                        Game.CameraManager.VisorEffect(_config.NoVisorEnabled);
-                                        _savedHeadGearId = _currentHeadGearId;
-                                    }
-                                }
-                            }
-
-                            if (checkPlayer)
-                            {
-                                scatterMap.Results[i][13].TryGetResult<bool>(out var isADS);
-                                scatterMap.Results[i][14].TryGetResult<int>(out var animationMask);
-                                scatterMap.Results[i][16].TryGetResult<byte>(out var currentStateName);
-
-                                // No Recoil/Sway
-                                if (_config.NoRecoilSwayEnabled && animationMask != 0)
-                                {
-                                    Memory.PlayerManager.SetNoRecoilSway(true);
-                                }
-                                else if (!_config.NoRecoilSwayEnabled && animationMask == 0)
-                                {
-                                    Memory.PlayerManager.SetNoRecoilSway(false);
-                                }
-
-                                // Thermal Vision / Optical Thermal
-                                if (isADS)
-                                {
-                                    if (_config.OpticThermalVisionEnabled)
-                                    {
-                                        Game.CameraManager.ThermalVision(false);
-                                        Game.CameraManager.OpticThermalVision(true);
-                                    }
-                                }
-                                else
-                                {
-                                    Game.CameraManager.ThermalVision(_config.ThermalVisionEnabled);
-                                    Game.CameraManager.OpticThermalVision(false);
-                                }
-
-                                // infinite stamina
-                                if (_config.MaxStaminaEnabled)
-                                {
-                                    if (currentStateName == 5)
-                                    {
-                                        Memory.PlayerManager.SetMovementState(true);
-                                    }
-                                    if (currentStateName == 6)
-                                    {
-                                        Memory.PlayerManager.SetMaxStamina();
-                                    }
-                                }
-                                else
-                                {
-                                    if (currentStateName == 6)
-                                    {
-                                        Memory.PlayerManager.SetMovementState(false);
-                                    }
-                                }
-                            }
-
                             if (p1 && p2 && p3)
                                 player.ErrorCount = 0;
                             else
                                 player.ErrorCount++;
+
+                            if (_config.MemoryMasterSwitch)
+                            {
+                            
+                                if (checkGear)
+                                {
+                                    var headGear = scatterMap.Results[i][9].TryGetResult<MemPointer>(out var hg);
+                                    var containedItem = scatterMap.Results[i][10].TryGetResult<MemPointer>(out var ci);
+                                    if (ci != 0 && containedItem)
+                                    {
+                                        var itemTemplate = scatterMap.Results[i][11].TryGetResult<MemPointer>(out var it);
+
+                                        var idPtr = Memory.ReadPtr(it + Offsets.ItemTemplate.BsgId);
+                                        var id = Memory.ReadUnityString(idPtr);
+                                        _currentHeadGearId = id;
+                                        if (_isFirstRun)
+                                        {
+                                            _savedHeadGearId = id;
+                                            _isFirstRun = false;
+                                        }
+                                        if (_savedHeadGearId != _currentHeadGearId)
+                                        {
+                                            Game.CameraManager.VisorEffect(_config.NoVisorEnabled);
+                                            _savedHeadGearId = _currentHeadGearId;
+                                        }
+                                    }
+                                }
+
+                                if (checkPlayer)
+                                {
+                                    scatterMap.Results[i][13].TryGetResult<bool>(out var isADS);
+                                    scatterMap.Results[i][14].TryGetResult<int>(out var animationMask);
+                                    scatterMap.Results[i][16].TryGetResult<byte>(out var currentStateName);
+
+                                    // No Recoil/Sway
+                                    if (_config.NoRecoilSwayEnabled && animationMask != 0)
+                                    {
+                                        Memory.PlayerManager.SetNoRecoilSway(true);
+                                    }
+                                    else if (!_config.NoRecoilSwayEnabled && animationMask == 0)
+                                    {
+                                        Memory.PlayerManager.SetNoRecoilSway(false);
+                                    }
+
+                                    // Thermal Vision / Optical Thermal
+                                    if (isADS)
+                                    {
+                                        if (_config.OpticThermalVisionEnabled)
+                                        {
+                                            Game.CameraManager.ThermalVision(false);
+                                            Game.CameraManager.OpticThermalVision(true);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Game.CameraManager.ThermalVision(_config.ThermalVisionEnabled);
+                                        Game.CameraManager.OpticThermalVision(false);
+                                    }
+
+                                    // infinite stamina
+                                    if (_config.MaxStaminaEnabled)
+                                    {
+                                        if (currentStateName == 5)
+                                        {
+                                            Memory.PlayerManager.SetMovementState(true);
+                                        }
+                                        if (currentStateName == 6)
+                                        {
+                                            Memory.PlayerManager.SetMaxStamina();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (currentStateName == 6)
+                                        {
+                                            Memory.PlayerManager.SetMovementState(false);
+                                        }
+                                    }
+                                }
+                            }
                         }
                         else
                         {
