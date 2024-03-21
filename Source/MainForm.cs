@@ -2001,9 +2001,15 @@ namespace eft_dma_radar
                                     var questZones = this.QuestManager.QuestZones; // cache ref
                                     if (questZones is not null)
                                     {
+                                        string mapName = string.Empty;
                                         foreach (var zone in questZones)
                                         {
-                                            if (zone.MapName.ToLower() == _selectedMap.Name.ToLower())
+                                            //Selected Map: STREETS
+                                            //Zone Map: Streets of Tarkov
+                                            if (_selectedMap.Name.ToLower() == "streets"){
+                                                mapName = "Streets of Tarkov";
+                                            }
+                                            if (zone.MapName.ToLower() == _selectedMap.Name.ToLower() || zone.MapName.ToLower() == mapName.ToLower())
                                             {
                                                 float position = zone.Position.Z - localPlayerMapPos.Height;
                                                 ///Console.WriteLine("Position: " + position);
@@ -2023,7 +2029,6 @@ namespace eft_dma_radar
                                                     position
                                                 );
                                             }
-
                                         }
                                     }
                                 }   
