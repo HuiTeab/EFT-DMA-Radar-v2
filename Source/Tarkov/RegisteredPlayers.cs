@@ -453,9 +453,9 @@ namespace eft_dma_radar
 
                             if (_config.MemoryMasterSwitch)
                             {
-                            
                                 if (checkGear)
                                 {
+                                    //@Keeegi - This doesn't work if player changes option while in raid so fix this shit!
                                     var headGear = scatterMap.Results[i][9].TryGetResult<MemPointer>(out var hg);
                                     var containedItem = scatterMap.Results[i][10].TryGetResult<MemPointer>(out var ci);
                                     if (ci != 0 && containedItem)
@@ -469,6 +469,7 @@ namespace eft_dma_radar
                                         {
                                             _savedHeadGearId = id;
                                             _isFirstRun = false;
+                                            Game.CameraManager.VisorEffect(_config.NoVisorEnabled);
                                         }
                                         if (_savedHeadGearId != _currentHeadGearId)
                                         {
@@ -502,13 +503,18 @@ namespace eft_dma_radar
                                             Game.CameraManager.ThermalVision(false);
                                             Game.CameraManager.OpticThermalVision(true);
                                         }
+                                        if (_config.NightVisionEnabled)
+                                        {
+                                            Game.CameraManager.NightVision(false);
+                                        }
+
                                     }
                                     else
-                                    {
+                                    { 
                                         Game.CameraManager.ThermalVision(_config.ThermalVisionEnabled);
-                                        Game.CameraManager.OpticThermalVision(false);
+                                        Game.CameraManager.OpticThermalVision(_config.ThermalVisionEnabled);
+                                        Game.CameraManager.NightVision(_config.NightVisionEnabled);
                                     }
-
                                     // infinite stamina
                                     if (_config.MaxStaminaEnabled)
                                     {

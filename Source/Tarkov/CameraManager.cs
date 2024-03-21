@@ -24,6 +24,12 @@ namespace eft_dma_radar.Source.Tarkov
             this.GetCamera();
         }
 
+        public void ResetCameras()
+        {
+            _opticCamera = 0;
+            _fpsCamera = 0;
+        }
+
         private bool GetCamera()
         {
             try
@@ -114,8 +120,7 @@ namespace eft_dma_radar.Source.Tarkov
             {
                 var fpsThermalComponent = GetComponentFromGameObject(_fpsCamera, "ThermalVision");
                 var thermalOn = Memory.ReadValue<bool>(fpsThermalComponent + 0xE0);
-
-
+                
                 if (on != thermalOn)
                 {
                     Memory.WriteValue(fpsThermalComponent + 0xE0, !thermalOn);
@@ -124,6 +129,9 @@ namespace eft_dma_radar.Source.Tarkov
                     Memory.WriteValue(fpsThermalComponent + 0xE3, thermalOn);
                     Memory.WriteValue(fpsThermalComponent + 0xE4, thermalOn);
                     Memory.WriteValue(fpsThermalComponent + 0xE5, thermalOn);
+                    Memory.WriteValue(fpsThermalComponent + 0xE8, thermalOn ? 0.013f : 0.1f);
+                    Memory.WriteValue(fpsThermalComponent + 0xEC, thermalOn ? 5.0f : 10.0f);
+                    Memory.WriteValue(fpsThermalComponent + 0xF0, thermalOn ? 2.0f : 6.0f);
                 }
             }
         }
@@ -189,9 +197,12 @@ namespace eft_dma_radar.Source.Tarkov
                         break;
                     }
                 }
-
                 Memory.WriteValue(opticComponent + 0x38, on);
                 Memory.WriteValue(opticThermalVision + 0xE0, on);
+                //Memory.WriteValue(opticThermalVision + 0xE1, on);
+                //Memory.WriteValue(opticThermalVision + 0xE8, on ? 0.013f : 0.1f);
+                //Memory.WriteValue(opticThermalVision + 0xEC, on ? 5.0f : 10.0f);
+                //Memory.WriteValue(opticThermalVision + 0xF0, on ? 2.0f : 6.0f);
             }
         }
     }

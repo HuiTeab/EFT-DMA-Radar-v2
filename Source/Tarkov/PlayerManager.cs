@@ -20,7 +20,6 @@ namespace eft_dma_radar.Source.Tarkov
 
         public Dictionary<string, float> OriginalValues { get; }
         public ulong proceduralWeaponAnimationPtr { get; set; }
-        public bool isADS { get; set; }
 
         /// <summary>
         /// Stores the different skills that can be modified
@@ -45,8 +44,6 @@ namespace eft_dma_radar.Source.Tarkov
             proceduralWeaponAnimationPtr = Memory.ReadPtr(playerBase + 0x1A0);
             playerProfile = Memory.ReadPtr(playerBase + 0x588);
             skillsManager = Memory.ReadPtr(playerProfile + 0x60);
-
-            isADS = Memory.ReadValue<bool>(proceduralWeaponAnimationPtr + 0x1BD);
 
             OriginalValues = new Dictionary<string, float>()
             {

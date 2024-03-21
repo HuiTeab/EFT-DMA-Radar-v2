@@ -208,6 +208,7 @@ namespace eft_dma_radar
 
             //wait for game to end
             Thread.Sleep(15000);
+            CameraManager.ResetCameras();
             _cameraManager = null;
             _playerManager = null;
 

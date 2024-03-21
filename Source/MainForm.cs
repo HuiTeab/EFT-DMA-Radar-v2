@@ -1968,62 +1968,65 @@ namespace eft_dma_radar
                             }
                             if (chkQuestHelper.Checked && !Memory.IsScav) // Draw quest items (if enabled)
                             {
-                                var questItems = this.QuestManager.QuestItems; // cache ref
-                                if (questItems is not null)
+                                if (this.QuestManager is not null)
                                 {
-                                    foreach (var item in questItems)
+                                    var questItems = this.QuestManager.QuestItems; // cache ref
+                                    if (questItems is not null)
                                     {
-                                        if (item.Position.X != 0)
+                                        foreach (var item in questItems)
                                         {
-                                            float position = item.Position.Z - localPlayerMapPos.Height;
-                                            var itemZoomedPos = item.Position
-                                                                    .ToMapPos(_selectedMap)
-                                                                    .ToZoomedPos(mapParams);
-
-                                            item.ZoomedPosition = new Vector2() // Cache Position as Vec2 for MouseMove event
+                                            if (item.Position.X != 0)
                                             {
-                                                X = itemZoomedPos.X,
-                                                Y = itemZoomedPos.Y
-                                            };
+                                                float position = item.Position.Z - localPlayerMapPos.Height;
+                                                var itemZoomedPos = item.Position
+                                                                        .ToMapPos(_selectedMap)
+                                                                        .ToZoomedPos(mapParams);
 
-                                            itemZoomedPos.DrawQuestItem(
-                                                canvas,
-                                                item,
-                                                position
-                                            );
+                                                item.ZoomedPosition = new Vector2() // Cache Position as Vec2 for MouseMove event
+                                                {
+                                                    X = itemZoomedPos.X,
+                                                    Y = itemZoomedPos.Y
+                                                };
+
+                                                itemZoomedPos.DrawQuestItem(
+                                                    canvas,
+                                                    item,
+                                                    position
+                                                );
+
+                                            }
+                                        }
+                                    }
+
+                                    var questZones = this.QuestManager.QuestZones; // cache ref
+                                    if (questZones is not null)
+                                    {
+                                        foreach (var zone in questZones)
+                                        {
+                                            if (zone.MapName.ToLower() == _selectedMap.Name.ToLower())
+                                            {
+                                                float position = zone.Position.Z - localPlayerMapPos.Height;
+                                                ///Console.WriteLine("Position: " + position);
+                                                var questZoneZoomedPos = zone.Position
+                                                                        .ToMapPos(_selectedMap)
+                                                                        .ToZoomedPos(mapParams);
+
+                                                zone.ZoomedPosition = new Vector2() // Cache Position as Vec2 for MouseMove event
+                                                {
+                                                    X = questZoneZoomedPos.X,
+                                                    Y = questZoneZoomedPos.Y
+                                                };
+
+                                                questZoneZoomedPos.DrawTaskZone(
+                                                    canvas,
+                                                    zone,
+                                                    position
+                                                );
+                                            }
 
                                         }
                                     }
-                                }
-
-                                var questZones = this.QuestManager.QuestZones; // cache ref
-                                if (questZones is not null)
-                                {
-                                    foreach (var zone in questZones)
-                                    {
-                                        if (zone.MapName.ToLower() == _selectedMap.Name.ToLower())
-                                        {
-                                            float position = zone.Position.Z - localPlayerMapPos.Height;
-                                            ///Console.WriteLine("Position: " + position);
-                                            var questZoneZoomedPos = zone.Position
-                                                                    .ToMapPos(_selectedMap)
-                                                                    .ToZoomedPos(mapParams);
-
-                                            zone.ZoomedPosition = new Vector2() // Cache Position as Vec2 for MouseMove event
-                                            {
-                                                X = questZoneZoomedPos.X,
-                                                Y = questZoneZoomedPos.Y
-                                            };
-
-                                            questZoneZoomedPos.DrawTaskZone(
-                                                canvas,
-                                                zone,
-                                                position
-                                            );
-                                        }
-
-                                    }
-                                }
+                                }   
                             }
                             var grenades = this.Grenades; // cache ref
                             if (grenades is not null) // Draw grenades
