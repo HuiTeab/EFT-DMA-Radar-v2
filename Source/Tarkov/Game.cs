@@ -205,10 +205,12 @@ namespace eft_dma_radar
         private void HandleRaidEnded(RaidEnded e)
         {
             Program.Log("Raid has ended!");
-
+            if (_config.MemoryMasterSwitch)
+            {
+                CameraManager.ResetCameras();
+            }
             //wait for game to end
             Thread.Sleep(15000);
-            CameraManager.ResetCameras();
             _cameraManager = null;
             _playerManager = null;
 

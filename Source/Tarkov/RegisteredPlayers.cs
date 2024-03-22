@@ -281,7 +281,7 @@ namespace eft_dma_radar
         /// <summary>
         /// Updates all 'Player' values (Position,health,direction,etc.)
         /// </summary>
-        public void UpdateAllPlayers()
+        public async void UpdateAllPlayers()
         {
 
             if (IsAtHideout)
@@ -559,6 +559,7 @@ namespace eft_dma_radar
                             {
                                 p3 = player.SetPosition(posBufs);
                             }
+                            await player.SetKDAsync();
                             if (p1 && p2 && p3)
                                 player.ErrorCount = 0;
                             else

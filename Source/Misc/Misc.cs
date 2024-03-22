@@ -824,6 +824,10 @@ namespace eft_dma_radar
 
             lines.Insert(0, $"Value: {TarkovDevAPIManager.FormatNumber(player.PlayerValue)}");
 
+            if (player.KDA != -1) {
+                lines.Insert(0, $"KD: {player.KDA}");
+            }
+
             DrawToolTip(canvas, string.Join("\n", lines));
         }
         /// <summary>

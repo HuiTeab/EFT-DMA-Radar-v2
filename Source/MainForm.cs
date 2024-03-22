@@ -1338,6 +1338,8 @@ namespace eft_dma_radar
             chkMagDrills.Checked = _config.MagDrillsEnabled;
             trkMagDrills.Value = _config.MagDrillSpeed;
 
+            chkMemoryMasterSwitch.Checked = _config.MemoryMasterSwitch;
+
             if (_config.Filters.Count == 0)
             { // add a default, blank config
                 LootFilter newFilter = new LootFilter()
@@ -2029,6 +2031,12 @@ namespace eft_dma_radar
                                                     position
                                                 );
                                             }
+                                            else {
+                                                continue;
+                                                Console.WriteLine("Zone Map: " + zone.MapName);
+                                                Console.WriteLine("Selected Map: " + _selectedMap.Name);
+                                            }
+
                                         }
                                     }
                                 }   
@@ -2353,6 +2361,7 @@ namespace eft_dma_radar
             _config.ThrowPowerEnabled = chkThrowPower.Checked;
             _config.ThrowPowerStrength = trkThrowPower.Value;
             _config.HideExfilNames = chkHideExfilNames.Checked;
+            _config.MemoryMasterSwitch = chkMemoryMasterSwitch.Checked;
 
             Config.SaveConfig(_config); // Save Config to Config.json
             Memory.Shutdown(); // Wait for Memory Thread to gracefully exit

@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Text;
 using eft_dma_radar.Source.Misc;
+using eft_dma_radar.Source.Tarkov;
 
 namespace eft_dma_radar
 {
@@ -414,6 +415,8 @@ namespace eft_dma_radar
                     var playerIsAI = GetNextObservedPlayerIsAI();
 
                     AccountID = Memory.ReadUnityString(Memory.ReadPtr(ObservedPlayerView + 0x50));
+                    //KDA = KDManager.GetKD(AccountID).Result;
+                    //Console.WriteLine($"KDA: {KDA}");
                     //[40] string_0x40 : String //ProfileID
                     //[48] string_0x48 : String //NickName
                     //[50] string_0x50 : String //AccountID
@@ -431,10 +434,12 @@ namespace eft_dma_radar
                     {
                         IsPmc = true;
                         Type = (playerSide == 1 ? PlayerType.USEC : PlayerType.BEAR);
+                        //KDA = KDManager.GetKD(AccountID).Result;
                     }
                     else if (playerSide == 4 && !playerIsAI)
                     {
                         Type = PlayerType.PScav;
+                        //KDA = KDManager.GetKD(AccountID).Result;
                     }
                     else if (playerSide == 4 && playerIsAI)
                     {
@@ -573,6 +578,33 @@ namespace eft_dma_radar
                 return false;
             }
         }
+        /// <summary>
+        /// Set PMC Player K/D.
+        /// </summary>
+        public async Task SetKDAsync()
+        {
+            try
+            {
+                if (KDA == -1f && IsHumanActive) // Get K/D for Hostile PMCs
+                {
+                    if (_kdRefreshSw.IsRunning && _kdRefreshSw.ElapsedMilliseconds < 20000)
+                        return; // Rate-limit check
+
+                    if (!_kdRefreshSw.IsRunning || _kdRefreshSw.ElapsedMilliseconds >= 20000)
+                    {
+                        _kdRefreshSw.Restart();
+                        KDA = await KDManager.GetKD(AccountID).ConfigureAwait(true);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.Log($"ERROR getting Player '{Name}' K/D: {ex}");
+                if (!_kdRefreshSw.IsRunning)
+                    _kdRefreshSw.Start();
+            }
+        }
+
         #endregion
 
         #region Methods
