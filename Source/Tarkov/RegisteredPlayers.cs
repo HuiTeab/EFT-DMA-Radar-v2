@@ -456,7 +456,7 @@ namespace eft_dma_radar
                                 if (checkGear)
                                 {
                                     try {
-                                        Game.CameraManager.VisorEffect(_config.NoVisorEnabled);
+                                        //Game.CameraManager.VisorEffect(_config.NoVisorEnabled);
                                         //@Keeegi - This doesn't work if player changes option while in raid so fix this shit!
                                         //var headGear = scatterMap.Results[i][9].TryGetResult<MemPointer>(out var hg);
                                         //var containedItem = scatterMap.Results[i][10].TryGetResult<MemPointer>(out var ci);

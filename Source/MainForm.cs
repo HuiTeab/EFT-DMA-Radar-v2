@@ -274,11 +274,6 @@ namespace eft_dma_radar
         {
             _config.NoRecoilSwayEnabled = chkNoRecoilSway.Checked;
         }
-        private void chkDoubleSearch_CheckedChanged(object sender, EventArgs e)
-        {
-            _config.DoubleSearchEnabled = chkDoubleSearch.Checked;
-        }
-
         private void chkShowLoot_CheckedChanged(object sender, EventArgs e)
         {
             _config.LootEnabled = chkShowLoot.Checked;
@@ -1274,7 +1269,6 @@ namespace eft_dma_radar
             chkThermalVision.Checked = _config.ThermalVisionEnabled;
             chkOpticThermalVision.Checked = _config.OpticThermalVisionEnabled;
             chkNoVisor.Checked = _config.NoVisorEnabled;
-            chkDoubleSearch.Checked = _config.DoubleSearchEnabled;
 
             chkMemoryMasterSwitch.Checked = _config.MemoryMasterSwitch;
 
@@ -2289,7 +2283,6 @@ namespace eft_dma_radar
             _config.NoVisorEnabled = chkNoVisor.Checked;
             _config.OpticThermalVisionEnabled = chkOpticThermalVision.Checked;
             _config.QuestHelperEnabled = chkQuestHelper.Checked;
-            _config.DoubleSearchEnabled = chkDoubleSearch.Checked;
             _config.NoVisorEnabled = chkNoVisor.Checked;
             _config.MemoryMasterSwitch = chkMemoryMasterSwitch.Checked;
 

@@ -138,7 +138,6 @@ namespace eft_dma_radar
             grpGlobalFeatures = new GroupBox();
             chkExtendedInteract = new CheckBox();
             chkChams = new CheckBox();
-            chkDoubleSearch = new CheckBox();
             grpGearFeatures = new GroupBox();
             chkInstantADS = new CheckBox();
             chkNoRecoilSway = new CheckBox();
@@ -1351,7 +1350,6 @@ namespace eft_dma_radar
             // 
             grpGlobalFeatures.Controls.Add(chkExtendedInteract);
             grpGlobalFeatures.Controls.Add(chkChams);
-            grpGlobalFeatures.Controls.Add(chkDoubleSearch);
             grpGlobalFeatures.Enabled = false;
             grpGlobalFeatures.Location = new Point(6, 22);
             grpGlobalFeatures.Name = "grpGlobalFeatures";
@@ -1363,7 +1361,7 @@ namespace eft_dma_radar
             // chkExtendedInteract
             // 
             chkExtendedInteract.AutoSize = true;
-            chkExtendedInteract.Location = new Point(151, 47);
+            chkExtendedInteract.Location = new Point(6, 47);
             chkExtendedInteract.Name = "chkExtendedInteract";
             chkExtendedInteract.Size = new Size(118, 19);
             chkExtendedInteract.TabIndex = 23;
@@ -1384,18 +1382,6 @@ namespace eft_dma_radar
             toolTip.SetToolTip(chkChams, "Enables chams on players [dont use lol]");
             chkChams.UseVisualStyleBackColor = true;
             chkChams.CheckedChanged += chkChams_CheckedChanged;
-            // 
-            // chkDoubleSearch
-            // 
-            chkDoubleSearch.AutoSize = true;
-            chkDoubleSearch.Location = new Point(6, 47);
-            chkDoubleSearch.Name = "chkDoubleSearch";
-            chkDoubleSearch.Size = new Size(102, 19);
-            chkDoubleSearch.TabIndex = 2;
-            chkDoubleSearch.Text = "Double Search";
-            toolTip.SetToolTip(chkDoubleSearch, "Enables searching x2 slots at once");
-            chkDoubleSearch.UseVisualStyleBackColor = true;
-            chkDoubleSearch.CheckedChanged += chkDoubleSearch_CheckedChanged;
             // 
             // grpGearFeatures
             // 
@@ -1845,7 +1831,6 @@ namespace eft_dma_radar
         private CheckBox chkShowHoverArmor;
         private Button button1;
         private GroupBox grpPhysicalFeatures;
-        private CheckBox chkDoubleSearch;
         private GroupBox grpGearFeatures;
         private GroupBox grpGlobalFeatures;
         private CheckBox chkQuestHelper;
