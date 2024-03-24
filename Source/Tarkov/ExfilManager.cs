@@ -59,30 +59,36 @@ namespace eft_dma_radar
                 var localPlayer = Memory.ReadPtr(localGameWorld + Offsets.LocalGameWorld.MainPlayer);
                 var localPlayerProfile = Memory.ReadPtr(localPlayer + Offsets.Player.Profile);
                 var localPlayerInfo = Memory.ReadPtr(localPlayerProfile + Offsets.Profile.PlayerInfo);
-                var localPlayerEntryPoint = Memory.ReadPtr(localPlayerInfo + 0x30);
-                var localPlayerEntryPointString = Memory.ReadUnityString(localPlayerEntryPoint);
-
-                exfilPoints = Memory.ReadPtr(exfilController + Offsets.ExfilController.ExfilList);
-                var count = Memory.ReadValue<int>(exfilPoints + Offsets.ExfilController.ExfilCount);
-                if (count < 1 || count > 24) throw new ArgumentOutOfRangeException();
-                for (uint i = 0; i < count; i++)
+                ulong localPlayerEntryPoint = 0;
+                try {
+                    localPlayerEntryPoint = Memory.ReadPtr(localPlayerInfo + 0x30);
+                }catch{}
+                if (localPlayerEntryPoint != 0)
                 {
-                    var exfilAddr = Memory.ReadPtr(exfilPoints + Offsets.UnityListBase.Start + (i * 0x8));
-                    var eligibleEntryPoints = Memory.ReadPtr(exfilAddr + 0x80);
-                    var eligibleEntryPointsCount = Memory.ReadValue<int>(eligibleEntryPoints + 0x18);
-                    for (uint j = 0; j < eligibleEntryPointsCount; j++)
+
+                    var localPlayerEntryPointString = Memory.ReadUnityString(localPlayerEntryPoint);
+                    exfilPoints = Memory.ReadPtr(exfilController + Offsets.ExfilController.ExfilList);
+                    var count = Memory.ReadValue<int>(exfilPoints + Offsets.ExfilController.ExfilCount);
+                    if (count < 1 || count > 24) throw new ArgumentOutOfRangeException();
+                    for (uint i = 0; i < count; i++)
                     {
-                        var entryPoint = Memory.ReadPtr(eligibleEntryPoints + 0x20 + (j * 0x8));
-                        var entryPointString = Memory.ReadUnityString(entryPoint);
-                        if (entryPointString.ToLower() == localPlayerEntryPointString.ToLower())
+                        var exfilAddr = Memory.ReadPtr(exfilPoints + Offsets.UnityListBase.Start + (i * 0x8));
+                        var eligibleEntryPoints = Memory.ReadPtr(exfilAddr + 0x80);
+                        var eligibleEntryPointsCount = Memory.ReadValue<int>(eligibleEntryPoints + 0x18);
+                        for (uint j = 0; j < eligibleEntryPointsCount; j++)
                         {
-                            var exfil = new Exfil(exfilAddr);
-                            var exfilSettings = Memory.ReadPtr(exfilAddr + Offsets.Exfil.Settings);
-                            var exfilName = Memory.ReadPtr(exfilSettings + Offsets.Exfil.Name);
-                            var exfilUnityName = Memory.ReadUnityString(exfilName);
-                            exfil.UpdateName(exfilUnityName);
-                            list.Add(exfil);
-                            break;
+                            var entryPoint = Memory.ReadPtr(eligibleEntryPoints + 0x20 + (j * 0x8));
+                            var entryPointString = Memory.ReadUnityString(entryPoint);
+                            if (entryPointString.ToLower() == localPlayerEntryPointString.ToLower())
+                            {
+                                var exfil = new Exfil(exfilAddr);
+                                var exfilSettings = Memory.ReadPtr(exfilAddr + Offsets.Exfil.Settings);
+                                var exfilName = Memory.ReadPtr(exfilSettings + Offsets.Exfil.Name);
+                                var exfilUnityName = Memory.ReadUnityString(exfilName);
+                                exfil.UpdateName(exfilUnityName);
+                                list.Add(exfil);
+                                break;
+                            }
                         }
                     }
                 }

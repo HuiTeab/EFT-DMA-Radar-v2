@@ -44,33 +44,33 @@ namespace eft_dma_radar.Source.Tarkov
                     client = new HttpClient();
                 }
                 useProxy = !useProxy;
-
-                //Console.WriteLine($"Requesting player profile for account ID: {accountID}");
-                var response = await client.GetAsync($"https://player.tarkov.dev/account/{accountID}");
                 
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var playerProfile = JsonSerializer.Deserialize<PlayerProfile>(content);
-
-                    if (playerProfile != null)
-                    {
-                        var killsItem = playerProfile.pmcStats.eft.overAllCounters.Items.FirstOrDefault(x => x.Key.Contains("Kills"));
-                        var deathsItem = playerProfile.pmcStats.eft.overAllCounters.Items.FirstOrDefault(x => x.Key.Contains("Deaths"));
-                        int kills = killsItem != null ? killsItem.Value : 0;
-                        int deaths = deathsItem != null ? deathsItem.Value : 0;
-
-                        if (deaths == 0)
-                        {
-                            return kills;
-                        }
-
-                        return (float)kills / deaths;
-                    }
-                }else
-                {
-                    //Console.WriteLine($"Failed to get player profile for account ID: {accountID}");
-                }
+                //Console.WriteLine($"Requesting player profile for account ID: {accountID}");
+                //var response = await client.GetAsync($"https://player.tarkov.dev/account/{accountID}");
+                
+                //if (response.IsSuccessStatusCode)
+                //{
+                //    var content = await response.Content.ReadAsStringAsync();
+                //    var playerProfile = JsonSerializer.Deserialize<PlayerProfile>(content);
+                //
+                //    if (playerProfile != null)
+                //    {
+                //        var killsItem = playerProfile.pmcStats.eft.overAllCounters.Items.FirstOrDefault(x => x.Key.Contains("Kills"));
+                //        var deathsItem = playerProfile.pmcStats.eft.overAllCounters.Items.FirstOrDefault(x => x.Key.Contains("Deaths"));
+                //        int kills = killsItem != null ? killsItem.Value : 0;
+                //        int deaths = deathsItem != null ? deathsItem.Value : 0;
+                //
+                //        if (deaths == 0)
+                //        {
+                //            return kills;
+                //       }
+                //
+                //        return (float)kills / deaths;
+                //    }
+                //}else
+                //{
+                //    //Console.WriteLine($"Failed to get player profile for account ID: {accountID}");
+                //}
             }
             catch (Exception ex)
             {

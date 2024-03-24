@@ -274,61 +274,6 @@ namespace eft_dma_radar
         {
             _config.NoRecoilSwayEnabled = chkNoRecoilSway.Checked;
         }
-
-        private void chkJumpPower_CheckedChanged(object sender, EventArgs e)
-        {
-            _config.JumpPowerEnabled = chkJumpPower.Checked;
-            trkJumpPower.Visible = chkJumpPower.Checked;
-        }
-
-        private void chkThrowPower_CheckedChanged(object sender, EventArgs e)
-        {
-            _config.ThrowPowerEnabled = chkThrowPower.Checked;
-            trkThrowPower.Visible = chkThrowPower.Checked;
-        }
-
-        private void chkMagDrills_CheckedChanged(object sender, EventArgs e)
-        {
-            _config.MagDrillsEnabled = chkMagDrills.Checked;
-            trkMagDrills.Visible = chkMagDrills.Checked;
-        }
-
-        private void trkJumpPower_Scroll(object sender, EventArgs e)
-        {
-            _config.JumpPowerStrength = trkJumpPower.Value;
-
-            if (chkJumpPower.Checked && Memory.LocalPlayer is not null)
-            {
-                Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.JumpStrength);
-            }
-        }
-
-        private void trkThrowPower_Scroll(object sender, EventArgs e)
-        {
-            _config.ThrowPowerStrength = trkThrowPower.Value;
-
-            if (chkThrowPower.Checked && Memory.LocalPlayer is not null)
-            {
-                Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.ThrowStrength);
-            }
-        }
-
-        private void trkMagDrills_Scroll(object sender, EventArgs e)
-        {
-            _config.MagDrillSpeed = trkMagDrills.Value;
-
-            if (chkMagDrills.Checked && Memory.LocalPlayer is not null)
-            {
-                Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsLoad);
-                Memory.PlayerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsUnload);
-            }
-        }
-
-        private void chkIncreaseMaxWeight_CheckedChanged(object sender, EventArgs e)
-        {
-            _config.IncreaseMaxWeightEnabled = chkIncreaseMaxWeight.Checked;
-        }
-
         private void chkDoubleSearch_CheckedChanged(object sender, EventArgs e)
         {
             _config.DoubleSearchEnabled = chkDoubleSearch.Checked;
@@ -1329,14 +1274,7 @@ namespace eft_dma_radar
             chkThermalVision.Checked = _config.ThermalVisionEnabled;
             chkOpticThermalVision.Checked = _config.OpticThermalVisionEnabled;
             chkNoVisor.Checked = _config.NoVisorEnabled;
-            chkIncreaseMaxWeight.Checked = _config.IncreaseMaxWeightEnabled;
             chkDoubleSearch.Checked = _config.DoubleSearchEnabled;
-            chkJumpPower.Checked = _config.JumpPowerEnabled;
-            trkJumpPower.Value = _config.JumpPowerStrength;
-            chkThrowPower.Checked = _config.ThrowPowerEnabled;
-            trkThrowPower.Value = _config.ThrowPowerStrength;
-            chkMagDrills.Checked = _config.MagDrillsEnabled;
-            trkMagDrills.Value = _config.MagDrillSpeed;
 
             chkMemoryMasterSwitch.Checked = _config.MemoryMasterSwitch;
 
@@ -2352,15 +2290,7 @@ namespace eft_dma_radar
             _config.OpticThermalVisionEnabled = chkOpticThermalVision.Checked;
             _config.QuestHelperEnabled = chkQuestHelper.Checked;
             _config.DoubleSearchEnabled = chkDoubleSearch.Checked;
-            _config.MagDrillsEnabled = chkMagDrills.Checked;
-            _config.MagDrillSpeed = trkMagDrills.Value;
             _config.NoVisorEnabled = chkNoVisor.Checked;
-            _config.IncreaseMaxWeightEnabled = chkIncreaseMaxWeight.Checked;
-            _config.JumpPowerEnabled = chkJumpPower.Checked;
-            _config.JumpPowerStrength = trkJumpPower.Value;
-            _config.ThrowPowerEnabled = chkThrowPower.Checked;
-            _config.ThrowPowerStrength = trkThrowPower.Value;
-            _config.HideExfilNames = chkHideExfilNames.Checked;
             _config.MemoryMasterSwitch = chkMemoryMasterSwitch.Checked;
 
             Config.SaveConfig(_config); // Save Config to Config.json

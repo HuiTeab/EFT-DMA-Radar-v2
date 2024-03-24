@@ -141,20 +141,13 @@ namespace eft_dma_radar
             chkDoubleSearch = new CheckBox();
             grpGearFeatures = new GroupBox();
             chkInstantADS = new CheckBox();
-            trkMagDrills = new TrackBar();
             chkNoRecoilSway = new CheckBox();
-            chkMagDrills = new CheckBox();
             chkNoVisor = new CheckBox();
             chkNightVision = new CheckBox();
             chkOpticThermalVision = new CheckBox();
             chkThermalVision = new CheckBox();
             grpPhysicalFeatures = new GroupBox();
             chkInfiniteStamina = new CheckBox();
-            chkIncreaseMaxWeight = new CheckBox();
-            trkThrowPower = new TrackBar();
-            trkJumpPower = new TrackBar();
-            chkThrowPower = new CheckBox();
-            chkJumpPower = new CheckBox();
             grpRadar = new GroupBox();
             btnRestartRadar = new Button();
             chkShowMapSetup = new CheckBox();
@@ -210,10 +203,7 @@ namespace eft_dma_radar
             grpMemoryWriting.SuspendLayout();
             grpGlobalFeatures.SuspendLayout();
             grpGearFeatures.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)trkMagDrills).BeginInit();
             grpPhysicalFeatures.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)trkThrowPower).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)trkJumpPower).BeginInit();
             grpRadar.SuspendLayout();
             tabRadar.SuspendLayout();
             grpMapSetup.SuspendLayout();
@@ -1410,9 +1400,7 @@ namespace eft_dma_radar
             // grpGearFeatures
             // 
             grpGearFeatures.Controls.Add(chkInstantADS);
-            grpGearFeatures.Controls.Add(trkMagDrills);
             grpGearFeatures.Controls.Add(chkNoRecoilSway);
-            grpGearFeatures.Controls.Add(chkMagDrills);
             grpGearFeatures.Controls.Add(chkNoVisor);
             grpGearFeatures.Controls.Add(chkNightVision);
             grpGearFeatures.Controls.Add(chkOpticThermalVision);
@@ -1438,21 +1426,6 @@ namespace eft_dma_radar
             chkInstantADS.UseVisualStyleBackColor = true;
             chkInstantADS.CheckedChanged += chkInstantADS_CheckedChanged;
             // 
-            // trkMagDrills
-            // 
-            trkMagDrills.LargeChange = 10;
-            trkMagDrills.Location = new Point(85, 122);
-            trkMagDrills.Maximum = 7;
-            trkMagDrills.Minimum = 1;
-            trkMagDrills.Name = "trkMagDrills";
-            trkMagDrills.Size = new Size(116, 45);
-            trkMagDrills.TabIndex = 33;
-            trkMagDrills.TickStyle = TickStyle.None;
-            toolTip.SetToolTip(trkMagDrills, "Speed of un/packing ammunition from a magazine");
-            trkMagDrills.Value = 5;
-            trkMagDrills.Visible = false;
-            trkMagDrills.Scroll += trkMagDrills_Scroll;
-            // 
             // chkNoRecoilSway
             // 
             chkNoRecoilSway.Anchor = AnchorStyles.Top | AnchorStyles.Right;
@@ -1465,18 +1438,6 @@ namespace eft_dma_radar
             toolTip.SetToolTip(chkNoRecoilSway, "Removes weapon recoil/sway");
             chkNoRecoilSway.UseVisualStyleBackColor = true;
             chkNoRecoilSway.CheckedChanged += chkNoRecoilSway_CheckedChanged;
-            // 
-            // chkMagDrills
-            // 
-            chkMagDrills.AutoSize = true;
-            chkMagDrills.Location = new Point(6, 122);
-            chkMagDrills.Name = "chkMagDrills";
-            chkMagDrills.Size = new Size(79, 19);
-            chkMagDrills.TabIndex = 32;
-            chkMagDrills.Text = "Mag Drills";
-            toolTip.SetToolTip(chkMagDrills, "Increases ammunition un/loading in magazines");
-            chkMagDrills.UseVisualStyleBackColor = true;
-            chkMagDrills.CheckedChanged += chkMagDrills_CheckedChanged;
             // 
             // chkNoVisor
             // 
@@ -1533,11 +1494,6 @@ namespace eft_dma_radar
             // grpPhysicalFeatures
             // 
             grpPhysicalFeatures.Controls.Add(chkInfiniteStamina);
-            grpPhysicalFeatures.Controls.Add(chkIncreaseMaxWeight);
-            grpPhysicalFeatures.Controls.Add(trkThrowPower);
-            grpPhysicalFeatures.Controls.Add(trkJumpPower);
-            grpPhysicalFeatures.Controls.Add(chkThrowPower);
-            grpPhysicalFeatures.Controls.Add(chkJumpPower);
             grpPhysicalFeatures.Enabled = false;
             grpPhysicalFeatures.Location = new Point(226, 110);
             grpPhysicalFeatures.Name = "grpPhysicalFeatures";
@@ -1549,7 +1505,7 @@ namespace eft_dma_radar
             // chkInfiniteStamina
             // 
             chkInfiniteStamina.AutoSize = true;
-            chkInfiniteStamina.Location = new Point(6, 97);
+            chkInfiniteStamina.Location = new Point(6, 22);
             chkInfiniteStamina.Name = "chkInfiniteStamina";
             chkInfiniteStamina.Size = new Size(109, 19);
             chkInfiniteStamina.TabIndex = 32;
@@ -1557,70 +1513,6 @@ namespace eft_dma_radar
             toolTip.SetToolTip(chkInfiniteStamina, "Allows you to run forever");
             chkInfiniteStamina.UseVisualStyleBackColor = true;
             chkInfiniteStamina.CheckedChanged += chkInfiniteStamina_CheckedChanged;
-            // 
-            // chkIncreaseMaxWeight
-            // 
-            chkIncreaseMaxWeight.AutoSize = true;
-            chkIncreaseMaxWeight.Location = new Point(6, 22);
-            chkIncreaseMaxWeight.Name = "chkIncreaseMaxWeight";
-            chkIncreaseMaxWeight.Size = new Size(136, 19);
-            chkIncreaseMaxWeight.TabIndex = 15;
-            chkIncreaseMaxWeight.Text = "Increase Max Weight";
-            toolTip.SetToolTip(chkIncreaseMaxWeight, "Increases maximum weight capacity");
-            chkIncreaseMaxWeight.UseVisualStyleBackColor = true;
-            chkIncreaseMaxWeight.CheckedChanged += chkIncreaseMaxWeight_CheckedChanged;
-            // 
-            // trkThrowPower
-            // 
-            trkThrowPower.LargeChange = 10;
-            trkThrowPower.Location = new Point(108, 72);
-            trkThrowPower.Minimum = 1;
-            trkThrowPower.Name = "trkThrowPower";
-            trkThrowPower.Size = new Size(116, 45);
-            trkThrowPower.TabIndex = 31;
-            trkThrowPower.TickStyle = TickStyle.None;
-            toolTip.SetToolTip(trkThrowPower, "The 'strength' of the throw");
-            trkThrowPower.Value = 5;
-            trkThrowPower.Visible = false;
-            trkThrowPower.Scroll += trkThrowPower_Scroll;
-            // 
-            // trkJumpPower
-            // 
-            trkJumpPower.LargeChange = 10;
-            trkJumpPower.Location = new Point(108, 47);
-            trkJumpPower.Minimum = 1;
-            trkJumpPower.Name = "trkJumpPower";
-            trkJumpPower.Size = new Size(116, 45);
-            trkJumpPower.TabIndex = 30;
-            trkJumpPower.TickStyle = TickStyle.None;
-            toolTip.SetToolTip(trkJumpPower, "The 'strength' of the jump");
-            trkJumpPower.Value = 5;
-            trkJumpPower.Visible = false;
-            trkJumpPower.Scroll += trkJumpPower_Scroll;
-            // 
-            // chkThrowPower
-            // 
-            chkThrowPower.AutoSize = true;
-            chkThrowPower.Location = new Point(6, 72);
-            chkThrowPower.Name = "chkThrowPower";
-            chkThrowPower.Size = new Size(95, 19);
-            chkThrowPower.TabIndex = 1;
-            chkThrowPower.Text = "Throw Power";
-            toolTip.SetToolTip(chkThrowPower, "Increases maximum throw power");
-            chkThrowPower.UseVisualStyleBackColor = true;
-            chkThrowPower.CheckedChanged += chkThrowPower_CheckedChanged;
-            // 
-            // chkJumpPower
-            // 
-            chkJumpPower.AutoSize = true;
-            chkJumpPower.Location = new Point(6, 47);
-            chkJumpPower.Name = "chkJumpPower";
-            chkJumpPower.Size = new Size(91, 19);
-            chkJumpPower.TabIndex = 0;
-            chkJumpPower.Text = "Jump Power";
-            toolTip.SetToolTip(chkJumpPower, "Increases maximum jump power");
-            chkJumpPower.UseVisualStyleBackColor = true;
-            chkJumpPower.CheckedChanged += chkJumpPower_CheckedChanged;
             // 
             // grpRadar
             // 
@@ -1834,11 +1726,8 @@ namespace eft_dma_radar
             grpGlobalFeatures.PerformLayout();
             grpGearFeatures.ResumeLayout(false);
             grpGearFeatures.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)trkMagDrills).EndInit();
             grpPhysicalFeatures.ResumeLayout(false);
             grpPhysicalFeatures.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)trkThrowPower).EndInit();
-            ((System.ComponentModel.ISupportInitialize)trkJumpPower).EndInit();
             grpRadar.ResumeLayout(false);
             grpRadar.PerformLayout();
             tabRadar.ResumeLayout(false);
@@ -1956,16 +1845,9 @@ namespace eft_dma_radar
         private CheckBox chkShowHoverArmor;
         private Button button1;
         private GroupBox grpPhysicalFeatures;
-        private CheckBox chkThrowPower;
-        private CheckBox chkJumpPower;
         private CheckBox chkDoubleSearch;
-        private TrackBar trkJumpPower;
-        private TrackBar trkThrowPower;
-        private CheckBox chkMagDrills;
-        private TrackBar trkMagDrills;
         private GroupBox grpGearFeatures;
         private GroupBox grpGlobalFeatures;
-        private CheckBox chkIncreaseMaxWeight;
         private CheckBox chkQuestHelper;
         private PictureBox picQuestItemsColor;
         private Label lblQuestItemsColor;

@@ -113,7 +113,7 @@ namespace eft_dma_radar
                 // Update game environment elements such as loot and exfils
                 if (_inGame && !InHideout)
                 {
-                    UpdateGameEnvironment();
+                    await UpdateGameEnvironmentAsync();
                 }
             }
             catch (DMAShutdown)
@@ -182,11 +182,11 @@ namespace eft_dma_radar
         /// <summary>
         /// Updates miscellaneous game environment elements like loot, grenades, and exfils.
         /// </summary>
-        private void UpdateGameEnvironment()
+        private async Task UpdateGameEnvironmentAsync()
         {
             // This method encapsulates the logic for updating various elements in the game
             // such as loot positions, grenade statuses, and exfil points
-            UpdateMisc();
+            await UpdateMiscAsync();
         }
 
         /// <summary>
@@ -420,10 +420,16 @@ namespace eft_dma_radar
             }
         }
 
+        private async Task<LootManager> LoadLootAsync()
+        {
+            await Task.Delay(1000); // Simulate asynchronous work.
+            return new LootManager(_localGameWorld);
+        }
+
         /// <summary>
         /// Loot, grenades, exfils,etc.
         /// </summary>
-        private void UpdateMisc()
+        private async Task UpdateMiscAsync()
         {
             if (_config.QuestHelperEnabled)
             {
@@ -442,26 +448,21 @@ namespace eft_dma_radar
             }
 
             //if show loot is enabled, load loot
-            if (_config.LootEnabled)
+            if (_config.LootEnabled && (_lootManager == null || _refreshLoot))
             {
-                if (_lootManager is null || _refreshLoot)
+                _loadingLoot = true;
+                try
                 {
-                    _loadingLoot = true;
-                    if (_lootManager is null)
-                    {
-                        // wait for loot to be loaded
-                        Thread.Sleep(10000);
-                    }
-                    try
-                    {
-                        var loot = new LootManager(_localGameWorld);
-                        _lootManager = loot; // update ref
-                        _refreshLoot = false;
-                    }
-                    catch (Exception ex)
-                    {
-                        Program.Log($"ERROR loading LootEngine: {ex}");
-                    }
+                    // Consider making LootManager initialization/loading asynchronous
+                    _lootManager = await LoadLootAsync();
+                    _refreshLoot = false;
+                }
+                catch (Exception ex)
+                {
+                    Program.Log($"ERROR loading LootEngine: {ex}");
+                }
+                finally
+                {
                     _loadingLoot = false;
                 }
             }
