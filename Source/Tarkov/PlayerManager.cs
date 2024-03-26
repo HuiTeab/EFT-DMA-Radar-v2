@@ -17,7 +17,6 @@ namespace eft_dma_radar.Source.Tarkov
         private ulong playerBase { get; set; }
         public Dictionary<string, float> OriginalValues { get; }
         public ulong proceduralWeaponAnimationPtr { get; set; }
-
         /// <summary>
         /// Creates new PlayerManager object
         /// </summary>
@@ -32,7 +31,7 @@ namespace eft_dma_radar.Source.Tarkov
         /// </summary>
         public void SetNoRecoilSway(bool on)
         {
-            Memory.WriteValue(proceduralWeaponAnimationPtr + 0x138, on ? 0 : (int)OriginalValues["Mask"]);
+            Memory.WriteValue(proceduralWeaponAnimationPtr + 0x138, on ? 0 : 125);
         }
 
         /// <summary>

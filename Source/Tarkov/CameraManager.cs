@@ -20,8 +20,6 @@ namespace eft_dma_radar.Source.Tarkov
         public CameraManager(ulong unityBase)
         {
             _unityBase = unityBase;
-
-            this.GetCamera();
         }
 
         public void ResetCameras()
@@ -82,7 +80,7 @@ namespace eft_dma_radar.Source.Tarkov
             if (_unityBase == 0)
                 return;
 
-            if (!this.IsReady)
+            if (!IsReady)
             {
                 GetCamera();
             }
@@ -123,15 +121,18 @@ namespace eft_dma_radar.Source.Tarkov
                 
                 if (on != thermalOn)
                 {
-                    Memory.WriteValue(fpsThermalComponent + 0xE0, !thermalOn);
-                    Memory.WriteValue(fpsThermalComponent + 0xE1, thermalOn);
-                    Memory.WriteValue(fpsThermalComponent + 0xE2, thermalOn);
-                    Memory.WriteValue(fpsThermalComponent + 0xE3, thermalOn);
-                    Memory.WriteValue(fpsThermalComponent + 0xE4, thermalOn);
-                    Memory.WriteValue(fpsThermalComponent + 0xE5, thermalOn);
-                    //Memory.WriteValue(fpsThermalComponent + 0xE8, thermalOn ? 0.013f : 0.1f);
-                    //Memory.WriteValue(fpsThermalComponent + 0xEC, thermalOn ? 5.0f : 10.0f);
-                    //Memory.WriteValue(fpsThermalComponent + 0xF0, thermalOn ? 2.0f : 6.0f);
+                    Memory.WriteValue(fpsThermalComponent + 0xE0, on);
+                    Memory.WriteValue(fpsThermalComponent + 0xE1, !on);
+                    Memory.WriteValue(fpsThermalComponent + 0xE2, !on);
+                    Memory.WriteValue(fpsThermalComponent + 0xE3, !on);
+                    Memory.WriteValue(fpsThermalComponent + 0xE4, !on);
+                    Memory.WriteValue(fpsThermalComponent + 0xE5, !on);
+                    Memory.WriteValue(fpsThermalComponent + 0xE8, !on ? 0.013f : 0.1f);
+                    Memory.WriteValue(fpsThermalComponent + 0xEC, !on ? 5.0f : 10.0f);
+                    Memory.WriteValue(fpsThermalComponent + 0xF0, !on ? 2.0f : 6.0f);
+                }
+                else {
+                    //Memory.WriteValue(fpsThermalComponent + 0xE0, !thermalOn);
                 }
             }
         }
@@ -163,10 +164,10 @@ namespace eft_dma_radar.Source.Tarkov
             if (this.IsReady)
             {
                 var visorComponent = GetComponentFromGameObject(_fpsCamera, "VisorEffect");
-                bool visorDown = (Memory.ReadValue<float>(visorComponent + 0xC0) == 1.0f);
+                bool visorDown = Memory.ReadValue<float>(visorComponent + 0xC0) == 1.0f;
                 if (on == visorDown)
                 {
-                    Memory.WriteValue(visorComponent + 0xC0, (on ? 0.0f : 1.0f));
+                    Memory.WriteValue(visorComponent + 0xC0, on ? 0.0f : 1.0f);
                 }
             }
         }

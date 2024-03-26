@@ -283,7 +283,6 @@ namespace eft_dma_radar
         /// </summary>
         public async void UpdateAllPlayers()
         {
-
             if (IsAtHideout)
             {
                 return;
@@ -508,10 +507,11 @@ namespace eft_dma_radar
                                         }
                                     }
                                     else
-                                    { 
+                                    {
                                         Game.CameraManager.ThermalVision(_config.ThermalVisionEnabled);
-                                        Game.CameraManager.OpticThermalVision(_config.ThermalVisionEnabled);
+                                        Game.CameraManager.OpticThermalVision(false);
                                         Game.CameraManager.NightVision(_config.NightVisionEnabled);
+                                        Game.CameraManager.VisorEffect(_config.NoVisorEnabled);
                                     }
                                     // infinite stamina
                                     if (_config.MaxStaminaEnabled)
