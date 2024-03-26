@@ -18,7 +18,8 @@ namespace eft_dma_radar
         private ConcurrentBag<LootContainerInfo> savedLootContainersInfo = new ConcurrentBag<LootContainerInfo>();
         private ConcurrentBag<LootCorpseInfo> savedLootCorpsesInfo = new ConcurrentBag<LootCorpseInfo>();
         private ConcurrentBag<LootItemInfo> savedLootItemsInfo = new ConcurrentBag<LootItemInfo>();
-        private List<DevLootItem> lootList = new List<DevLootItem>();
+        //private List<DevLootItem> lootlist = new List<DevLootItem>();
+        private List<(DevLootItem items, DevLootItem containers, DevLootItem corpses)> lootlist = new List<(DevLootItem items, DevLootItem containers, DevLootItem corpses)>();
         /// <summary>
         /// Filtered loot ready for display by GUI.
         /// </summary>
@@ -39,6 +40,12 @@ namespace eft_dma_radar
         {
             get => Memory.QuestManager.QuestItems;
         }
+
+        private string CurrentMapName
+        {
+            get => Memory.MapName;
+        }
+
         /// <summary>
         /// key,value pair of filtered item ids (key) and their filtered color (value)
         /// </summary>
@@ -63,14 +70,21 @@ namespace eft_dma_radar
                 while (Memory.InGame)
                 {
                     stopwatch.Restart();
-                    Console.WriteLine("[LootManager] Refreshing loot...");
+                    //Console.WriteLine("[LootManager] Refreshing loot...");
                     GetLootList();
                     GetLoot();
                     FillLoot();
                     ApplyFilter();
-                    Console.WriteLine($"[LootManager] Refreshed loot in {stopwatch.ElapsedMilliseconds}ms.");
-                    Thread.Sleep(2500);
-                    //Thread.Sleep(10000);
+                    //Console.WriteLine($"[LootManager] Refreshed loot in {stopwatch.ElapsedMilliseconds}ms.");
+                    if (CurrentMapName == "TarkovStreets")
+                    {
+                        Thread.Sleep(30000);
+                    }
+                    else
+                    {
+                        Thread.Sleep(10000);
+                    }
+                    
 
                 }
                 //Console.WriteLine("[LootManager] Refresh thread stopped.");
@@ -188,6 +202,9 @@ namespace eft_dma_radar
             var validRound11 = validScatterMap.AddRound();
             var validRound12 = validScatterMap.AddRound();
             var validRound13 = validScatterMap.AddRound();
+            var validRound14 = validScatterMap.AddRound();
+            var validRound15 = validScatterMap.AddRound();
+            var validRound16 = validScatterMap.AddRound();
 
             for (int i = 0; i < validLootEntities.Count; i++)
             {
@@ -216,9 +233,9 @@ namespace eft_dma_radar
                 var isQuestItem = validRound10.AddEntry<bool>(i, 17, itemTemplate, null, Offsets.ItemTemplate.IsQuestItem);
                 var BSGIdPtr = validRound11.AddEntry<ulong>(i, 18, itemTemplate, null, Offsets.ItemTemplate.BsgId);
                 var containerIDPtr = validRound3.AddEntry<ulong>(i, 19, interactiveClass, null, 0x128);
-                var itemOwner = validRound3.AddEntry<ulong>(i, 20, item, null, 0x40);
-                var rootItem = validRound3.AddEntry<ulong>(i, 21, itemOwner, null, 0xC0);
-                var slots = validRound3.AddEntry<ulong>(i, 22, rootItem, null, 0x78);
+                var itemOwner = validRound14.AddEntry<ulong>(i, 20, interactiveClass, null, 0x40);
+                var rootItem = validRound15.AddEntry<ulong>(i, 21, itemOwner, null, 0xC0);
+                var slots = validRound16.AddEntry<ulong>(i, 22, rootItem, null, 0x78);
                 var containerItemOwner = validRound3.AddEntry<ulong>(i, 23, interactiveClass, null, Offsets.LootInteractiveClass.ContainerItemOwner);
                 var containerItemBase = validRound12.AddEntry<ulong>(i, 24, containerItemOwner, null, 0xC0);
                 var containerGrids = validRound13.AddEntry<ulong>(i, 25, containerItemBase, null, Offsets.LootItemBase.Grids);
@@ -242,7 +259,7 @@ namespace eft_dma_radar
                     var result7 = validScatterMap.Results[i][10].TryGetResult<string>(out var className);
                     var result8 = validScatterMap.Results[i][14].TryGetResult<ulong>(out var transformInternal);
                     var result9 = validScatterMap.Results[i][7].TryGetResult<ulong>(out var objectClass);
-                    if (className == "ObservedLootItem" || className == "Corpse")
+                    if (className == "ObservedLootItem")
                     {
                         if (!savedLootItemsInfo.Any(x => x.LootInteractiveClass == lootInteractiveClass))
                         {
@@ -278,7 +295,7 @@ namespace eft_dma_radar
                         }
 
                     }
-                    else if (className == "ObservedCorpse")
+                    else if (className == "ObservedCorpse" || className == "Corpse")
                     {
                         if (!savedLootCorpsesInfo.Any(x => x.LootInteractiveClass == lootInteractiveClass))
                         {
@@ -307,43 +324,56 @@ namespace eft_dma_radar
             });
         }
 
+        private int lastLootItemsCount = 0;
+        private int lastLootCorpsesCount = 0;
+
         private void FillLoot()
         {
-            var loot = new List<DevLootItem>();
-            foreach (var item in savedLootItemsInfo)
+            //Console.WriteLine($"[LootManager] Saved loot items: {savedLootItemsInfo.Count}");
+            //Console.WriteLine($"[LootManager] Saved loot containers: {savedLootContainersInfo.Count}");
+            //Console.WriteLine($"[LootManager] Saved loot corpses: {savedLootCorpsesInfo.Count}");
+            var lootlist = new List<DevLootItem>();
+
+            bool shouldUpdateItems = savedLootItemsInfo.Count != lastLootItemsCount;
+            bool shouldUpdateCorpses = savedLootCorpsesInfo.Count != lastLootCorpsesCount;
+            
+            if (shouldUpdateItems)
             {
-                if (validLootEntities.Any(x => x.Pointer == item.LootInteractiveClass))
+                foreach (var item in savedLootItemsInfo)
                 {
-                    if (!item.QuestItem)
+                    if (validLootEntities.Any(x => x.Pointer == item.LootInteractiveClass))
                     {
-                        if (TarkovDevAPIManager.AllItems.TryGetValue(item.ItemID, out var entry))
+                        if (!item.QuestItem)
                         {
-                            loot.Add(new DevLootItem
+                            if (TarkovDevAPIManager.AllItems.TryGetValue(item.ItemID, out var entry))
                             {
-                                Label = entry.Label,
-                                AlwaysShow = entry.AlwaysShow,
-                                Important = entry.Important,
-                                Position = item.Pos,
-                                Item = entry.Item,
-                            });
+                                lootlist.Add(new DevLootItem
+                                {
+                                    Label = entry.Label,
+                                    AlwaysShow = entry.AlwaysShow,
+                                    Important = entry.Important,
+                                    Position = item.Pos,
+                                    Item = entry.Item,
+                                });
+                            }
+                            else {
+                                Console.WriteLine($"[LootManager] Item {item.ItemID} not found in API.");
+                            }
                         }
                         else {
-                            Console.WriteLine($"[LootManager] Item {item.ItemID} not found in API.");
-                            //55d7217a4bdc2d86028b456d = corpse
+                            var questItemTest = QuestItems.Where(x => x.Id == item.ItemID).FirstOrDefault();
+                            if (questItemTest != null)
+                            {
+                                questItemTest.Position = item.Pos;
+                            }
                         }
                     }
                     else {
-                        var questItemTest = QuestItems.Where(x => x.Id == item.ItemID).FirstOrDefault();
-                        if (questItemTest != null)
-                        {
-                            questItemTest.Position = item.Pos;
-                        }
+                        //remove from saved itemlist
+                        savedLootItemsInfo = new ConcurrentBag<LootItemInfo>(savedLootItemsInfo.Where(x => x.LootInteractiveClass != item.LootInteractiveClass));
                     }
                 }
-                else {
-                    //remove from saved itemlist
-                    savedLootItemsInfo = new ConcurrentBag<LootItemInfo>(savedLootItemsInfo.Where(x => x.LootInteractiveClass != item.LootInteractiveClass));
-                }
+                lastLootItemsCount = savedLootItemsInfo.Count;
             }
             foreach (var container in savedLootContainersInfo)
             {
@@ -352,7 +382,7 @@ namespace eft_dma_radar
                 {
                     try
                     {
-                        GetItemsInGrid(container.ContainerGrids, container.Name, container.Pos, loot, true, container.ContainerName);
+                        GetItemsInGrid(container.ContainerGrids, container.Name, container.Pos, lootlist, true, container.ContainerName);
                     }
                     catch { }
                 }
@@ -361,7 +391,26 @@ namespace eft_dma_radar
                     Console.WriteLine($"[LootManager] Container {container.Name} not found in API.");
                 }
             }
-            Loot = new ReadOnlyCollection<DevLootItem>(loot);
+            foreach (var corpse in savedLootCorpsesInfo)
+            {
+                try
+                {
+                    var slotsArray = new MemArray(corpse.Slots);
+                    var pos = corpse.Pos;
+                    foreach (var slot in slotsArray.Data)
+                    {
+                        try{
+                            var namePtr = Memory.ReadPtr(slot + Offsets.Slot.Name);
+                            var slotName = Memory.ReadUnityString(namePtr);
+                            var containedItem = Memory.ReadPtr(slot + 0x40);
+                            var grids = Memory.ReadPtr(containedItem + Offsets.LootItemBase.Grids);
+                            GetItemsInGrid(grids, slotName, pos, lootlist, true, "Corpse");
+                        }catch{}
+                    }
+                }
+                catch { }
+            }
+            Loot = new ReadOnlyCollection<DevLootItem>(lootlist);
         }
 
 
@@ -477,6 +526,10 @@ namespace eft_dma_radar
 
         private void GetItemsInGrid(ulong gridsArrayPtr, string id, Vector3 pos, List<DevLootItem> loot, bool isContainer = false, string containerName = "")
         {
+            if (loot == null)
+            {
+                return;
+            }
             if (TarkovDevAPIManager.AllItems.TryGetValue(id, out var entry))
             {
                 loot.Add(new DevLootItem
@@ -526,6 +579,39 @@ namespace eft_dma_radar
 
             if (!shouldProcessGrid)
             {
+                //This shoule be fixed soon as possible!!! this is fully unnecessary and should be removed but currently filling the loot list with items
+                foreach (var grid in gridsArray.Data)
+                {
+                    var gridEnumerableClass = Memory.ReadPtr(grid + Offsets.Grids.GridsEnumerableClass);
+                    var itemListPtr = Memory.ReadPtr(gridEnumerableClass + 0x18);
+                    var itemList = new MemList(itemListPtr);
+                    
+                    foreach (var childItem in itemList.Data)
+                    {
+                        try
+                        {
+                            var childItemTemplate = Memory.ReadPtr(childItem + Offsets.LootItemBase.ItemTemplate);
+                            var childItemIdPtr = Memory.ReadPtr(childItemTemplate + Offsets.ItemTemplate.BsgId);
+                            var childItemIdStr = Memory.ReadUnityString(childItemIdPtr).Replace("\\0", "");
+                            if (TarkovDevAPIManager.AllItems.TryGetValue(childItemIdStr, out var entry2))
+                            {
+                                loot.Add(new DevLootItem
+                                {
+                                    Label = entry2.Label,
+                                    AlwaysShow = entry2.AlwaysShow,
+                                    Important = entry2.Important,
+                                    Position = pos,
+                                    Item = entry2.Item,
+                                    Container = isContainer,
+                                    ContainerName = containerName,
+                                });
+                            }
+                        }
+                        catch
+                        {
+                        }
+                    }
+                }
                 return;
             }
             if (shouldProcessGrid)
