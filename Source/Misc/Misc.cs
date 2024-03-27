@@ -268,6 +268,12 @@ namespace eft_dma_radar
         [JsonPropertyName("memoryMasterSwitch")]
         public bool MemoryMasterSwitch { get; set; }
 
+        /// <summary>
+        /// Enables / disables automatic loot refreshing.
+        /// </summary>
+        [JsonPropertyName("autoLootRefresh")]
+        public bool AutoLootRefresh { get; set; }
+
         public Config()
         {
             Vsync = true;

@@ -67,27 +67,32 @@ namespace eft_dma_radar
             {
                 Stopwatch stopwatch = Stopwatch.StartNew();
                 //Console.WriteLine("[LootManager] Refresh thread started.");
-                while (Memory.InGame)
+                if (_config.AutoLootRefresh)
                 {
-                    stopwatch.Restart();
-                    //Console.WriteLine("[LootManager] Refreshing loot...");
+                    while (Memory.InGame)
+                    {
+                        
+                            stopwatch.Restart();
+                            GetLootList();
+                            GetLoot();
+                            FillLoot();
+                            ApplyFilter();
+                            //Console.WriteLine($"[LootManager] Refreshed loot in {stopwatch.ElapsedMilliseconds}ms.");
+                            if (CurrentMapName == "TarkovStreets")
+                            {
+                                Thread.Sleep(30000);
+                            }
+                            else
+                            {
+                                Thread.Sleep(10000);
+                            }
+                    }
+                }else{
                     GetLootList();
                     GetLoot();
                     FillLoot();
                     ApplyFilter();
-                    //Console.WriteLine($"[LootManager] Refreshed loot in {stopwatch.ElapsedMilliseconds}ms.");
-                    if (CurrentMapName == "TarkovStreets")
-                    {
-                        Thread.Sleep(30000);
-                    }
-                    else
-                    {
-                        Thread.Sleep(10000);
-                    }
-                    
-
                 }
-                //Console.WriteLine("[LootManager] Refresh thread stopped.");
             })
             {
                 Priority = ThreadPriority.BelowNormal,
@@ -324,56 +329,43 @@ namespace eft_dma_radar
             });
         }
 
-        private int lastLootItemsCount = 0;
-        private int lastLootCorpsesCount = 0;
-
         private void FillLoot()
         {
-            //Console.WriteLine($"[LootManager] Saved loot items: {savedLootItemsInfo.Count}");
-            //Console.WriteLine($"[LootManager] Saved loot containers: {savedLootContainersInfo.Count}");
-            //Console.WriteLine($"[LootManager] Saved loot corpses: {savedLootCorpsesInfo.Count}");
             var lootlist = new List<DevLootItem>();
 
-            bool shouldUpdateItems = savedLootItemsInfo.Count != lastLootItemsCount;
-            bool shouldUpdateCorpses = savedLootCorpsesInfo.Count != lastLootCorpsesCount;
-            
-            if (shouldUpdateItems)
+            foreach (var item in savedLootItemsInfo)
             {
-                foreach (var item in savedLootItemsInfo)
+                if (validLootEntities.Any(x => x.Pointer == item.LootInteractiveClass))
                 {
-                    if (validLootEntities.Any(x => x.Pointer == item.LootInteractiveClass))
+                    if (!item.QuestItem)
                     {
-                        if (!item.QuestItem)
+                        if (TarkovDevAPIManager.AllItems.TryGetValue(item.ItemID, out var entry))
                         {
-                            if (TarkovDevAPIManager.AllItems.TryGetValue(item.ItemID, out var entry))
+                            lootlist.Add(new DevLootItem
                             {
-                                lootlist.Add(new DevLootItem
-                                {
-                                    Label = entry.Label,
-                                    AlwaysShow = entry.AlwaysShow,
-                                    Important = entry.Important,
-                                    Position = item.Pos,
-                                    Item = entry.Item,
-                                });
-                            }
-                            else {
-                                Console.WriteLine($"[LootManager] Item {item.ItemID} not found in API.");
-                            }
+                                Label = entry.Label,
+                                AlwaysShow = entry.AlwaysShow,
+                                Important = entry.Important,
+                                Position = item.Pos,
+                                Item = entry.Item,
+                            });
                         }
                         else {
-                            var questItemTest = QuestItems.Where(x => x.Id == item.ItemID).FirstOrDefault();
-                            if (questItemTest != null)
-                            {
-                                questItemTest.Position = item.Pos;
-                            }
+                            Console.WriteLine($"[LootManager] Item {item.ItemID} not found in API.");
                         }
                     }
                     else {
-                        //remove from saved itemlist
-                        savedLootItemsInfo = new ConcurrentBag<LootItemInfo>(savedLootItemsInfo.Where(x => x.LootInteractiveClass != item.LootInteractiveClass));
+                        var questItemTest = QuestItems.Where(x => x.Id == item.ItemID).FirstOrDefault();
+                        if (questItemTest != null)
+                        {
+                            questItemTest.Position = item.Pos;
+                        }
                     }
                 }
-                lastLootItemsCount = savedLootItemsInfo.Count;
+                else {
+                    //remove from saved itemlist
+                    savedLootItemsInfo = new ConcurrentBag<LootItemInfo>(savedLootItemsInfo.Where(x => x.LootInteractiveClass != item.LootInteractiveClass));
+                }
             }
             foreach (var container in savedLootContainersInfo)
             {

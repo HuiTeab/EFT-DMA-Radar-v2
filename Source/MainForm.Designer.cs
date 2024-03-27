@@ -107,6 +107,7 @@ namespace eft_dma_radar
             txtLootFilterEditName = new TextBox();
             picLootFilterEditColor = new PictureBox();
             grpLoot = new GroupBox();
+            chkAutoRefresh = new CheckBox();
             grpLootValues = new GroupBox();
             lblImportantLootDisplay = new Label();
             lblRegularLootDisplay = new Label();
@@ -997,6 +998,7 @@ namespace eft_dma_radar
             // 
             // grpLoot
             // 
+            grpLoot.Controls.Add(chkAutoRefresh);
             grpLoot.Controls.Add(grpLootValues);
             grpLoot.Controls.Add(btnRefreshLoot);
             grpLoot.Controls.Add(chkHideLootValue);
@@ -1007,6 +1009,18 @@ namespace eft_dma_radar
             grpLoot.TabIndex = 13;
             grpLoot.TabStop = false;
             grpLoot.Text = "Loot";
+            // 
+            // chkAutoRefresh
+            // 
+            chkAutoRefresh.AutoSize = true;
+            chkAutoRefresh.Location = new Point(163, 165);
+            chkAutoRefresh.Name = "chkAutoRefresh";
+            chkAutoRefresh.Size = new Size(94, 19);
+            chkAutoRefresh.TabIndex = 33;
+            chkAutoRefresh.Text = "Auto Refresh";
+            toolTip.SetToolTip(chkAutoRefresh, "Enables automatic loot refresh");
+            chkAutoRefresh.UseVisualStyleBackColor = true;
+            chkAutoRefresh.CheckedChanged += chkAutoRefresh_CheckedChanged;
             // 
             // grpLootValues
             // 
@@ -1859,5 +1873,6 @@ namespace eft_dma_radar
         private CheckBox chkExtendedInteract;
         private CheckBox chkMemoryMasterSwitch;
         private CheckBox chkInfiniteStamina;
+        private CheckBox chkAutoRefresh;
     }
 }

@@ -40,7 +40,6 @@ namespace eft_dma_radar
         {
             get => Memory.Ready;
         }
-
         /// <summary>
         /// Radar has found Local Game World.
         /// </summary>
@@ -346,6 +345,10 @@ namespace eft_dma_radar
             grpGlobalFeatures.Enabled = enabled;
             grpGearFeatures.Enabled = enabled;
             grpPhysicalFeatures.Enabled = enabled;
+        }
+        private void chkAutoRefresh_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.AutoLootRefresh = chkAutoRefresh.Checked;
         }
 
         private void chkExtendedInteract_CheckedChanged(object sender, EventArgs e)
@@ -1269,7 +1272,7 @@ namespace eft_dma_radar
             chkThermalVision.Checked = _config.ThermalVisionEnabled;
             chkOpticThermalVision.Checked = _config.OpticThermalVisionEnabled;
             chkNoVisor.Checked = _config.NoVisorEnabled;
-
+            chkAutoRefresh.Checked = _config.AutoLootRefresh;
             chkMemoryMasterSwitch.Checked = _config.MemoryMasterSwitch;
 
             if (_config.Filters.Count == 0)
@@ -1940,7 +1943,8 @@ namespace eft_dma_radar
                                         {
                                             //Selected Map: STREETS
                                             //Zone Map: Streets of Tarkov
-                                            if (_selectedMap.Name.ToLower() == "streets"){
+                                            if (_selectedMap.Name.ToLower() == "streets")
+                                            {
                                                 mapName = "Streets of Tarkov";
                                             }
                                             if (zone.MapName.ToLower() == _selectedMap.Name.ToLower() || zone.MapName.ToLower() == mapName.ToLower())
@@ -1963,7 +1967,8 @@ namespace eft_dma_radar
                                                     position
                                                 );
                                             }
-                                            else {
+                                            else
+                                            {
                                                 continue;
                                                 Console.WriteLine("Zone Map: " + zone.MapName);
                                                 Console.WriteLine("Selected Map: " + _selectedMap.Name);
@@ -1971,7 +1976,7 @@ namespace eft_dma_radar
 
                                         }
                                     }
-                                }   
+                                }
                             }
                             var grenades = this.Grenades; // cache ref
                             if (grenades is not null) // Draw grenades
@@ -2285,6 +2290,7 @@ namespace eft_dma_radar
             _config.QuestHelperEnabled = chkQuestHelper.Checked;
             _config.NoVisorEnabled = chkNoVisor.Checked;
             _config.MemoryMasterSwitch = chkMemoryMasterSwitch.Checked;
+            _config.AutoLootRefresh = chkAutoRefresh.Checked;
 
             Config.SaveConfig(_config); // Save Config to Config.json
             Memory.Shutdown(); // Wait for Memory Thread to gracefully exit
