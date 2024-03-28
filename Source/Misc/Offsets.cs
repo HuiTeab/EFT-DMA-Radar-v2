@@ -30,11 +30,11 @@
     }
     public struct LocalGameWorld // [Class] -.ClientLocalGameWorld : ClientGameWorld
     {
-        public const uint MainPlayer = 0x148; // to EFT.Player
+        public const uint MainPlayer = 0x150; // to EFT.Player
         public const uint ExfilController = 0x18; // to ExfilController
-        public const uint LootList = 0xC8; // to UnityList
-        public const uint RegisteredPlayers = 0xF0; // to RegisteredPlayers
-        public const uint Grenades = 0x1A0; // to Grenades
+        public const uint LootList = 0xD0; // to UnityList
+        public const uint RegisteredPlayers = 0xF8; // to RegisteredPlayers
+        public const uint Grenades = 0x1A8; // to Grenades
     }
     public struct ExfilController // -.GClass0B67
     {

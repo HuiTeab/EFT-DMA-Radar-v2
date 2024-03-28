@@ -167,11 +167,11 @@ namespace eft_dma_radar
             var classNamePtr = Memory.ReadPtrChain(_localGameWorld, Offsets.UnityClass.Name);
             var classNameString = Memory.ReadString(classNamePtr, 64).Replace("\0", string.Empty);
             if (classNameString == "ClientLocalGameWorld") {
-                var mapNamePrt = Memory.ReadPtrChain(_localGameWorld, new uint[] { 0x148, 0x550 });
+                var mapNamePrt = Memory.ReadPtrChain(_localGameWorld, new uint[] { 0x150, 0x550 });
                 var mapName = Memory.ReadUnityString(mapNamePrt);
                 _mapName = mapName;
             } else {
-                var mapNamePrt = Memory.ReadPtr(_localGameWorld + 0x40);
+                var mapNamePrt = Memory.ReadPtr(_localGameWorld + 0x48);
                 var mapName = Memory.ReadUnityString(mapNamePrt);
                 _mapName = mapName;
             }
