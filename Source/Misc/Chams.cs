@@ -9,8 +9,7 @@ namespace eft_dma_radar.Source.Misc {
 
     internal class Chams {
         
-        public static void ClothingChams(ulong playerBase) {
-            var playerBody = Memory.ReadPtr(playerBase + 0xA8);
+        public static void ClothingChams(ulong playerBody) {
             if (playerBody == 0) {
                 return;
             }
@@ -52,18 +51,20 @@ namespace eft_dma_radar.Source.Misc {
                     if (MaterialCount > 0 && MaterialCount < 5) {
                         var MaterialDictionaryBase = Memory.ReadPtr(pMaterialDictionary + 0x148);
                         for (int k = 0; k < MaterialCount; k++) {
+                            try {
+                                
                             var MaterialEntryPtr = Memory.ReadPtr(MaterialDictionaryBase + (0x50 * (uint)k));
-                            //Console.WriteLine("MaterialEntryPtr: " + MaterialEntryPtr);
+                            //Console.WriteLine($"MaterialEntryPtr: {MaterialEntryPtr} {playerNick}");
                             SavePointer(MaterialDictionaryBase + (0x50 * (uint)k), MaterialEntryPtr);
                             Memory.WriteValue<ulong>(MaterialDictionaryBase + (0x50 * (uint)k), 0);
+                            }catch { }
                         }
                     }
                 }
             }
         }
 
-        public static void GearChams(ulong playerBase) {
-            var playerBody = Memory.ReadPtr(playerBase + 0xA8);
+        public static void GearChams(ulong playerBody) {
             if (playerBody == 0) {
                 return;
             }
@@ -111,6 +112,7 @@ namespace eft_dma_radar.Source.Misc {
                             var MaterialDictionaryBase = Memory.ReadPtr(pMaterialDict + 0x148);
                             for (int l = 0; l < MaterialCount; l++) {
                                 var MaterialEntryPtr = Memory.ReadPtr(MaterialDictionaryBase + (0x50 * (uint)k));
+                                //Console.WriteLine($"MaterialEntryPtr: {MaterialEntryPtr}");
                                 SavePointer(MaterialDictionaryBase + (0x50 * (uint)k), MaterialEntryPtr);
                                 Memory.WriteValue<ulong>(MaterialDictionaryBase + (0x50 * (uint)k), 0);
                             }

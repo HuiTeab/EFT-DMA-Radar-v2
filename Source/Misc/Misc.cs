@@ -7,11 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using eft_dma_radar.Source.Misc;
 using System.Runtime.Intrinsics;
-using Offsets;
-using System.Numerics;
-using static System.Net.Mime.MediaTypeNames;
-using System.IO;
-using static System.Windows.Forms.LinkLabel;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Menu;
 
 namespace eft_dma_radar
 {
@@ -168,8 +164,14 @@ namespace eft_dma_radar
         /// <summary>
         /// Enables / disables no recoil.
         /// </summary>
-        [JsonPropertyName("noRecoilSwayEnabled")]
-        public bool NoRecoilSwayEnabled { get; set; }
+        [JsonPropertyName("noRecoilEnabled")]
+        public bool NoRecoilEnabled { get; set; }
+
+        /// <summary>
+        /// Enables / disables no sway.
+        /// </summary>
+        [JsonPropertyName("noSwayEnabled")]
+        public bool NoSwayEnabled { get; set; }
 
         /// <summary>
         /// Enables / disables max / infinite stamina.
@@ -250,6 +252,54 @@ namespace eft_dma_radar
         public bool HideTextOutline { get; set; }
 
         /// <summary>
+        /// Enables / disables memory writing master switch.
+        /// </summary>
+        [JsonPropertyName("masterSwitchEnabled")]
+        public bool MasterSwitchEnabled { get; set; }
+
+        /// <summary>
+        /// Enables / disables extended reach.
+        /// </summary>
+        [JsonPropertyName("extendedReachEnabled")]
+        public bool ExtendedReachEnabled { get; set; }
+
+        /// <summary>
+        /// Enables / disables infinite stamina.
+        /// </summary>
+        [JsonPropertyName("infiniteStaminaEnabled")]
+        public bool InfiniteStaminaEnabled { get; set; }
+
+        /// <summary>
+        /// Enables / disables showing corpses.
+        /// </summary>
+        [JsonPropertyName("showCorpsesEnabled")]
+        public bool ShowCorpsesEnabled { get; set; }
+
+        /// <summary>
+        /// Enables / disables showing sub items.
+        /// </summary>
+        [JsonPropertyName("showSubItemsEnabled")]
+        public bool ShowSubItemsEnabled { get; set; }
+
+        /// <summary>
+        /// Minimum loot value (rubles) to display 'corpses' on map.
+        /// </summary>
+        [JsonPropertyName("minCorpseValue")]
+        public int MinCorpseValue { get; set; }
+
+        /// <summary>
+        /// Minimum loot value (rubles) to display 'sub items' on map.
+        /// </summary>
+        [JsonPropertyName("minSubItemValue")]
+        public int MinSubItemValue { get; set; }
+
+        /// <summary>
+        /// Enables / disables auto loot refresh.
+        /// </summary>
+        [JsonPropertyName("autoLootRefreshEnabled")]
+        public bool AutoLootRefreshEnabled { get; set; }
+
+        /// <summary>
         /// Allows storage of multiple loot filters.
         /// </summary>
         [JsonPropertyName("LootFilters")]
@@ -274,7 +324,8 @@ namespace eft_dma_radar
             HideNames = false;
             ImportantLootOnly = false;
             HideLootValue = false;
-            NoRecoilSwayEnabled = false;
+            NoRecoilEnabled = false;
+            NoSwayEnabled = false;
             MaxStaminaEnabled = false;
             LoggingEnabled = false;
             ShowHoverArmor = false;
@@ -307,7 +358,8 @@ namespace eft_dma_radar
                 ["ExfilPendingIcon"] = new PaintColor.Colors { A = 255, R = 255, G = 255, B = 0 },
                 ["ExfilClosedText"] = new PaintColor.Colors { A = 255, R = 255, G = 255, B = 255 },
                 ["ExfilClosedIcon"] = new PaintColor.Colors { A = 255, R = 255, G = 0, B = 0 },
-                ["TextOutline"] = new PaintColor.Colors { A = 255, R = 0, G = 0, B = 0 }
+                ["TextOutline"] = new PaintColor.Colors { A = 255, R = 0, G = 0, B = 0 },
+                ["DeathMarker"] = new PaintColor.Colors { A = 255, R = 0, G = 0, B = 0 }
             };
 
             NightVisionEnabled = false;
@@ -325,6 +377,14 @@ namespace eft_dma_radar
             InstantADSEnabled = false;
             HideExfilNames = false;
             HideTextOutline = false;
+            MasterSwitchEnabled = false;
+            InfiniteStaminaEnabled = false;
+            ExtendedReachEnabled = false;
+            ShowCorpsesEnabled = false;
+            ShowSubItemsEnabled = false;
+            MinCorpseValue = 100000;
+            MinSubItemValue = 15000;
+            AutoLootRefreshEnabled = false;
         }
 
         /// <summary>
@@ -391,6 +451,8 @@ namespace eft_dma_radar
         /// </summary>
         public float Height = 0;
 
+        private Config _config { get => Program.Config; }
+
         /// <summary>
         /// Get exact player location (with optional X,Y offsets).
         /// </summary>
@@ -437,11 +499,12 @@ namespace eft_dma_radar
         /// <summary>
         /// Draws a Death Marker on this location.
         /// </summary>
-        public void DrawDeathMarker(SKCanvas canvas)
+        public void DrawDeathMarker(SKCanvas canvas, LootItem item)
         {
             float length = 6 * UIScale;
-            canvas.DrawLine(new SKPoint(this.X - length, this.Y + length), new SKPoint(this.X + length, this.Y - length), SKPaints.PaintDeathMarker);
-            canvas.DrawLine(new SKPoint(this.X - length, this.Y - length), new SKPoint(this.X + length, this.Y + length), SKPaints.PaintDeathMarker);
+            var paint = Extensions.GetDeathMarkerPaint(item);
+            canvas.DrawLine(new SKPoint(this.X - length, this.Y + length), new SKPoint(this.X + length, this.Y - length), paint);
+            canvas.DrawLine(new SKPoint(this.X - length, this.Y - length), new SKPoint(this.X + length, this.Y + length), paint);
         }
         /// <summary>
         /// Draws an Exfil on this location.
@@ -466,7 +529,7 @@ namespace eft_dma_radar
                 canvas.DrawCircle(this.GetPoint(), 4 * UIScale, paint);
             }
 
-            if (!Program.Config.HideExfilNames)
+            if (!_config.HideExfilNames)
             {
                 var coords = this.GetPoint();
                 var textWidth = text.MeasureText(exfil.Name);
@@ -474,7 +537,7 @@ namespace eft_dma_radar
                 coords.X = (coords.X - textWidth / 2);
                 coords.Y = (coords.Y - text.TextSize / 2) - 3;
 
-                if (!Program.Config.HideTextOutline)
+                if (!_config.HideTextOutline)
                     canvas.DrawText(exfil.Name, coords, Extensions.GetTextOutlinePaint());
 
                 canvas.DrawText(exfil.Name, coords, text);
@@ -490,12 +553,17 @@ namespace eft_dma_radar
         /// <summary>
         /// Draws a loot item on this location.
         /// </summary>
-        //public void DrawLoot(SKCanvas canvas, string label, SKPaint paint, SKPaint text, float heightDiff)
-        public void DrawLoot(SKCanvas canvas, DevLootItem item, float heightDiff) {
+        public void DrawLoot(SKCanvas canvas, LootItem item, float heightDiff) {
+            if (item.Container && item.IsCorpse)
+            {
+                this.DrawDeathMarker(canvas, item);
+                return;
+            }
+
             var paint = Extensions.GetEntityPaint(item);
             var text = Extensions.GetTextPaint(item);
-            var label = (item.Container) ? item.ContainerName : (Program.Config.HideLootValue ? item.Item.shortName : item.GetFormattedValueShortName());
- 
+            var label = (item.Container) ? item.ContainerName : (_config.HideLootValue ? item.Item.shortName : item.GetFormattedValueShortName());
+
             if (heightDiff > 1.45) // loot is above player
             {
                 using var path = this.GetUpArrow();
@@ -512,7 +580,7 @@ namespace eft_dma_radar
             }
 
             var coords = this.GetPoint(7 * UIScale, 3 * UIScale);
-            if (!Program.Config.HideTextOutline)
+            if (!_config.HideTextOutline)
                 canvas.DrawText(label, coords, Extensions.GetTextOutlinePaint());
             canvas.DrawText(label, coords, text);
         }
@@ -541,7 +609,7 @@ namespace eft_dma_radar
             }
 
             var coords = this.GetPoint(7 * UIScale, 3 * UIScale);
-            if (!Program.Config.HideTextOutline)
+            if (!_config.HideTextOutline)
                 canvas.DrawText(label, coords, Extensions.GetTextOutlinePaint());
             canvas.DrawText(label, coords, text);
         }
@@ -570,7 +638,7 @@ namespace eft_dma_radar
             }
 
             var coords = this.GetPoint(7 * UIScale, 3 * UIScale);
-            if (!Program.Config.HideTextOutline)
+            if (!_config.HideTextOutline)
                 canvas.DrawText(label, coords, Extensions.GetTextOutlinePaint());
             canvas.DrawText(label, coords, text);
         }
@@ -612,7 +680,7 @@ namespace eft_dma_radar
             {
                 var coords = this.GetPoint(9 * UIScale, spacing);
 
-                if (!Program.Config.HideTextOutline)
+                if (!_config.HideTextOutline)
                     canvas.DrawText(line, coords, Extensions.GetTextOutlinePaint());
                 canvas.DrawText(line, coords, text);
                 spacing += 12 * UIScale;
@@ -621,14 +689,19 @@ namespace eft_dma_radar
         /// <summary>
         /// Draws Loot information on this location
         /// </summary>
-        public void DrawContainerTooltip(SKCanvas canvas, DevLootItem item)
+        public void DrawContainerTooltip(SKCanvas canvas, LootItem item)
         {
-            if (item.Container)
+            if (item is LootContainer container)
             {
-                DrawToolTip(canvas, Helpers.GetContainerItems(item));
-            } else
+                DrawToolTip(canvas, container.Items);
+            }
+            else if (item is LootCorpse corpse)
             {
-                DrawToolTip(canvas, new List<DevLootItem> { item });
+                DrawToolTip(canvas, corpse);
+            }
+            else
+            {
+                DrawToolTip(canvas, new List<LootItem> { item });
             }
         }
         /// <summary>
@@ -713,7 +786,7 @@ namespace eft_dma_radar
         {
             if (!player.IsAlive)
             {
-                DrawCorpseTooltip(canvas, player);
+                //DrawCorpseTooltip(canvas, player);
                 return;
             }
 
@@ -727,7 +800,7 @@ namespace eft_dma_radar
         /// <summary>
         /// Draws the tool tip for loot items/containers
         /// </summary>
-        private void DrawToolTip(SKCanvas canvas, List<DevLootItem> items)
+        private void DrawToolTip(SKCanvas canvas, List<LootItem> items)
         {
             var maxWidth = 0f;
 
@@ -754,6 +827,67 @@ namespace eft_dma_radar
             foreach (var item in items)
             {
                 canvas.DrawText(item.GetFormattedValueName(), left + padding, y, Extensions.GetTextPaint(item));
+                y -= textSpacing;
+            }
+        }
+
+        private void DrawToolTip(SKCanvas canvas, LootCorpse corpse)
+        {
+            var maxWidth = 0f;
+            var items = corpse.Items;
+            var height = items.Count;
+
+            foreach (var gearItem in items)
+            {
+                var width = SKPaints.TextBase.MeasureText(gearItem.GetFormattedTotalValueName());
+                maxWidth = Math.Max(maxWidth, width);
+
+                //if (_config.ShowSubItemsEnabled && gearItem.Loot.Count > 0)
+                if (gearItem.Loot.Count > 0)
+                {
+                    foreach (var lootItem in gearItem.Loot)
+                    {
+                        if (lootItem.AlwaysShow || lootItem.Important || (!_config.ImportantLootOnly && _config.ShowSubItemsEnabled && lootItem.Value > _config.MinSubItemValue))
+                        {
+                            width = SKPaints.TextBase.MeasureText($"     {lootItem.GetFormattedValueName()}");
+                            maxWidth = Math.Max(maxWidth, width);
+
+                            height++;
+                        }
+                    }
+                }
+            }
+
+            var textSpacing = 15 * UIScale;
+            var padding = 3 * UIScale;
+
+            height = (int)(height * textSpacing);
+
+            var left = X + padding;
+            var top = Y - padding;
+            var right = left + maxWidth + padding * 2;
+            var bottom = top + height + padding * 2;
+
+            var backgroundRect = new SKRect(left, top, right, bottom);
+            canvas.DrawRect(backgroundRect, SKPaints.PaintTransparentBacker);
+
+            var y = bottom - (padding * 2.2f);
+            foreach (var gearItem in items)
+            {
+                //if (_config.ShowSubItemsEnabled && gearItem.Loot.Count > 0)
+                if (gearItem.Loot.Count > 0)
+                {
+                    foreach (var lootItem in gearItem.Loot)
+                    {
+                        if (lootItem.AlwaysShow || lootItem.Important || (!_config.ImportantLootOnly && _config.ShowSubItemsEnabled && lootItem.Value > _config.MinSubItemValue))
+                        {
+                            canvas.DrawText("   " + lootItem.GetFormattedValueName(), left + padding, y, Extensions.GetTextPaint(lootItem));
+                            y -= textSpacing;
+                        }
+                    }
+                }
+
+                canvas.DrawText(gearItem.GetFormattedTotalValueName(), left + padding, y, Extensions.GetTextPaint(gearItem));
                 y -= textSpacing;
             }
         }
@@ -784,7 +918,7 @@ namespace eft_dma_radar
                     }
                 }
 
-                if (Program.Config.ShowHoverArmor)
+                if (_config.ShowHoverArmor)
                 {
                     var gearSlots = new Dictionary<string, string>()
                     {
@@ -805,7 +939,12 @@ namespace eft_dma_radar
                 }
             }
 
-            lines.Insert(0, $"Value: {TarkovDevAPIManager.FormatNumber(player.PlayerValue)}");
+            lines.Insert(0, $"Value: {TarkovDevManager.FormatNumber(player.Value)}");
+
+            if (player.KDA != -1)
+            {
+                lines.Insert(0, $"KD: {player.KDA}");
+            }
 
             DrawToolTip(canvas, string.Join("\n", lines));
         }
@@ -815,8 +954,9 @@ namespace eft_dma_radar
         private void DrawCorpseTooltip(SKCanvas canvas, Player player)
         {
             var lines = new List<string>();
+            var corpseName = $"Corpse [{player.Name}]";
 
-            lines.Insert(0, "Corpse");
+            lines.Insert(0, corpseName);
 
             if (player.Lvl != 0)
                 lines.Insert(0, $"L:{player.Lvl}");
@@ -860,15 +1000,6 @@ namespace eft_dma_radar
                 y -= textSpacing;
             }
         }
-    }
-    /// <summary>
-    /// Contains long/short names for player gear.
-    /// </summary>
-    public class GearItem
-    {
-        public string Long { get; init; }
-        public string Short { get; init; }
-        public string id { get; init; }
     }
 
     /// <summary>
@@ -1189,7 +1320,7 @@ namespace eft_dma_radar
         }
     }
 
-        public class ScatterReadEntry<T> : IScatterEntry
+    public class ScatterReadEntry<T> : IScatterEntry
     {
         #region Properties
 
@@ -1387,6 +1518,67 @@ namespace eft_dma_radar
 
     #region Custom EFT Classes
     /// <summary>
+    /// Defines a piece of gear
+    /// </summary>
+    public class GearItem
+    {
+        public string ID { get; set; }
+        public string Long { get; set; }
+        public string Short { get; set; }
+        public int Value { get; set; }
+        public int LootValue {  get => Loot.Sum(x => x.Value); }
+        public int TotalValue { get => this.Value + this.LootValue; }
+        public List<LootItem> Loot { get; set; }
+        public bool HasThermal { get; set; }
+        public bool Important { get; set; }
+        public LootFilter.Colors Color { get; set; }
+
+        /// <summary>
+        /// Gets the formatted the items value
+        /// </summary>
+        public string GetFormattedValue()
+        {
+            return TarkovDevManager.FormatNumber(this.Value);
+        }
+
+        /// <summary>
+        /// Gets the formatted the loot value of the item
+        /// </summary>
+        public string GetFormattedLootValue()
+        {
+            return TarkovDevManager.FormatNumber(this.LootValue);
+        }
+
+        /// <summary>
+        /// Gets the formatted the total value of the item
+        /// </summary>
+        public string GetFormattedTotalValue()
+        {
+            return TarkovDevManager.FormatNumber(this.TotalValue);
+        }
+
+        /// <summary>
+        /// Gets the formatted item value + name
+        /// </summary>
+        public string GetFormattedValueName()
+        {
+            return this.Value > 0 ? $"[{this.GetFormattedValue()}] {this.Long}" : this.Long;
+        }
+
+        /// <summary>
+        /// Gets the formatted item value + name
+        /// </summary>
+        public string GetFormattedValueShortName()
+        {
+            return this.Value > 0 ? $"[{this.GetFormattedValue()}] {this.Short}" : this.Short;
+        }
+
+        public string GetFormattedTotalValueName()
+        {
+            return this.TotalValue > 0 ? $"[{this.GetFormattedTotalValue()}] {this.Long}" : this.Long;
+        }
+    }
+    /// <summary>
     /// Contains weapon info for Primary Weapons.
     /// </summary>
     public struct PlayerWeaponInfo
@@ -1504,7 +1696,6 @@ namespace eft_dma_radar
     #endregion
 
     #region Helpers
-
     public static class Helpers
     {
         /// <summary>
@@ -1549,7 +1740,7 @@ namespace eft_dma_radar
         };
 
         public static string[] RaiderGuardRogueNames = {
-            "Afraid",
+            "Afraid", // Rogues
             "Andresto",
             "Applejuice",
             "Arizona",
@@ -1646,7 +1837,7 @@ namespace eft_dma_radar
             "Panther",
             "Philbo",
             "Quebec",
-            "Racoon",
+            "Raccoon",
             "Rage",
             "Rambo",
             "Rassler",
@@ -1703,6 +1894,7 @@ namespace eft_dma_radar
             "Aimbotkin",
             "Baklazhan", // kaban guards
             "Bazil",
+            "Belyash",
             "Bibop",
             "Cheburek",
             "Dihlofos",
@@ -1710,6 +1902,7 @@ namespace eft_dma_radar
             "Flamberg",
             "Gladius",
             "Gromila",
+            "Gus",
             "Kapral",
             "Kartezhnik",
             "Khvost",
@@ -1967,7 +2160,74 @@ namespace eft_dma_radar
             "Starshiy brat",
             "Strelok brat",
             "Tatyanka Desatnik",
-            "Visyak"
+            "Visyak",
+        "Baba Yaga", // Follower of Morana
+        "Buran",
+        "Domovoy",
+        "Gamayun",
+        "Gololed",
+        "Gorynych",
+        "Hladnik",
+        "Hladovit",
+        "Holodec",
+        "Holodryg",
+        "Holodun",
+        "Ineevik",
+        "Ineyko",
+        "Ineynik",
+        "Karachun",
+        "Kikimora",
+        "Koleda",
+        "Kupala",
+        "Ledorez",
+        "Ledovik",
+        "Ledyanik",
+        "Ledyanoy",
+        "Liho",
+        "Merzlotnik",
+        "Mor",
+        "Morozec",
+        "Morozina",
+        "Morozko",
+        "Moroznik",
+        "Obmoroz",
+        "Poludnik",
+        "Serebryak",
+        "Severyanin",
+        "Sirin",
+        "Skvoznyak",
+        "Snegobur",
+        "Snegoed",
+        "Snegohod",
+        "Snegovey",
+        "Snegovik",
+        "Snezhin",
+        "Sosulnik",
+        "Striga",
+        "Studen",
+        "Stuzhaylo",
+        "Stuzhevik",
+        "Sugrobnik",
+        "Sugrobus",
+        "Talasum",
+        "Tryasovica",
+        "Tuchevik",
+        "Uraganische",
+        "Vetrenik",
+        "Vetrozloy",
+        "Vihrevoy",
+        "Viy",
+        "Vodyanoy",
+        "Vyugar",
+        "Vyugovik",
+        "Zimar",
+        "Zimnik",
+        "Zimobor",
+        "Zimogor",
+        "Zimorod",
+        "Zimovey",
+        "Zlomraz",
+        "Zloveschun"
         };
 
         public static string TransliterateCyrillic(string input)
@@ -1981,13 +2241,6 @@ namespace eft_dma_radar
 
             return output.ToString();
         }
-
-        public static List<DevLootItem> GetContainerItems(DevLootItem item) {
-            return Memory.Loot.Loot.Where(x => x.Container && x.Position == item.Position)
-                .OrderBy(x => TarkovDevAPIManager.GetItemValue(x.Item))
-                .ToList();
-        }
     }
     #endregion
-    
 }

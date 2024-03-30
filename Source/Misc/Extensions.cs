@@ -112,26 +112,49 @@ namespace eft_dma_radar
         /// <summary>
         /// Determines the items paint color.
         /// </summary>
-        public static SKPaint GetEntityPaint(DevLootItem item)
+        public static SKPaint GetEntityPaint(LootItem item)
         {
-            int value = TarkovDevAPIManager.GetItemValue(item.Item);
-            bool isImportant = (item.Important || value >= Program.Config.MinImportantLootValue);
-            bool isFiltered = Memory.Loot.LootFilterColors.ContainsKey(item.Item.id);
+            bool isFiltered = !item.Color.Equals(new LootFilter.Colors { R = 0, G = 0, B = 0, A = 0 });
 
             SKPaint paintToUse = SKPaints.PaintLoot.Clone();
 
             if (isFiltered)
             {
-                LootFilter.Colors col = Memory.Loot.LootFilterColors[item.Item.id];
+                var col = item.Color;
                 paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
             }
-            else if (isImportant)
+            else if (item.Important)
             {
                 paintToUse.Color = Extensions.SKColorFromPaintColor("ImportantLoot");
             }
             else
             {
                 paintToUse.Color = Extensions.SKColorFromPaintColor("RegularLoot");
+            }
+
+            return paintToUse;
+        }
+
+        /// <summary>
+        /// Determines the death marker paint color.
+        /// </summary>
+        public static SKPaint GetDeathMarkerPaint(LootItem item)
+        {
+            bool isFiltered = !item.Color.Equals(new LootFilter.Colors { R = 0, G = 0, B = 0, A = 0 });
+            SKPaint paintToUse = SKPaints.PaintLoot.Clone();
+
+            if (isFiltered)
+            {
+                var col = item.Color;
+                paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
+            }
+            else if (item.Important)
+            {
+                paintToUse.Color = Extensions.SKColorFromPaintColor("ImportantLoot");
+            }
+            else
+            {
+                paintToUse.Color = Extensions.SKColorFromPaintColor("DeathMarker");
             }
 
             return paintToUse;
@@ -203,20 +226,39 @@ namespace eft_dma_radar
         /// <summary>
         /// Determines the loot items text color.
         /// </summary>
-        public static SKPaint GetTextPaint(DevLootItem item)
+        public static SKPaint GetTextPaint(LootItem item)
         {
-            int value = TarkovDevAPIManager.GetItemValue(item.Item);
-            bool isImportant = (item.Important || value >= Program.Config.MinImportantLootValue);
-            bool isFiltered = Memory.Loot.LootFilterColors.ContainsKey(item.Item.id);
-
+            bool isFiltered = !item.Color.Equals(new LootFilter.Colors { R = 0, G = 0, B = 0, A = 0 });
             SKPaint paintToUse = SKPaints.TextLoot.Clone();
 
             if (isFiltered)
             {
-                LootFilter.Colors col = Memory.Loot.LootFilterColors[item.Item.id];
+                var col = item.Color;
                 paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
             }
-            else if (isImportant)
+            else if (item.Important)
+            {
+                paintToUse.Color = Extensions.SKColorFromPaintColor("ImportantLoot");
+            }
+            else
+            {
+                paintToUse.Color = Extensions.SKColorFromPaintColor("RegularLoot");
+            }
+
+            return paintToUse;
+        }
+
+        public static SKPaint GetTextPaint(GearItem item)
+        {
+            bool isFiltered = !item.Color.Equals(new LootFilter.Colors { R = 0, G = 0, B = 0, A = 0 });
+            SKPaint paintToUse = SKPaints.TextLoot.Clone();
+
+            if (isFiltered)
+            {
+                var col = item.Color;
+                paintToUse.Color = new SKColor(col.R, col.G, col.B, col.A);
+            }
+            else if (item.Important)
             {
                 paintToUse.Color = Extensions.SKColorFromPaintColor("ImportantLoot");
             }

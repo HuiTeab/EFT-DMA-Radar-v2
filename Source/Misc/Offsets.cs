@@ -87,14 +87,14 @@
         public const uint ID = 0x40; // to UnityString
         public const uint NickName = 0x48; // to UnityString
         public const uint ObservedPlayerController = 0x80; // to PlayerController
-        public static readonly uint[] To_MovementContext = new uint[] { 0x80, 0xC8, 0x10}; // to MovementContext
+        public static readonly uint[] To_MovementContext = new uint[] { 0x80, 0xC8, 0x10 }; // to MovementContext
         public static readonly uint[] To_TransformInternal = new uint[] { 0x60, 0x28, 0x28, 0x10, 0x20, 0x10 }; // to TransformInternal
     }
 
     public struct ObservedPlayerController //[Class] -.GClass1E0D : Object, GInterface94D4, IDisposable
     {
         public const uint InventoryController = 0x118; // to InventoryController
-        
+
     }
 
     public struct ObserverdPlayerMovementContext
