@@ -418,7 +418,7 @@ namespace eft_dma_radar
                     if ((playerSide == 1 || playerSide == 2) && !playerIsAI) {
                         this.IsPmc = true;
                         this.Type = (playerSide == 1 ? PlayerType.USEC : PlayerType.BEAR);
-                        this.KDA = KDManager.GetKD(this.AccountID).Result;
+                        //this.KDA = KDManager.GetKD(this.AccountID).Result;
                     } else if (playerSide == 4 && !playerIsAI) {
                         this.Type = PlayerType.PScav;
                     } else if (playerSide == 4 && playerIsAI) {
@@ -570,7 +570,7 @@ namespace eft_dma_radar
                     if (!this._kdRefreshSw.IsRunning || this._kdRefreshSw.ElapsedMilliseconds >= 20000)
                     {
                         this._kdRefreshSw.Restart();
-                        this.KDA = await KDManager.GetKD(this.AccountID).ConfigureAwait(true);
+                        //this.KDA = await KDManager.GetKD(this.AccountID).ConfigureAwait(true);
                     }
                 }
             }
