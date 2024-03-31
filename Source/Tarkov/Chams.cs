@@ -16,6 +16,7 @@ namespace eft_dma_radar.Source.Misc {
         }
 
         public Chams() {
+        
         }
 
         public void ClothingChams(ulong playerBody) {
@@ -66,7 +67,7 @@ namespace eft_dma_radar.Source.Misc {
                             var MaterialEntryPtr = Memory.ReadPtr(MaterialDictionaryBase + (0x50 * (uint)k));
                             //Console.WriteLine($"MaterialEntryPtr: {MaterialEntryPtr} {playerNick}");
                             SavePointer(MaterialDictionaryBase + (0x50 * (uint)k), MaterialEntryPtr);
-                            //Memory.WriteValue<ulong>(MaterialDictionaryBase + (0x50 * (uint)k), _cameraManager.GetNightMaterial());
+                            //Memory.WriteValue<ulong>(MaterialDictionaryBase + (0x50 * (uint)k), 0);
                             }catch { }
                         }
                     }
