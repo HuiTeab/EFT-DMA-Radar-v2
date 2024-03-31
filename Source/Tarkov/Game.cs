@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using eft_dma_radar.Source.Misc;
 using eft_dma_radar.Source.MonoSharp;
 using eft_dma_radar.Source.Tarkov;
 
@@ -20,6 +21,7 @@ namespace eft_dma_radar
         private Config _config;
         private CameraManager _cameraManager;
         private QuestManager _questManager;
+        private Chams _chams;
         private Toolbox _toolbox;
         private ulong _localGameWorld;
         private readonly ulong _unityBase;
@@ -97,6 +99,10 @@ namespace eft_dma_radar
         public QuestManager QuestManager {
         
             get => _questManager;
+        }
+        public Chams Chams
+        {
+            get => _chams;
         }
         #endregion
 
@@ -449,6 +455,17 @@ namespace eft_dma_radar
                         catch (Exception ex)
                         {
                             Program.Log($"ERROR loading Toolbox: {ex}");
+                        }
+                    }
+                    if (this._chams is null)
+                    {
+                        try
+                        {
+                            this._chams = new Chams();
+                        }
+                        catch (Exception ex)
+                        {
+                            Program.Log($"ERROR loading Chams: {ex}");
                         }
                     }
                 }

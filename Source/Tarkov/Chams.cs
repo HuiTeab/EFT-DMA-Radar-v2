@@ -4,12 +4,22 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using eft_dma_radar.Source.Tarkov;
 
 namespace eft_dma_radar.Source.Misc {
 
-    internal class Chams {
+    public class Chams {
         
-        public static void ClothingChams(ulong playerBody) {
+        private CameraManager _cameraManager
+        {
+            get => Memory.CameraManager;
+        }
+
+        public Chams() {
+        }
+
+        public void ClothingChams(ulong playerBody) {
+            
             if (playerBody == 0) {
                 return;
             }
@@ -56,7 +66,7 @@ namespace eft_dma_radar.Source.Misc {
                             var MaterialEntryPtr = Memory.ReadPtr(MaterialDictionaryBase + (0x50 * (uint)k));
                             //Console.WriteLine($"MaterialEntryPtr: {MaterialEntryPtr} {playerNick}");
                             SavePointer(MaterialDictionaryBase + (0x50 * (uint)k), MaterialEntryPtr);
-                            Memory.WriteValue<ulong>(MaterialDictionaryBase + (0x50 * (uint)k), 0);
+                            //Memory.WriteValue<ulong>(MaterialDictionaryBase + (0x50 * (uint)k), _cameraManager.GetNightMaterial());
                             }catch { }
                         }
                     }
@@ -64,7 +74,7 @@ namespace eft_dma_radar.Source.Misc {
             }
         }
 
-        public static void GearChams(ulong playerBody) {
+        public void GearChams(ulong playerBody) {
             if (playerBody == 0) {
                 return;
             }
@@ -114,7 +124,7 @@ namespace eft_dma_radar.Source.Misc {
                                 var MaterialEntryPtr = Memory.ReadPtr(MaterialDictionaryBase + (0x50 * (uint)k));
                                 //Console.WriteLine($"MaterialEntryPtr: {MaterialEntryPtr}");
                                 SavePointer(MaterialDictionaryBase + (0x50 * (uint)k), MaterialEntryPtr);
-                                Memory.WriteValue<ulong>(MaterialDictionaryBase + (0x50 * (uint)k), 0);
+                                //Memory.WriteValue<ulong>(MaterialDictionaryBase + (0x50 * (uint)k), 0);
                             }
                         }
                     }
@@ -130,7 +140,7 @@ namespace eft_dma_radar.Source.Misc {
 
         public static void RestorePointers() {
             foreach (var backup in pointerBackups) {
-                Memory.WriteValue<ulong>(backup.Address, backup.OriginalValue);
+                //Memory.WriteValue<ulong>(backup.Address, backup.OriginalValue);
             }
             pointerBackups.Clear();
         }

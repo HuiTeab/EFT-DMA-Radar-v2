@@ -375,6 +375,7 @@ namespace eft_dma_radar
                             IsLocalPlayer = false;
                             IsPmc = false;
                             Name = Helpers.TransliterateCyrillic(Name);
+                            this.PlayerBody = Memory.ReadPtr(playerBase + 0xA8);
 
                         }
                         else

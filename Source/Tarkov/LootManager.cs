@@ -231,7 +231,6 @@ namespace eft_dma_radar
             var vRound6 = validScatterMap.AddRound();
             var vRound7 = validScatterMap.AddRound();
             var vRound8 = validScatterMap.AddRound();
-            var vRound9 = validScatterMap.AddRound();
 
             for (int i = 0; i < this.validLootEntities.Count; i++)
             {
@@ -346,12 +345,52 @@ namespace eft_dma_radar
                                         return;
                                     if (!validScatterMap.Results[i][16].TryGetResult<ulong>(out var BSGIDPtr))
                                         return;
-
                                     var id = Memory.ReadUnityString(BSGIDPtr);
+                                    try {
+                                        var searchableItem = TarkovDevManager.AllItems.Values.FirstOrDefault(x => x.Item.id == id && x.Item.categories.FirstOrDefault(x => x.name == "Searchable item") != null);
+                                        if (searchableItem != null)
+                                        {
+                                            if (!validScatterMap.Results[i][6].TryGetResult<ulong>(out var iItemOwner))
+                                                return;
+                                            var item_0xC0 = Memory.ReadPtr(iItemOwner + 0xC0);
+                                            var itemGrids = Memory.ReadPtr(item_0xC0 + 0x70);
+                                            //this.savedLootContainersInfo.Add(new ContainerInfo {InteractiveClass = interactiveClass, Position = position, Name = searchableItem.Item.shortName ?? containerName, Grids = itemGrids});
+                                        }
+
+                                    }catch{}
+
+                                    try {
+                                        var searchableItem = TarkovDevManager.AllItems.Values.FirstOrDefault(x => x.Item.id == id && x.Item.categories.FirstOrDefault(x => x.name == "Weapon") != null);
+                                        if (searchableItem != null)
+                                        {
+                                            if (!validScatterMap.Results[i][6].TryGetResult<ulong>(out var iItemOwner))
+                                                return;
+                                            var item_0xC0 = Memory.ReadPtr(iItemOwner + 0xC0);
+                                            var itemGrids = Memory.ReadPtr(item_0xC0 + 0x70);
+                                            var itemSlots = Memory.ReadPtr(item_0xC0 + 0x78);
+                                            try {
+                                            
+                                                var size = Memory.ReadValue<int>(itemSlots + Offsets.UnityList.Count);
+                                                //Console.WriteLine($"Size: {size}");
+                                                var slotDict = new Dictionary<string, ulong>(StringComparer.OrdinalIgnoreCase);
+
+                                                for (int slotID = 0; slotID < size; slotID++)
+                                                {
+                                                    var slotPtr = Memory.ReadPtr(itemSlots + Offsets.UnityListBase.Start + (uint)slotID * 0x8);
+                                                    var namePtr = Memory.ReadPtr(slotPtr + Offsets.Slot.Name);
+                                                    var name = Memory.ReadUnityString(namePtr);
+                                                    
+                                                    slotDict.TryAdd(name, slotPtr);
+                                                }
+                                                //Console.WriteLine($"Slots: {slotDict.Count}");
+                                            }catch {}
+                                        }
+
+                                    }catch{}
+
 
                                     if (id == null)
                                         return;
-
                                     this.savedLootItemsInfo.Add(new LootItemInfo(interactiveClass, questItem, position, id));
                                 }
                             }

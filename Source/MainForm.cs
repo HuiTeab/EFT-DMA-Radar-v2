@@ -483,7 +483,6 @@ namespace eft_dma_radar
             var allPlayers = this.AllPlayers
                ?.Select(x => x.Value)
                .Where(x => !x.HasExfild);
-
             ulong playerBody = 0;
             if (allPlayers is not null)
             {
@@ -507,11 +506,10 @@ namespace eft_dma_radar
                     }
                     if (chkChams.Checked)
                     {
-                        Chams.ClothingChams(playerBody);
+                        
                     }
                     else
                     {
-                        Chams.RestorePointers();
                     }
                 }
             }

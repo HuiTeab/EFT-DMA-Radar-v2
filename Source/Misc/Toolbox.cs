@@ -49,7 +49,7 @@ namespace eft_dma_radar.Source.Tarkov
                     {
                         this.ToolboxWorker();
                     }
-                    Thread.Sleep(500);
+                    Thread.Sleep(100);
                 }
 
                 Program.Log("LocalPlayer found, initializing toolbox");
@@ -159,18 +159,6 @@ namespace eft_dma_radar.Source.Tarkov
             {
                 this.extendedReachToggled = false;
                 Game.SetInteractDistance(false);
-            }
-
-            // Infinite Stamina
-            if (this._config.InfiniteStaminaEnabled)
-            {
-                this._playerManager.SetMovementState(true);
-                this._playerManager.SetMaxStamina();
-
-            }
-            else if (!this._config.InfiniteStaminaEnabled)
-            {
-                this._playerManager.SetMovementState(false);
             }
 
             // Camera Stuff

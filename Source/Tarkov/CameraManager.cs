@@ -113,7 +113,18 @@ namespace eft_dma_radar.Source.Tarkov
             if (this.IsReady)
             {
                 var fpsThermalComponent = GetComponentFromGameObject(this._fpsCamera, "ThermalVision");
+		        //component.TextureMask.Stretch = false;
+		        //component.TextureMask.Size = 0f;
                 var thermalOn = Memory.ReadValue<bool>(fpsThermalComponent + 0xE0);
+                //[40] TextureMask : BSG.CameraEffects.TextureMask
+                var textureMask = Memory.ReadPtr(fpsThermalComponent + 0x40);
+                //[60] Stretch : Boolean
+                //[64] Size : Single
+                //var color = Memory.ReadPtr(textureMask + 0x20);
+                //var stretch = Memory.ReadValue<bool>(textureMask + 0x60);
+                //var size = Memory.ReadValue<float>(textureMask + 0x64);
+                //Console.WriteLine($"stretch: {stretch}, size: {size} color: {color}");
+
 
                 if (on != thermalOn)
                 {
@@ -124,9 +135,13 @@ namespace eft_dma_radar.Source.Tarkov
                     Memory.WriteValue(fpsThermalComponent + 0xE4, thermalOn);
                     Memory.WriteValue(fpsThermalComponent + 0xE5, thermalOn);
 
-                    Memory.WriteValue(fpsThermalComponent + 0xE8, thermalOn ? 0.013f : 0.1f);
-                    Memory.WriteValue(fpsThermalComponent + 0xEC, thermalOn ? 5.0f : 10.0f);
-                    Memory.WriteValue(fpsThermalComponent + 0xF0, thermalOn ? 2.0f : 6.0f);
+                    //var thermalVisionUtilities = Memory.ReadPtr(fpsThermalComponent + 0x18);
+                    //var valuesCoefs = Memory.ReadPtr(thermalVisionUtilities + 0x18);
+                    //flir = mainTexColorCoef: 0.7, minimumTemperatureValue: 0.01, rampShift: -0.5
+                    //Memory.WriteValue(valuesCoefs + 0x10, 1.0f); //mainTexColorCoef 0.5f is default / 0.7f is flir / 1f is max red?
+                    //Memory.WriteValue(valuesCoefs + 0x14, 0.00001f); //minimumTemperatureValue 0.01f is default / 0.001f is flir / detection any temp?
+                    //Memory.WriteValue(thermalVisionUtilities + 0x30, 2); //0 = pink / 1 = green / 2 = white
+                    
                 }
             }
         }
@@ -173,8 +188,8 @@ namespace eft_dma_radar.Source.Tarkov
             if (this.IsReady)
             {
                 ulong opticComponent = 0;
-                ulong opticThermalVision = 0;
                 var component = Memory.ReadPtr(this._opticCamera + 0x30);
+                var opticThermal = GetComponentFromGameObject(this._opticCamera, "ThermalVision");
                 for (int i = 0x8; i < 0x100; i += 0x10)
                 {
                     var fields = Memory.ReadPtr(component + (ulong)i);
@@ -186,14 +201,45 @@ namespace eft_dma_radar.Source.Tarkov
                     if (className == "ThermalVision")
                     {
                         opticComponent = fields;
-                        opticThermalVision = Memory.ReadPtr(fieldsPtr_ + 0x28);
                         break;
                     }
                 }
-
                 Memory.WriteValue(opticComponent + 0x38, on);
-                Memory.WriteValue(opticThermalVision + 0xE0, on);
+                Memory.WriteValue(opticThermal + 0xE1, !on);
+                Memory.WriteValue(opticThermal + 0xE2, !on);
+                Memory.WriteValue(opticThermal + 0xE3, !on);
+                Memory.WriteValue(opticThermal + 0xE4, !on);
+                Memory.WriteValue(opticThermal + 0xE5, !on);
+                //var thermalVisionUtilities = Memory.ReadPtr(opticThermal + 0x18);
+                //var valuesCoefs = Memory.ReadPtr(thermalVisionUtilities + 0x18);
+                //flir = mainTexColorCoef: 0.7, minimumTemperatureValue: 0.01, rampShift: -0.5
+                //Memory.WriteValue(valuesCoefs + 0x10, 1f); //mainTexColorCoef 0.5f is default / 0.7f is flir / 1f is max red?
+                //Memory.WriteValue(valuesCoefs + 0x14, 0.0001f); //minimumTemperatureValue 0.01f is default / 0.001f is flir / detection any temp?
+                //Memory.WriteValue(thermalVisionUtilities + 0x30, 2); //0 = pink / 1 = green / 2 = white
+
             }
+        }
+
+        public ulong GetNightMaterial() {
+            if (this.IsReady)
+            {
+                var nightVisionComponent = GetComponentFromGameObject(_fpsCamera, "NightVision");
+                var nightVisionMaterial = Memory.ReadPtr(nightVisionComponent + 0x90);
+
+                return nightVisionMaterial;
+            }
+            return 0;
+        }
+
+        public ulong GetNightColor() {
+            if (this.IsReady)
+            {
+                var nightVisionComponent = GetComponentFromGameObject(_fpsCamera, "NightVision");
+                var nightVisionColor = Memory.ReadPtr(nightVisionComponent + 0xD8);
+
+                return nightVisionColor;
+            }
+            return 0;
         }
     }
 }
