@@ -109,6 +109,7 @@ namespace eft_dma_radar
             txtLootFilterEditName = new TextBox();
             picLootFilterEditColor = new PictureBox();
             grpLoot = new GroupBox();
+            chkAutoLootRefresh = new CheckBox();
             chkShowSubItems = new CheckBox();
             chkShowCorpses = new CheckBox();
             grpLootValues = new GroupBox();
@@ -144,6 +145,17 @@ namespace eft_dma_radar
             chkShowAimview = new CheckBox();
             chkHideNames = new CheckBox();
             grpMemoryWriting = new GroupBox();
+            grpThermal = new GroupBox();
+            chkOpticThermalSetting = new CheckBox();
+            chkThermalSetting = new CheckBox();
+            chkThermalShift = new CheckBox();
+            chkThermalColorCoef = new CheckBox();
+            chkThermalRampPalette = new CheckBox();
+            trkThermalShift = new TrackBar();
+            chkThermalTemp = new CheckBox();
+            cboThermalRampPalette = new ComboBox();
+            trkThermalTemp = new TrackBar();
+            trkThermalColorCoef = new TrackBar();
             chkMasterSwitch = new CheckBox();
             grpGlobalFeatures = new GroupBox();
             chkExtendedReach = new CheckBox();
@@ -182,7 +194,6 @@ namespace eft_dma_radar
             tabControl = new TabControl();
             colDialog = new ColorDialog();
             toolTip = new ToolTip(components);
-            chkAutoLootRefresh = new CheckBox();
             tabLootFilter.SuspendLayout();
             tabPlayerHistory.SuspendLayout();
             tabPlayerLoadouts.SuspendLayout();
@@ -223,6 +234,10 @@ namespace eft_dma_radar
             ((System.ComponentModel.ISupportInitialize)trkZoom).BeginInit();
             ((System.ComponentModel.ISupportInitialize)trkUIScale).BeginInit();
             grpMemoryWriting.SuspendLayout();
+            grpThermal.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)trkThermalShift).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)trkThermalTemp).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)trkThermalColorCoef).BeginInit();
             grpGlobalFeatures.SuspendLayout();
             grpGearFeatures.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)trkMagDrills).BeginInit();
@@ -248,7 +263,7 @@ namespace eft_dma_radar
             tabLootFilter.Location = new Point(4, 24);
             tabLootFilter.Name = "tabLootFilter";
             tabLootFilter.Padding = new Padding(3);
-            tabLootFilter.Size = new Size(1168, 638);
+            tabLootFilter.Size = new Size(1333, 774);
             tabLootFilter.TabIndex = 4;
             tabLootFilter.Text = "Loot Filter";
             tabLootFilter.UseVisualStyleBackColor = true;
@@ -336,7 +351,7 @@ namespace eft_dma_radar
             lstViewLootFilter.Location = new Point(3, 35);
             lstViewLootFilter.MultiSelect = false;
             lstViewLootFilter.Name = "lstViewLootFilter";
-            lstViewLootFilter.Size = new Size(1162, 600);
+            lstViewLootFilter.Size = new Size(1327, 736);
             lstViewLootFilter.TabIndex = 0;
             lstViewLootFilter.UseCompatibleStateImageBehavior = false;
             lstViewLootFilter.View = View.Details;
@@ -366,7 +381,7 @@ namespace eft_dma_radar
             tabPlayerHistory.Controls.Add(lstViewPMCHistory);
             tabPlayerHistory.Location = new Point(4, 24);
             tabPlayerHistory.Name = "tabPlayerHistory";
-            tabPlayerHistory.Size = new Size(1168, 638);
+            tabPlayerHistory.Size = new Size(1333, 774);
             tabPlayerHistory.TabIndex = 3;
             tabPlayerHistory.Text = "Player History";
             tabPlayerHistory.UseVisualStyleBackColor = true;
@@ -383,7 +398,7 @@ namespace eft_dma_radar
             lstViewPMCHistory.Location = new Point(0, 0);
             lstViewPMCHistory.MultiSelect = false;
             lstViewPMCHistory.Name = "lstViewPMCHistory";
-            lstViewPMCHistory.Size = new Size(1168, 638);
+            lstViewPMCHistory.Size = new Size(1333, 774);
             lstViewPMCHistory.TabIndex = 0;
             lstViewPMCHistory.UseCompatibleStateImageBehavior = false;
             lstViewPMCHistory.View = View.Details;
@@ -403,7 +418,7 @@ namespace eft_dma_radar
             tabPlayerLoadouts.Controls.Add(rchTxtPlayerInfo);
             tabPlayerLoadouts.Location = new Point(4, 24);
             tabPlayerLoadouts.Name = "tabPlayerLoadouts";
-            tabPlayerLoadouts.Size = new Size(1168, 638);
+            tabPlayerLoadouts.Size = new Size(1333, 774);
             tabPlayerLoadouts.TabIndex = 2;
             tabPlayerLoadouts.Text = "Player Loadouts";
             tabPlayerLoadouts.UseVisualStyleBackColor = true;
@@ -415,7 +430,7 @@ namespace eft_dma_radar
             rchTxtPlayerInfo.Location = new Point(0, 0);
             rchTxtPlayerInfo.Name = "rchTxtPlayerInfo";
             rchTxtPlayerInfo.ReadOnly = true;
-            rchTxtPlayerInfo.Size = new Size(1168, 638);
+            rchTxtPlayerInfo.Size = new Size(1333, 774);
             rchTxtPlayerInfo.TabIndex = 0;
             rchTxtPlayerInfo.Text = "";
             // 
@@ -425,7 +440,7 @@ namespace eft_dma_radar
             tabSettings.Location = new Point(4, 24);
             tabSettings.Name = "tabSettings";
             tabSettings.Padding = new Padding(3);
-            tabSettings.Size = new Size(1168, 638);
+            tabSettings.Size = new Size(1333, 774);
             tabSettings.TabIndex = 1;
             tabSettings.Text = "Settings";
             tabSettings.UseVisualStyleBackColor = true;
@@ -443,7 +458,7 @@ namespace eft_dma_radar
             grpConfig.Margin = new Padding(4, 3, 4, 3);
             grpConfig.Name = "grpConfig";
             grpConfig.Padding = new Padding(4, 3, 4, 3);
-            grpConfig.Size = new Size(1162, 632);
+            grpConfig.Size = new Size(1327, 768);
             grpConfig.TabIndex = 8;
             grpConfig.TabStop = false;
             grpConfig.Text = "Radar Config";
@@ -1058,6 +1073,17 @@ namespace eft_dma_radar
             grpLoot.TabStop = false;
             grpLoot.Text = "Loot";
             // 
+            // chkAutoLootRefresh
+            // 
+            chkAutoLootRefresh.AutoSize = true;
+            chkAutoLootRefresh.Location = new Point(6, 200);
+            chkAutoLootRefresh.Name = "chkAutoLootRefresh";
+            chkAutoLootRefresh.Size = new Size(121, 19);
+            chkAutoLootRefresh.TabIndex = 35;
+            chkAutoLootRefresh.Text = "Auto Loot Refresh";
+            chkAutoLootRefresh.UseVisualStyleBackColor = true;
+            chkAutoLootRefresh.CheckedChanged += chkAutoLootRefresh_CheckedChanged;
+            // 
             // chkShowSubItems
             // 
             chkShowSubItems.AutoSize = true;
@@ -1472,16 +1498,142 @@ namespace eft_dma_radar
             // 
             // grpMemoryWriting
             // 
+            grpMemoryWriting.Controls.Add(grpThermal);
             grpMemoryWriting.Controls.Add(chkMasterSwitch);
             grpMemoryWriting.Controls.Add(grpGlobalFeatures);
             grpMemoryWriting.Controls.Add(grpGearFeatures);
             grpMemoryWriting.Controls.Add(grpPhysicalFeatures);
             grpMemoryWriting.Location = new Point(6, 330);
             grpMemoryWriting.Name = "grpMemoryWriting";
-            grpMemoryWriting.Size = new Size(462, 296);
+            grpMemoryWriting.Size = new Size(462, 432);
             grpMemoryWriting.TabIndex = 9;
             grpMemoryWriting.TabStop = false;
             grpMemoryWriting.Text = "Memory Writing [RISKY]";
+            // 
+            // grpThermal
+            // 
+            grpThermal.Controls.Add(chkOpticThermalSetting);
+            grpThermal.Controls.Add(chkThermalSetting);
+            grpThermal.Controls.Add(chkThermalShift);
+            grpThermal.Controls.Add(chkThermalColorCoef);
+            grpThermal.Controls.Add(chkThermalRampPalette);
+            grpThermal.Controls.Add(trkThermalShift);
+            grpThermal.Controls.Add(chkThermalTemp);
+            grpThermal.Controls.Add(cboThermalRampPalette);
+            grpThermal.Controls.Add(trkThermalTemp);
+            grpThermal.Controls.Add(trkThermalColorCoef);
+            grpThermal.Location = new Point(5, 296);
+            grpThermal.Name = "grpThermal";
+            grpThermal.Size = new Size(451, 130);
+            grpThermal.TabIndex = 29;
+            grpThermal.TabStop = false;
+            grpThermal.Text = "Thermal Settings";
+            // 
+            // chkOpticThermalSetting
+            // 
+            chkOpticThermalSetting.AutoSize = true;
+            chkOpticThermalSetting.Location = new Point(66, 22);
+            chkOpticThermalSetting.Name = "chkOpticThermalSetting";
+            chkOpticThermalSetting.Size = new Size(55, 19);
+            chkOpticThermalSetting.TabIndex = 9;
+            chkOpticThermalSetting.Text = "Optic";
+            chkOpticThermalSetting.UseVisualStyleBackColor = true;
+            chkOpticThermalSetting.CheckedChanged += chkOpticThermalSetting_CheckedChanged;
+            // 
+            // chkThermalSetting
+            // 
+            chkThermalSetting.AutoSize = true;
+            chkThermalSetting.Location = new Point(7, 22);
+            chkThermalSetting.Name = "chkThermalSetting";
+            chkThermalSetting.Size = new Size(53, 19);
+            chkThermalSetting.TabIndex = 8;
+            chkThermalSetting.Text = "Main";
+            chkThermalSetting.UseVisualStyleBackColor = true;
+            chkThermalSetting.CheckedChanged += chkThermalSetting_CheckedChanged;
+            // 
+            // chkThermalShift
+            // 
+            chkThermalShift.AutoSize = true;
+            chkThermalShift.Location = new Point(152, 85);
+            chkThermalShift.Name = "chkThermalShift";
+            chkThermalShift.Size = new Size(50, 19);
+            chkThermalShift.TabIndex = 7;
+            chkThermalShift.Text = "Shift";
+            toolTip.SetToolTip(chkThermalShift, "?");
+            chkThermalShift.UseVisualStyleBackColor = true;
+            chkThermalShift.CheckedChanged += chkThermalShift_CheckedChanged;
+            // 
+            // chkThermalColorCoef
+            // 
+            chkThermalColorCoef.AutoSize = true;
+            chkThermalColorCoef.Location = new Point(152, 22);
+            chkThermalColorCoef.Name = "chkThermalColorCoef";
+            chkThermalColorCoef.Size = new Size(80, 19);
+            chkThermalColorCoef.TabIndex = 4;
+            chkThermalColorCoef.Text = "ColorCoef";
+            toolTip.SetToolTip(chkThermalColorCoef, "mainTexColorCoef 0.5f is default / 0.7f is flir / 1f is max red?");
+            chkThermalColorCoef.UseVisualStyleBackColor = true;
+            chkThermalColorCoef.CheckedChanged += chkThermalColorCoef_CheckedChanged;
+            // 
+            // chkThermalRampPalette
+            // 
+            chkThermalRampPalette.AutoSize = true;
+            chkThermalRampPalette.Location = new Point(7, 53);
+            chkThermalRampPalette.Name = "chkThermalRampPalette";
+            chkThermalRampPalette.Size = new Size(93, 19);
+            chkThermalRampPalette.TabIndex = 5;
+            chkThermalRampPalette.Text = "RampPalette";
+            chkThermalRampPalette.UseVisualStyleBackColor = true;
+            chkThermalRampPalette.CheckedChanged += chkThermalRampPalette_CheckedChanged;
+            // 
+            // trkThermalShift
+            // 
+            trkThermalShift.Location = new Point(250, 85);
+            trkThermalShift.Maximum = 100;
+            trkThermalShift.Name = "trkThermalShift";
+            trkThermalShift.Size = new Size(195, 45);
+            trkThermalShift.TabIndex = 3;
+            trkThermalShift.Scroll += trkThermalShift_Scroll;
+            // 
+            // chkThermalTemp
+            // 
+            chkThermalTemp.AutoSize = true;
+            chkThermalTemp.Location = new Point(152, 53);
+            chkThermalTemp.Name = "chkThermalTemp";
+            chkThermalTemp.Size = new Size(92, 19);
+            chkThermalTemp.TabIndex = 6;
+            chkThermalTemp.Text = "Temperature";
+            toolTip.SetToolTip(chkThermalTemp, "minimumTemperatureValue 0.01f is default / 0.001f is flir / detection any temp?");
+            chkThermalTemp.UseVisualStyleBackColor = true;
+            chkThermalTemp.CheckedChanged += chkThermalTemp_CheckedChanged;
+            // 
+            // cboThermalRampPalette
+            // 
+            cboThermalRampPalette.FormattingEnabled = true;
+            cboThermalRampPalette.Items.AddRange(new object[] { "Fusion", "Rainbow", "WhiteHot", "BlackHot" });
+            cboThermalRampPalette.Location = new Point(7, 85);
+            cboThermalRampPalette.Name = "cboThermalRampPalette";
+            cboThermalRampPalette.Size = new Size(139, 23);
+            cboThermalRampPalette.TabIndex = 0;
+            cboThermalRampPalette.SelectedIndexChanged += cboThermalColors_SelectedIndexChanged;
+            // 
+            // trkThermalTemp
+            // 
+            trkThermalTemp.Location = new Point(250, 53);
+            trkThermalTemp.Maximum = 100;
+            trkThermalTemp.Name = "trkThermalTemp";
+            trkThermalTemp.Size = new Size(195, 45);
+            trkThermalTemp.TabIndex = 2;
+            trkThermalTemp.Scroll += trkThermalTemp_Scroll;
+            // 
+            // trkThermalColorCoef
+            // 
+            trkThermalColorCoef.Location = new Point(250, 22);
+            trkThermalColorCoef.Maximum = 100;
+            trkThermalColorCoef.Name = "trkThermalColorCoef";
+            trkThermalColorCoef.Size = new Size(195, 45);
+            trkThermalColorCoef.TabIndex = 1;
+            trkThermalColorCoef.Scroll += trkThermalColorCoef_Scroll;
             // 
             // chkMasterSwitch
             // 
@@ -1823,7 +1975,7 @@ namespace eft_dma_radar
             tabRadar.Location = new Point(4, 24);
             tabRadar.Name = "tabRadar";
             tabRadar.Padding = new Padding(3);
-            tabRadar.Size = new Size(1168, 638);
+            tabRadar.Size = new Size(1333, 774);
             tabRadar.TabIndex = 0;
             tabRadar.Text = "Radar";
             tabRadar.UseVisualStyleBackColor = true;
@@ -1917,29 +2069,18 @@ namespace eft_dma_radar
             tabControl.Location = new Point(0, 0);
             tabControl.Name = "tabControl";
             tabControl.SelectedIndex = 0;
-            tabControl.Size = new Size(1176, 666);
+            tabControl.Size = new Size(1341, 802);
             tabControl.TabIndex = 8;
             // 
             // colDialog
             // 
             colDialog.FullOpen = true;
             // 
-            // chkAutoLootRefresh
-            // 
-            chkAutoLootRefresh.AutoSize = true;
-            chkAutoLootRefresh.Location = new Point(6, 200);
-            chkAutoLootRefresh.Name = "chkAutoLootRefresh";
-            chkAutoLootRefresh.Size = new Size(121, 19);
-            chkAutoLootRefresh.TabIndex = 35;
-            chkAutoLootRefresh.Text = "Auto Loot Refresh";
-            chkAutoLootRefresh.UseVisualStyleBackColor = true;
-            chkAutoLootRefresh.CheckedChanged += chkAutoLootRefresh_CheckedChanged;
-            // 
             // frmMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1176, 666);
+            ClientSize = new Size(1341, 802);
             Controls.Add(tabControl);
             Margin = new Padding(4, 3, 4, 3);
             Name = "frmMain";
@@ -1991,6 +2132,11 @@ namespace eft_dma_radar
             ((System.ComponentModel.ISupportInitialize)trkUIScale).EndInit();
             grpMemoryWriting.ResumeLayout(false);
             grpMemoryWriting.PerformLayout();
+            grpThermal.ResumeLayout(false);
+            grpThermal.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)trkThermalShift).EndInit();
+            ((System.ComponentModel.ISupportInitialize)trkThermalTemp).EndInit();
+            ((System.ComponentModel.ISupportInitialize)trkThermalColorCoef).EndInit();
             grpGlobalFeatures.ResumeLayout(false);
             grpGlobalFeatures.PerformLayout();
             grpGearFeatures.ResumeLayout(false);
@@ -2163,6 +2309,17 @@ namespace eft_dma_radar
         private TrackBar trkSubItemLootValue;
         private CheckBox chkShowSubItems;
         private CheckBox chkAutoLootRefresh;
+        private GroupBox grpThermal;
+        private ComboBox cboThermalRampPalette;
+        private TrackBar trkThermalShift;
+        private TrackBar trkThermalTemp;
+        private TrackBar trkThermalColorCoef;
+        private CheckBox chkThermalColorCoef;
+        private CheckBox chkThermalRampPalette;
+        private CheckBox chkThermalShift;
+        private CheckBox chkThermalTemp;
+        private CheckBox chkOpticThermalSetting;
+        private CheckBox chkThermalSetting;
     }
 }
 

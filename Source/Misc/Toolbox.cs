@@ -49,7 +49,7 @@ namespace eft_dma_radar.Source.Tarkov
                     {
                         this.ToolboxWorker();
                     }
-                    Thread.Sleep(100);
+                    Thread.Sleep(250);
                 }
 
                 Program.Log("LocalPlayer found, initializing toolbox");
@@ -201,12 +201,12 @@ namespace eft_dma_radar.Source.Tarkov
                     }
                     else
                     {
-                        if (this._config.ThermalVisionEnabled && !this.thermalVisionToggled)
+                        if (this._config.ThermalVisionEnabled) //&& !this.thermalVisionToggled)
                         {
                             this.thermalVisionToggled = true;
                             this._cameraManager.ThermalVision(true);
                         }
-                        else if (!this._config.ThermalVisionEnabled && this.thermalVisionToggled)
+                        else if (!this._config.ThermalVisionEnabled) //&& this.thermalVisionToggled)
                         {
                             this.thermalVisionToggled = false;
                             this._cameraManager.ThermalVision(false);

@@ -312,6 +312,66 @@ namespace eft_dma_radar
         //public List<PaintColor> PaintColors { get; set; }
         public Dictionary<string, PaintColor.Colors> PaintColors { get; set; }
 
+        /// <summary>
+        /// Enables / disables thermal vision settings
+        /// </summary>
+        [JsonPropertyName("ThermalVisionSettingsEnabled")]
+        public bool ThermalVisionSettingsEnabled { get; set; }
+
+        /// <summary>
+        /// Enables / disables optic thermal vision settings
+        /// </summary>
+        [JsonPropertyName("ThermalVisionOpticSettingsEnabled")]
+        public bool ThermalVisionOpticSettingsEnabled { get; set; }
+
+        /// <summary>
+        /// Enables / disables thermal vision RampPalette change
+        /// </summary>
+        [JsonPropertyName("ThermalVisionRampPaletteEnabled")]
+        public bool ThermalVisionRampPaletteEnabled { get; set; }
+
+        /// <summary>
+        /// Thermal Vision Color Index
+        /// </summary>
+        [JsonPropertyName("ThermalVisionColorIndex")]
+        public int ThermalVisionColorIndex { get; set; }
+
+        /// <summary>
+        /// Enables / disables thermal vision mainTexColorCoef change
+        /// </summary>
+        [JsonPropertyName("ThermalVisionMainTexColorCoefEnabled")]
+        public bool ThermalVisionMainTexColorCoefEnabled { get; set; }
+
+        /// <summary>
+        /// Thermal vision mainTexColorCoef value
+        /// </summary>
+        [JsonPropertyName("ThermalVisionMainTexColorCoef")]
+        public float ThermalVisionMainTexColorCoef { get; set; }
+
+        /// <summary>
+        /// Enables / disables thermal vision minimumTemperature change
+        /// </summary>
+        [JsonPropertyName("ThermalVisionMinimumTemperatureEnabled")]
+        public bool ThermalVisionMinimumTemperatureEnabled { get; set; }
+
+        /// <summary>
+        /// Thermal vision minimumTemperature value
+        /// </summary>
+        [JsonPropertyName("ThermalVisionMinimumTemperature")]
+        public float ThermalVisionMinimumTemperature { get; set; }
+
+        /// <summary>
+        /// Enables / disables thermal vision rampShift change
+        /// </summary>
+        [JsonPropertyName("ThermalVisionRampShiftEnabled")]
+        public bool ThermalVisionRampShiftEnabled { get; set; }
+
+        /// <summary>
+        /// Thermal vision rampShift value
+        /// </summary>
+        [JsonPropertyName("ThermalVisionRampShift")]
+        public float ThermalVisionRampShift { get; set; }
+
         public Config()
         {
             Vsync = true;
@@ -385,6 +445,16 @@ namespace eft_dma_radar
             MinCorpseValue = 100000;
             MinSubItemValue = 15000;
             AutoLootRefreshEnabled = false;
+            ThermalVisionColorIndex = 3;
+            ThermalVisionRampPaletteEnabled = false;
+            ThermalVisionMainTexColorCoefEnabled = false;
+            ThermalVisionMinimumTemperatureEnabled = false;
+            ThermalVisionRampShiftEnabled = false;
+            ThermalVisionSettingsEnabled = false;
+            ThermalVisionOpticSettingsEnabled = false;
+            ThermalVisionMainTexColorCoef = 0.5f;
+            ThermalVisionMinimumTemperature = 0.01f;
+            ThermalVisionRampShift = -0.5f;
         }
 
         /// <summary>

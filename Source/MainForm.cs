@@ -474,45 +474,115 @@ namespace eft_dma_radar
                 Loot.ApplyFilter();
             }
         }
-
-        /// <summary>
-        /// Fired when Chams checkbox has been adjusted
-        /// </summary>
+        
         private void chkChams_CheckedChanged(object sender, EventArgs e)
         {
-            var allPlayers = this.AllPlayers
-               ?.Select(x => x.Value)
-               .Where(x => !x.HasExfild);
-            ulong playerBody = 0;
-            if (allPlayers is not null)
+
+        }
+
+        private void cboThermalColors_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _config.ThermalVisionColorIndex = cboThermalRampPalette.SelectedIndex;
+        }
+
+        private void chkThermalSetting_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.ThermalVisionSettingsEnabled = chkThermalSetting.Checked;
+            if (chkThermalSetting.Checked)
             {
-                foreach (var player in allPlayers)
-                {
-                    if (player.Type == PlayerType.LocalPlayer)
-                    {
-                        continue;
-                    }
-                    if (player.Type == PlayerType.AIOfflineScav)
-                    {
-                        playerBody = player.PlayerBody;
-                    }
-                    if (player.Type == PlayerType.AIScav)
-                    {
-                        playerBody = player.PlayerBody;
-                    }
-                    if (playerBody == 0)
-                    {
-                        continue;
-                    }
-                    if (chkChams.Checked)
-                    {
-                        
-                    }
-                    else
-                    {
-                    }
-                }
+                chkOpticThermalSetting.Enabled = false;
             }
+            else
+            {
+                chkOpticThermalSetting.Enabled = true;
+            }
+        }
+
+        private void chkThermalRampPalette_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.ThermalVisionRampPaletteEnabled = chkThermalRampPalette.Checked;
+            if (chkThermalRampPalette.Checked)
+            {
+                cboThermalRampPalette.Enabled = true;
+            }
+            else
+            {
+                cboThermalRampPalette.Enabled = false;
+            }
+        }
+
+        private void chkOpticThermalSetting_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.ThermalVisionOpticSettingsEnabled = chkOpticThermalSetting.Checked;
+            if (chkOpticThermalSetting.Checked)
+            {
+                chkThermalSetting.Enabled = false;
+            }
+            else
+            {
+                chkThermalSetting.Enabled = true;
+            }
+        }
+
+        private void chkThermalColorCoef_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.ThermalVisionMainTexColorCoefEnabled = chkThermalColorCoef.Checked;
+            if (chkThermalColorCoef.Checked)
+            {
+                trkThermalColorCoef.Enabled = true;
+            }
+            else
+            {
+                trkThermalColorCoef.Enabled = false;
+            }
+        }
+
+        private void chkThermalTemp_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.ThermalVisionMinimumTemperatureEnabled = chkThermalTemp.Checked;
+            if (chkThermalTemp.Checked)
+            {
+                trkThermalTemp.Enabled = true;
+            }
+            else
+            {
+                trkThermalTemp.Enabled = false;
+            }
+        }
+
+        private void chkThermalShift_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.ThermalVisionRampShiftEnabled = chkThermalShift.Checked;
+            if (chkThermalShift.Checked)
+            {
+                trkThermalShift.Enabled = true;
+            }
+            else
+            {
+                trkThermalShift.Enabled = false;
+            }
+        }
+
+        private void trkThermalColorCoef_Scroll(object sender, EventArgs e)
+        {
+            int value = trkThermalColorCoef.Value;
+            float floatValue = value / 100.0f;
+            _config.ThermalVisionMainTexColorCoef = floatValue;
+        }
+
+        private void trkThermalTemp_Scroll(object sender, EventArgs e)
+        {
+            int value = trkThermalTemp.Value; 
+            float floatValue = (0.01f - 0.001f) * (value / 100.0f) + 0.001f;
+            _config.ThermalVisionMinimumTemperature = floatValue;
+
+        }
+
+        private void trkThermalShift_Scroll(object sender, EventArgs e)
+        {
+            int value = trkThermalShift.Value;
+            float floatValue = (value / 100.0f) - 1.0f;
+            _config.ThermalVisionRampShift = floatValue;
 
         }
 
@@ -1424,6 +1494,7 @@ namespace eft_dma_radar
             chkShowCorpses.Checked = _config.ShowCorpsesEnabled;
             chkShowSubItems.Checked = _config.ShowSubItemsEnabled;
             chkAutoLootRefresh.Checked = _config.AutoLootRefreshEnabled;
+            cboThermalRampPalette.SelectedIndex = _config.ThermalVisionColorIndex;
 
             if (_config.Filters.Count == 0)
             { // add a default, blank config
@@ -2445,6 +2516,7 @@ namespace eft_dma_radar
             _config.ThrowPowerEnabled = chkThrowPower.Checked;
             _config.ThrowPowerStrength = trkThrowPower.Value;
             _config.HideExfilNames = chkHideExfilNames.Checked;
+            _config.ThermalVisionColorIndex = cboThermalRampPalette.SelectedIndex;
 
             Config.SaveConfig(_config); // Save Config to Config.json
             Memory.Shutdown(); // Wait for Memory Thread to gracefully exit

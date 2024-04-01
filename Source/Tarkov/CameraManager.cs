@@ -19,6 +19,10 @@ namespace eft_dma_radar.Source.Tarkov
                 return this._opticCamera != 0 && this._fpsCamera != 0;
             }
         }
+        private Config _config
+        {
+            get => Program.Config;
+        }
 
         public CameraManager(ulong unityBase)
         {
@@ -126,19 +130,19 @@ namespace eft_dma_radar.Source.Tarkov
 
 
                     try{
-                        var thermalVisionUtilities = Memory.ReadPtr(fpsThermalComponent + 0x18);
-                        var valuesCoefs = Memory.ReadPtr(thermalVisionUtilities + 0x18);
+                        //var thermalVisionUtilities = Memory.ReadPtr(fpsThermalComponent + 0x18);
+                        //var valuesCoefs = Memory.ReadPtr(thermalVisionUtilities + 0x18);
                         //flir = mainTexColorCoef: 0.7, minimumTemperatureValue: 0.01, rampShift: -0.5
-                        Memory.WriteValue(valuesCoefs + 0x10, 1.0f); //mainTexColorCoef 0.5f is default / 0.7f is flir / 1f is max red?
-                        Memory.WriteValue(valuesCoefs + 0x14, 0.00001f); //minimumTemperatureValue 0.01f is default / 0.001f is flir / detection any temp?
-                        Memory.WriteValue(thermalVisionUtilities + 0x30, 0); //0 = Fusion / 1 = Rainbow? / 2 = WhiteHot / 3 = BlackHot(Default)
+                        //Memory.WriteValue(valuesCoefs + 0x10, this._config.ThermalVisionMainTexColorCoef); //mainTexColorCoef 0.5f is default / 0.7f is flir / 1f is max red?
+                        //Memory.WriteValue(valuesCoefs + 0x14, this._config.ThermalVisionMinimumTemperature); //minimumTemperatureValue 0.01f is default / 0.001f is flir / detection any temp?
+                        //Memory.WriteValue(thermalVisionUtilities + 0x30, this._config.ThermalVisionColorIndex); //0 = Fusion / 1 = Rainbow? / 2 = WhiteHot / 3 = BlackHot(Default)
                         //[E8] ChromaticAberrationThermalShift : Single
                         //[EC] UnsharpRadiusBlur : Single
                         //[F0] UnsharpBias : Single
                         //var chromaticAberrationThermalShift = Memory.ReadValue<float>(fpsThermalComponent + 0xE8);
                         //var unsharpRadiusBlur = Memory.ReadValue<float>(fpsThermalComponent + 0xEC);
-                        Memory.WriteValue(fpsThermalComponent + 0xEC, 0.0f);
-                        Memory.WriteValue(fpsThermalComponent + 0xF0, 2.5f);
+                        //Memory.WriteValue(fpsThermalComponent + 0xEC, 0.0f);
+                        //Memory.WriteValue(fpsThermalComponent + 0xF0, 2.5f);
                         //var unsharpBias = Memory.ReadValue<float>(fpsThermalComponent + 0xF0);
                         //var mainTexColorCoef = Memory.ReadValue<float>(valuesCoefs + 0x10);
                         //var minimumTemperatureValue = Memory.ReadValue<float>(valuesCoefs + 0x14);
@@ -156,6 +160,16 @@ namespace eft_dma_radar.Source.Tarkov
 
                     
                 }
+
+
+                try{
+                    var thermalVisionUtilities = Memory.ReadPtr(fpsThermalComponent + 0x18);
+                    var valuesCoefs = Memory.ReadPtr(thermalVisionUtilities + 0x18);
+                    Memory.WriteValue(valuesCoefs + 0x10, this._config.ThermalVisionMainTexColorCoef); //mainTexColorCoef 0.5f is default / 0.7f is flir / 1f is max red?
+                    Memory.WriteValue(valuesCoefs + 0x14, this._config.ThermalVisionMinimumTemperature); //minimumTemperatureValue 0.01f is default / 0.001f is flir / detection any temp?
+                    Memory.WriteValue(valuesCoefs + 0x18, this._config.ThermalVisionRampShift); //rampShift -0.5f is default
+                    Memory.WriteValue(thermalVisionUtilities + 0x30, this._config.ThermalVisionColorIndex); //0 = Fusion / 1 = Rainbow? / 2 = WhiteHot / 3 = BlackHot(Default)
+                }catch{}
             }
         }
 
