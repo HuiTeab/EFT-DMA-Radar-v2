@@ -151,12 +151,12 @@ namespace eft_dma_radar
 
             try
             {
-                var mapNamePrt = Memory.ReadPtrChain(this._localGameWorld, new uint[] { 0x150, 0x550 });
+                var mapNamePrt = Memory.ReadPtrChain(this._localGameWorld, new uint[] { 0x148, 0x580 });
                 this._mapName = Memory.ReadUnityString(mapNamePrt);
             }
             catch
             {
-                var mapNamePrt = Memory.ReadPtr(this._localGameWorld + 0x48);
+                var mapNamePrt = Memory.ReadPtr(this._localGameWorld + 0x40);
                 this._mapName = Memory.ReadUnityString(mapNamePrt);
             }
         }
@@ -329,7 +329,7 @@ namespace eft_dma_radar
                             if (registeredPlayers.PlayerCount > 0)
                             {
                                 var localPlayer = Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.MainPlayer);
-                                var playerInfoPtr = Memory.ReadPtrChain(localPlayer, new uint[] { 0x588, 0x28 });
+                                var playerInfoPtr = Memory.ReadPtrChain(localPlayer, new uint[] { 0x5B8, 0x28 });
                                 var localPlayerSide = Memory.ReadValue<int>(playerInfoPtr + Offsets.PlayerInfo.PlayerSide);
                                 this._isScav = (localPlayerSide == 4);
 
@@ -386,12 +386,11 @@ namespace eft_dma_radar
                         Program.Log($"ERROR loading QuestManager: {ex}");
                     }
                 }
-
                 if (this._config.LootEnabled && (this._lootManager is null || this._refreshLoot))
                 {
                     this._loadingLoot = true;
                     try
-                    {
+                    {   
                         this._lootManager = new LootManager(this._localGameWorld);
                         this._refreshLoot = false;
                     }

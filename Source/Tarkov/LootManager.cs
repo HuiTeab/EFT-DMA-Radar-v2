@@ -132,7 +132,6 @@ namespace eft_dma_radar
 
             if (this.countLootListObjects < 0 || this.countLootListObjects > 4096)
                 throw new ArgumentOutOfRangeException("countLootListObjects"); // Loot list sanity check
-
             var scatterMap = new ScatterReadMap(this.countLootListObjects);
             var round1 = scatterMap.AddRound();
 
