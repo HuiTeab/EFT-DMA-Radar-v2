@@ -240,22 +240,22 @@ namespace eft_dma_radar
 
                 var lootBaseObject = vRound3.AddEntry<ulong>(i, 2, interactiveClass, null, Offsets.LootInteractiveClass.LootBaseObject);
                 var entry7 = vRound3.AddEntry<ulong>(i, 3, interactiveClass, null, 0x0);
-                var item = vRound3.AddEntry<ulong>(i, 4, interactiveClass, null, 0xB0);
-                var containerIDPtr = vRound3.AddEntry<ulong>(i, 5, interactiveClass, null, 0x128);
-                var itemOwner = vRound3.AddEntry<ulong>(i, 6, interactiveClass, null, 0x40);
+                var item = vRound3.AddEntry<ulong>(i, 4, interactiveClass, null, Offsets.ObservedLootItem.Item);
+                var containerIDPtr = vRound3.AddEntry<ulong>(i, 5, interactiveClass, null, Offsets.LootableContainer.Template);
+                var itemOwner = vRound3.AddEntry<ulong>(i, 6, interactiveClass, null, Offsets.LootInteractiveClass.ItemOwner);
                 var containerItemOwner = vRound3.AddEntry<ulong>(i, 7, interactiveClass, null, Offsets.LootInteractiveClass.ContainerItemOwner);
 
                 var gameObject = vRound4.AddEntry<ulong>(i, 8, lootBaseObject, null, Offsets.LootBaseObject.GameObject);
                 var entry9 = vRound4.AddEntry<ulong>(i, 9, entry7, null, 0x0);
                 var itemTemplate = vRound4.AddEntry<ulong>(i, 10, item, null, Offsets.LootItemBase.ItemTemplate);
-                var containerItemBase = vRound4.AddEntry<ulong>(i, 11, containerItemOwner, null, 0xC0);
+                var containerItemBase = vRound4.AddEntry<ulong>(i, 11, containerItemOwner, null, Offsets.ContainerItemOwner.Item);
 
                 var objectName = vRound5.AddEntry<ulong>(i, 12, gameObject, null, Offsets.GameObject.ObjectName);
                 var objectClass = vRound5.AddEntry<ulong>(i, 13, gameObject, null, Offsets.GameObject.ObjectClass);
                 var entry10 = vRound5.AddEntry<ulong>(i, 14, entry9, null, 0x48);
                 var isQuestItem = vRound5.AddEntry<bool>(i, 15, itemTemplate, null, Offsets.ItemTemplate.IsQuestItem);
                 var BSGIdPtr = vRound5.AddEntry<ulong>(i, 16, itemTemplate, null, Offsets.ItemTemplate.BsgId);
-                var rootItem = vRound5.AddEntry<ulong>(i, 17, itemOwner, null, 0xC0);
+                var rootItem = vRound5.AddEntry<ulong>(i, 17, itemOwner, null, Offsets.ItemOwner.Item);
                 var containerGrids = vRound5.AddEntry<ulong>(i, 18, containerItemBase, null, Offsets.LootItemBase.Grids);
 
                 var className = vRound6.AddEntry<string>(i, 19, entry10, 64);
@@ -346,49 +346,6 @@ namespace eft_dma_radar
                                     if (!validScatterMap.Results[i][16].TryGetResult<ulong>(out var BSGIDPtr))
                                         return;
                                     var id = Memory.ReadUnityString(BSGIDPtr);
-                                    try {
-                                        var searchableItem = TarkovDevManager.AllItems.Values.FirstOrDefault(x => x.Item.id == id && x.Item.categories.FirstOrDefault(x => x.name == "Searchable item") != null);
-                                        if (searchableItem != null)
-                                        {
-                                            if (!validScatterMap.Results[i][6].TryGetResult<ulong>(out var iItemOwner))
-                                                return;
-                                            var item_0xC0 = Memory.ReadPtr(iItemOwner + 0xC0);
-                                            var itemGrids = Memory.ReadPtr(item_0xC0 + 0x70);
-                                            //this.savedLootContainersInfo.Add(new ContainerInfo {InteractiveClass = interactiveClass, Position = position, Name = searchableItem.Item.shortName ?? containerName, Grids = itemGrids});
-                                        }
-
-                                    }catch{}
-
-                                    try {
-                                        var searchableItem = TarkovDevManager.AllItems.Values.FirstOrDefault(x => x.Item.id == id && x.Item.categories.FirstOrDefault(x => x.name == "Weapon") != null);
-                                        if (searchableItem != null)
-                                        {
-                                            if (!validScatterMap.Results[i][6].TryGetResult<ulong>(out var iItemOwner))
-                                                return;
-                                            var item_0xC0 = Memory.ReadPtr(iItemOwner + 0xC0);
-                                            var itemGrids = Memory.ReadPtr(item_0xC0 + 0x70);
-                                            var itemSlots = Memory.ReadPtr(item_0xC0 + 0x78);
-                                            try {
-                                            
-                                                var size = Memory.ReadValue<int>(itemSlots + Offsets.UnityList.Count);
-                                                //Console.WriteLine($"Size: {size}");
-                                                var slotDict = new Dictionary<string, ulong>(StringComparer.OrdinalIgnoreCase);
-
-                                                for (int slotID = 0; slotID < size; slotID++)
-                                                {
-                                                    var slotPtr = Memory.ReadPtr(itemSlots + Offsets.UnityListBase.Start + (uint)slotID * 0x8);
-                                                    var namePtr = Memory.ReadPtr(slotPtr + Offsets.Slot.Name);
-                                                    var name = Memory.ReadUnityString(namePtr);
-                                                    
-                                                    slotDict.TryAdd(name, slotPtr);
-                                                }
-                                                //Console.WriteLine($"Slots: {slotDict.Count}");
-                                            }catch {}
-                                        }
-
-                                    }catch{}
-
-
                                     if (id == null)
                                         return;
                                     this.savedLootItemsInfo.Add(new LootItemInfo(interactiveClass, questItem, position, id));
@@ -747,7 +704,7 @@ namespace eft_dma_radar
                     foreach (var grid in gridsArray.Data)
                     {
                         var gridEnumerableClass = Memory.ReadPtr(grid + Offsets.Grids.GridsEnumerableClass);
-                        var itemListPtr = Memory.ReadPtr(gridEnumerableClass + 0x18);
+                        var itemListPtr = Memory.ReadPtr(gridEnumerableClass + Offsets.UnityList.Count);
                         var itemList = new MemList(itemListPtr);
 
                         foreach (var childItem in itemList.Data)
@@ -771,7 +728,7 @@ namespace eft_dma_radar
                     foreach (var grid in gridsArray.Data)
                     {
                         var gridEnumerableClass = Memory.ReadPtr(grid + Offsets.Grids.GridsEnumerableClass);
-                        var itemListPtr = Memory.ReadPtr(gridEnumerableClass + 0x18);
+                        var itemListPtr = Memory.ReadPtr(gridEnumerableClass + Offsets.UnityList.Count);
                         var itemList = new MemList(itemListPtr);
 
                         foreach (var childItem in itemList.Data)
@@ -809,7 +766,7 @@ namespace eft_dma_radar
                     foreach (var grid in gridsArray.Data)
                     {
                         var gridEnumerableClass = Memory.ReadPtr(grid + Offsets.Grids.GridsEnumerableClass);
-                        var itemListPtr = Memory.ReadPtr(gridEnumerableClass + 0x18);
+                        var itemListPtr = Memory.ReadPtr(gridEnumerableClass + Offsets.UnityList.Count);
                         var itemList = new MemList(itemListPtr);
 
                         foreach (var childItem in itemList.Data)
@@ -958,7 +915,7 @@ namespace eft_dma_radar
                             {
                                 if (LootManager.slotsToSearch.Contains(slotName))
                                 {
-                                    var slotsPtr = Memory.ReadPtr(containedItem + 0x78);
+                                    var slotsPtr = Memory.ReadPtr(containedItem + Offsets.Equipment.Slots);
                                     LootManager.GetItemsInSlots(slotsPtr, position, lootItems);
                                 }
                                 else if (LootManager.gridSlotsToSearch.Contains(slotName))

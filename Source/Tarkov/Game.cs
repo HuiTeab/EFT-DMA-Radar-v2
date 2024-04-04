@@ -152,7 +152,7 @@ namespace eft_dma_radar
 
             try
             {
-                var mapNamePrt = Memory.ReadPtrChain(this._localGameWorld, new uint[] { Offsets.LocalGameWorld.MainPlayer, Offsets.Player.Profile });
+                var mapNamePrt = Memory.ReadPtrChain(this._localGameWorld, new uint[] { Offsets.LocalGameWorld.MainPlayer, Offsets.Player.Location });
                 this._mapName = Memory.ReadUnityString(mapNamePrt);
             }
             catch
