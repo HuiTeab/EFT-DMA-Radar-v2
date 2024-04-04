@@ -34,7 +34,7 @@ namespace eft_dma_radar.Source.Tarkov
         {
             try
             {
-                var addr = Memory.ReadPtr(this._unityBase + 0x0179F500);
+                var addr = Memory.ReadPtr(this._unityBase + Offsets.ModuleBase.CameraObjectManager);
                 for (int i = 0; i < 500; i++)
                 {
                     var allCameras = Memory.ReadPtr(addr + 0x0);
@@ -89,7 +89,7 @@ namespace eft_dma_radar.Source.Tarkov
 
         private ulong GetComponentFromGameObject(ulong gameObject, string componentName)
         {
-            var component = Memory.ReadPtr(gameObject + 0x30);
+            var component = Memory.ReadPtr(gameObject + Offsets.GameObject.ObjectClass);
             // Loop through a fixed range of potential component slots
             for (int i = 0x8; i < 0x500; i += 0x10)
             {
@@ -100,7 +100,6 @@ namespace eft_dma_radar.Source.Tarkov
                 componentPtr = Memory.ReadPtr(componentPtr + 0x28);
                 var classNamePtr = Memory.ReadPtrChain(fieldsPtr, Offsets.UnityClass.Name);
                 var className = Memory.ReadString(classNamePtr, 64).Replace("\0", string.Empty);
-                //Console.WriteLine($"GetComponentFromGameObject: {className}");
                 if (className.Contains(componentName, StringComparison.OrdinalIgnoreCase))
                 {
                     return componentPtr;
@@ -116,59 +115,29 @@ namespace eft_dma_radar.Source.Tarkov
         {
             if (this.IsReady)
             {
-                var fpsThermalComponent = GetComponentFromGameObject(this._fpsCamera, "ThermalVision");
-                var thermalOn = Memory.ReadValue<bool>(fpsThermalComponent + 0xE0);
+                var FPSThermal = GetComponentFromGameObject(this._fpsCamera, "ThermalVision");
+                var thermalOn = Memory.ReadValue<bool>(FPSThermal + Offsets.ThermalVision.On);
 
                 if (on != thermalOn)
                 {
-                    Memory.WriteValue(fpsThermalComponent + 0xE0, !thermalOn);
-                    Memory.WriteValue(fpsThermalComponent + 0xE1, thermalOn);
-                    Memory.WriteValue(fpsThermalComponent + 0xE2, thermalOn);
-                    Memory.WriteValue(fpsThermalComponent + 0xE3, thermalOn);
-                    Memory.WriteValue(fpsThermalComponent + 0xE4, thermalOn);
-                    Memory.WriteValue(fpsThermalComponent + 0xE5, thermalOn);
-
-
-                    try{
-                        //var thermalVisionUtilities = Memory.ReadPtr(fpsThermalComponent + 0x18);
-                        //var valuesCoefs = Memory.ReadPtr(thermalVisionUtilities + 0x18);
-                        //flir = mainTexColorCoef: 0.7, minimumTemperatureValue: 0.01, rampShift: -0.5
-                        //Memory.WriteValue(valuesCoefs + 0x10, this._config.ThermalVisionMainTexColorCoef); //mainTexColorCoef 0.5f is default / 0.7f is flir / 1f is max red?
-                        //Memory.WriteValue(valuesCoefs + 0x14, this._config.ThermalVisionMinimumTemperature); //minimumTemperatureValue 0.01f is default / 0.001f is flir / detection any temp?
-                        //Memory.WriteValue(thermalVisionUtilities + 0x30, this._config.ThermalVisionColorIndex); //0 = Fusion / 1 = Rainbow? / 2 = WhiteHot / 3 = BlackHot(Default)
-                        //[E8] ChromaticAberrationThermalShift : Single
-                        //[EC] UnsharpRadiusBlur : Single
-                        //[F0] UnsharpBias : Single
-                        //var chromaticAberrationThermalShift = Memory.ReadValue<float>(fpsThermalComponent + 0xE8);
-                        //var unsharpRadiusBlur = Memory.ReadValue<float>(fpsThermalComponent + 0xEC);
-                        //Memory.WriteValue(fpsThermalComponent + 0xEC, 0.0f);
-                        //Memory.WriteValue(fpsThermalComponent + 0xF0, 2.5f);
-                        //var unsharpBias = Memory.ReadValue<float>(fpsThermalComponent + 0xF0);
-                        //var mainTexColorCoef = Memory.ReadValue<float>(valuesCoefs + 0x10);
-                        //var minimumTemperatureValue = Memory.ReadValue<float>(valuesCoefs + 0x14);
-                        //var rampShift = Memory.ReadValue<float>(valuesCoefs + 0x18);
-                        //var thermalMaskPtr = Memory.ReadPtr(thermalVisionUtilities + 0x40);
-                        //var thermalShaderPtr = Memory.ReadPtr(thermalMaskPtr + 0x18);
-                        //var color = Memory.ReadPtr(thermalMaskPtr + 0x50);
-                        //var stretch = Memory.ReadValue<bool>(thermalMaskPtr + 0x60);
-
-                        //Console.WriteLine($"chromaticAberrationThermalShift: {chromaticAberrationThermalShift}, unsharpRadiusBlur: {unsharpRadiusBlur}, unsharpBias: {unsharpBias}");
-                        //Console.WriteLine($"mainTexColorCoef: {mainTexColorCoef}, minimumTemperatureValue: {minimumTemperatureValue}, rampShift: {rampShift}, color: {color}, stretch: {stretch}");
-                    }catch{}
-
-
-
-                    
+                    Memory.WriteValue(FPSThermal + Offsets.ThermalVision.On, !thermalOn);
+                    Memory.WriteValue(FPSThermal + Offsets.ThermalVision.IsNoisy, thermalOn);
+                    Memory.WriteValue(FPSThermal + Offsets.ThermalVision.IsFpsStuck, thermalOn);
+                    Memory.WriteValue(FPSThermal + Offsets.ThermalVision.IsMotionBlurred, thermalOn);
+                    Memory.WriteValue(FPSThermal + Offsets.ThermalVision.IsGlitched, thermalOn);
+                    Memory.WriteValue(FPSThermal + Offsets.ThermalVision.IsPixelated, thermalOn);
+                    Memory.WriteValue(FPSThermal + Offsets.ThermalVision.ChromaticAberrationThermalShift, 0.0f);
+                    Memory.WriteValue(FPSThermal + Offsets.ThermalVision.UnsharpRadiusBlur, 2.0f);
                 }
 
 
                 try{
-                    var thermalVisionUtilities = Memory.ReadPtr(fpsThermalComponent + 0x18);
-                    var valuesCoefs = Memory.ReadPtr(thermalVisionUtilities + 0x18);
-                    Memory.WriteValue(valuesCoefs + 0x10, this._config.ThermalVisionMainTexColorCoef); //mainTexColorCoef 0.5f is default / 0.7f is flir / 1f is max red?
-                    Memory.WriteValue(valuesCoefs + 0x14, this._config.ThermalVisionMinimumTemperature); //minimumTemperatureValue 0.01f is default / 0.001f is flir / detection any temp?
-                    Memory.WriteValue(valuesCoefs + 0x18, this._config.ThermalVisionRampShift); //rampShift -0.5f is default
-                    Memory.WriteValue(thermalVisionUtilities + 0x30, this._config.ThermalVisionColorIndex); //0 = Fusion / 1 = Rainbow? / 2 = WhiteHot / 3 = BlackHot(Default)
+                    var thermalVisionUtilities = Memory.ReadPtr(FPSThermal + Offsets.ThermalVision.ThermalVisionUtilities);
+                    var valuesCoefs = Memory.ReadPtr(thermalVisionUtilities + Offsets.ThermalVisionUtilities.ValuesCoefs);
+                    Memory.WriteValue(valuesCoefs + Offsets.ValuesCoefs.MainTexColorCoef, this._config.ThermalVisionMainTexColorCoef); //mainTexColorCoef 0.5f is default / 0.7f is flir / 1f is max red?
+                    Memory.WriteValue(valuesCoefs + Offsets.ValuesCoefs.MinimumTemperatureValue, this._config.ThermalVisionMinimumTemperature); //minimumTemperatureValue 0.01f is default / 0.001f is flir / detection any temp?
+                    Memory.WriteValue(valuesCoefs + Offsets.ValuesCoefs.RampShift, this._config.ThermalVisionRampShift); //rampShift -0.5f is default
+                    Memory.WriteValue(thermalVisionUtilities + Offsets.ThermalVisionUtilities.CurrentRampPalette, this._config.ThermalVisionColorIndex); //0 = Fusion / 1 = Rainbow? / 2 = WhiteHot / 3 = BlackHot(Default)
                 }catch{}
             }
         }
@@ -181,11 +150,11 @@ namespace eft_dma_radar.Source.Tarkov
             if (this.IsReady)
             {
                 var nightVisionComponent = GetComponentFromGameObject(_fpsCamera, "NightVision");
-                var nightVisionOn = Memory.ReadValue<bool>(nightVisionComponent + 0xEC);
+                var nightVisionOn = Memory.ReadValue<bool>(nightVisionComponent + Offsets.NightVision.On);
 
                 if (on != nightVisionOn)
                 {
-                    Memory.WriteValue(nightVisionComponent + 0xEC, !nightVisionOn);
+                    Memory.WriteValue(nightVisionComponent + Offsets.NightVision.On, !nightVisionOn);
                 }
             }
         }
@@ -198,11 +167,11 @@ namespace eft_dma_radar.Source.Tarkov
             if (this.IsReady)
             {
                 var visorComponent = GetComponentFromGameObject(this._fpsCamera, "VisorEffect");
-                bool visorDown = (Memory.ReadValue<float>(visorComponent + 0xC0) == 1.0f);
+                bool visorDown = Memory.ReadValue<float>(visorComponent + Offsets.VisorEffect.Intensity) == 1.0f;
 
                 if (on == visorDown)
                 {
-                    Memory.WriteValue(visorComponent + 0xC0, (on ? 0.0f : 1.0f));
+                    Memory.WriteValue(visorComponent + Offsets.VisorEffect.Intensity, on ? 0.0f : 1.0f);
                 }
             }
         }
@@ -215,7 +184,7 @@ namespace eft_dma_radar.Source.Tarkov
             if (this.IsReady)
             {
                 ulong opticComponent = 0;
-                var component = Memory.ReadPtr(this._opticCamera + 0x30);
+                var component = Memory.ReadPtr(this._opticCamera + Offsets.GameObject.ObjectClass);
                 var opticThermal = GetComponentFromGameObject(this._opticCamera, "ThermalVision");
                 for (int i = 0x8; i < 0x100; i += 0x10)
                 {
@@ -232,22 +201,21 @@ namespace eft_dma_radar.Source.Tarkov
                     }
                 }
                 Memory.WriteValue(opticComponent + 0x38, on);
-                Memory.WriteValue(opticThermal + 0xE1, !on);
-                Memory.WriteValue(opticThermal + 0xE2, !on);
-                Memory.WriteValue(opticThermal + 0xE3, !on);
-                Memory.WriteValue(opticThermal + 0xE4, !on);
-                Memory.WriteValue(opticThermal + 0xE5, !on);
+                Memory.WriteValue(opticThermal + Offsets.ThermalVision.IsNoisy, !on);
+                Memory.WriteValue(opticThermal + Offsets.ThermalVision.IsFpsStuck, !on);
+                Memory.WriteValue(opticThermal + Offsets.ThermalVision.IsMotionBlurred, !on);
+                Memory.WriteValue(opticThermal + Offsets.ThermalVision.IsGlitched, !on);
+                Memory.WriteValue(opticThermal + Offsets.ThermalVision.IsPixelated, !on);
+                Memory.WriteValue(opticThermal + Offsets.ThermalVision.ChromaticAberrationThermalShift, 0.0f);
+                Memory.WriteValue(opticThermal + Offsets.ThermalVision.UnsharpRadiusBlur, 2.0f);
 
                 try{
-                    var thermalVisionUtilities = Memory.ReadPtr(opticThermal + 0x18);
-                    var valuesCoefs = Memory.ReadPtr(thermalVisionUtilities + 0x18);
-                    //flir = mainTexColorCoef: 0.7, minimumTemperatureValue: 0.01, rampShift: -0.5
-                    Memory.WriteValue(valuesCoefs + 0x10, 1.0f); //mainTexColorCoef 0.5f is default / 0.7f is flir / 1f is max red?
-                    Memory.WriteValue(valuesCoefs + 0x14, 0.00001f); //minimumTemperatureValue 0.01f is default / 0.001f is flir / detection any temp?
-                    Memory.WriteValue(thermalVisionUtilities + 0x30, 0); //0 pink / 1 green / 2 white
-                    Memory.WriteValue(opticThermal + 0xEC, 0.0f);
-                    Memory.WriteValue(opticThermal + 0xF0, 2.0f);
-
+                    var thermalVisionUtilities = Memory.ReadPtr(opticThermal + Offsets.ThermalVision.ThermalVisionUtilities);
+                    var valuesCoefs = Memory.ReadPtr(thermalVisionUtilities + Offsets.ThermalVisionUtilities.ValuesCoefs);
+                    Memory.WriteValue(valuesCoefs + Offsets.ValuesCoefs.MainTexColorCoef, this._config.ThermalVisionMainTexColorCoef);
+                    Memory.WriteValue(valuesCoefs + Offsets.ValuesCoefs.MinimumTemperatureValue, this._config.ThermalVisionMinimumTemperature);
+                    Memory.WriteValue(valuesCoefs + Offsets.ValuesCoefs.RampShift, this._config.ThermalVisionRampShift);
+                    Memory.WriteValue(thermalVisionUtilities + Offsets.ThermalVisionUtilities.CurrentRampPalette, this._config.ThermalVisionColorIndex);
                 }catch{}
 
             }

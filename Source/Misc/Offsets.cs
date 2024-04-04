@@ -17,6 +17,7 @@
     public struct ModuleBase
     {
         public const uint GameObjectManager = 0x17FFD28; // to eft_dma_radar.GameObjectManager
+        public const uint CameraObjectManager = 0x0179F500; // to Camera
     }
     public struct GameObject
     {
@@ -27,14 +28,6 @@
     public struct GameWorld
     {
         public static readonly uint[] To_LocalGameWorld = new uint[] { GameObject.ObjectClass, 0x18, 0x28 };
-    }
-    public struct LocalGameWorld // [Class] -.ClientLocalGameWorld : ClientGameWorld
-    {
-        public const uint MainPlayer = 0x150; // to EFT.Player
-        public const uint ExfilController = 0x18; // to ExfilController
-        public const uint LootList = 0xD0; // to UnityList
-        public const uint RegisteredPlayers = 0xF8; // to RegisteredPlayers
-        public const uint Grenades = 0x1A8; // to Grenades
     }
     public struct ExfilController // -.GClass0B67
     {
@@ -61,24 +54,15 @@
         //public static readonly uint[] To_TransformInternal = new uint[] { 0xA8, 0x28, 0x28, 0x10, 0x20, 0x10 }; // to TransformInternal
         public static readonly uint[] To_TransformInternal = new uint[] { 0xA8, 0x28, 0x28, 0x10, 0x20 + (0 * 0x8), 0x10 }; // to TransformInternal
         public const uint MovementContext = 0x40; // to MovementContext
-        public const uint Corpse = 0x390; // EFT.Interactive.Corpse
-        public const uint Profile = 0x588; // to Profile
-        public const uint InventoryController = 0x5E0; // to InventoryController
+        public const uint Corpse = 0x3C8; // EFT.Interactive.Corpse
+        public const uint Profile = 0x5B8; // to Profile
+        public const uint InventoryController = 0x610; // to InventoryController
     }
     public struct Profile // EFT.Profile
     {
         public const uint Id = 0x10; // unity string
         public const uint AccountId = 0x18; // unity string
         public const uint PlayerInfo = 0x28; // to PlayerInfo
-    }
-    public struct PlayerInfo // -.GClass1044
-    {
-        public const uint Nickname = 0x10; // unity string
-        public const uint GroupId = 0x20; // ptr to UnityString (0/null if solo or bot)
-        public const uint GameVersion = 0x38; // unity string
-        public const uint Settings = 0x50; // to PlayerSettings
-        public const uint PlayerSide = 0x70; // int32
-        public const uint MemberCategory = 0x8C; // int32 enum
     }
     public struct ObservedPlayerView // [Class] EFT.NextObservedPlayer.ObservedPlayerView : MonoBehaviour
     {
@@ -180,5 +164,82 @@
     {
         public const uint Vertices = 0x18; // List<Vector128<float>>
         public const uint Indices = 0x20; // List<int>
+    }
+
+    //New Offsets (Added by Keeegi)
+    //[Class] EFT.Animations.ProceduralWeaponAnimation : MonoBehaviour
+    public struct ProceduralWeaponAnimation
+    {
+        public const uint IsAiming = 0x1BD; //[1BD] _isAiming : Boolean
+    }
+    public struct ThermalVision
+    {
+        public const uint ThermalVisionUtilities = 0x18; //[18] ThermalVisionUtilities : -.ThermalVisionUtilities
+        public const uint StuckFPSUtilities = 0x20; //[20] StuckFpsUtilities : -.StuckFPSUtilities
+        public const uint MotionBlurUtilities = 0x28; //[28] MotionBlurUtilities : -.MotionBlurUtilities
+        public const uint GlitchUtilities = 0x30; //[30] GlitchUtilities : -.GlitchUtilities
+        public const uint PixelationUtilities = 0x38; //[38] PixelationUtilities : -.PixelationUtilities
+        public const uint On = 0xE0; //[E0] On : Boolean
+        public const uint IsNoisy = 0xE1;//[E1] IsNoisy : Boolean
+        public const uint IsFpsStuck = 0xE2;//[E2] IsFpsStuck : Boolean
+        public const uint IsMotionBlurred = 0xE3;//[E3] IsMotionBlurred : Boolean
+        public const uint IsGlitched = 0xE4;//[E4] IsGlitched : Boolean
+        public const uint IsPixelated = 0xE5;//[E5] IsPixelated : Boolean
+        public const uint ChromaticAberrationThermalShift = 0xE8;//[E8] ChromaticAberrationThermalShift : Single
+        public const uint UnsharpRadiusBlur = 0xEC;//[EC] UnsharpRadiusBlur : Single
+        public const uint UnsharpBias = 0xF0;//[F0] UnsharpBias : Single
+    }
+    public struct ThermalVisionUtilities
+    {
+        public const uint ValuesCoefs = 0x18; //[18] ValuesCoefs : -.ValuesCoefs
+        public const uint CurrentRampPalette = 0x30; //[30] CurrentRampPalette : System.Int32
+        public const uint DepthFade = 0x34; //[34] DepthFade : Single
+    }
+    public struct ValuesCoefs
+    {
+        public const uint MainTexColorCoef = 0x10; //[10] MainTexColorCoef : Single
+        public const uint MinimumTemperatureValue = 0x14; //[14] MinimumTemperatureValue : Single
+        public const uint RampShift = 0x18; //[18] RampShift : Single
+    }
+    public struct NightVision
+    {
+        public const uint On = 0xEC; //[EC] On : Boolean
+    }
+    public struct VisorEffect
+    {
+        public const uint Intensity = 0xC0; //[C0] Intensity : Single
+    }
+
+    public struct PlayerInfo // [Class] -.GClass1645
+    {
+        public const uint Nickname = 0x10; //[10] Nickname : String
+        public const uint GroupId = 0x20; //[20] GroupId : String
+        public const uint EntryPoint = 0x30; //[30] EntryPoint : String
+        public const uint GameVersion = 0x38; //[38] GameVersion : String
+        public const uint Settings = 0x50; //[50] Settings : -.GClass1623
+        public const uint PlayerSide = 0x70; //[70] Side : System.Int32
+        public const uint MemberCategory = 0x8C; //[8C] MemberCategory : System.Int32
+    }
+    
+    public struct ExfiltrationPoint
+    {
+        public const uint EligibleEntryPoints = 0x80; //[80] EligibleEntryPoints : System.String[]
+    }
+
+    public struct LocalGameWorld // [Class] -.ClientLocalGameWorld : ClientGameWorld
+    {
+        public const uint MapName = 0x40; //[40] string_0x40 : String
+        public const uint MainPlayer = 0x148; // to EFT.Player
+        public const uint ExfilController = 0x18; // to ExfilController
+        public const uint LootList = 0xC8; // to UnityList
+        public const uint RegisteredPlayers = 0xF0; // to RegisteredPlayers
+        public const uint Grenades = 0x1A0; // to Grenades
+        public const uint RaidStarted = 0x220; //[220] boolean_0x220 : Boolean
+    }
+
+    public struct EFTHardSettings
+    {
+        public const uint LOOT_RAYCAST_DISTANCE = 0x210; //[210] LOOT_RAYCAST_DISTANCE : Single
+        public const uint DOOR_RAYCAST_DISTANCE = 0x214; //[214] DOOR_RAYCAST_DISTANCE : Single
     }
 }

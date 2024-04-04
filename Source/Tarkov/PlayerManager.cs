@@ -61,7 +61,7 @@ namespace eft_dma_radar.Source.Tarkov
         public PlayerManager(ulong localGameWorld)
         {
             this.playerBase = Memory.ReadPtr(localGameWorld + Offsets.LocalGameWorld.MainPlayer);
-            this.playerProfile = Memory.ReadPtr(playerBase + 0x588);
+            this.playerProfile = Memory.ReadPtr(playerBase + Offsets.Player.Profile);
 
             this.movementContext = Memory.ReadPtr(playerBase + Offsets.Player.MovementContext);
             this.baseMovementState = Memory.ReadPtr(movementContext + 0xD0);

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Numerics;
-using eft_dma_radar.Source.Misc;
-using eft_dma_radar.Source.Tarkov;
-using Offsets;
 
 namespace eft_dma_radar
 {
@@ -37,7 +33,7 @@ namespace eft_dma_radar
             try
             {
                 var exfilController = Memory.ReadPtr(localGameWorld + Offsets.LocalGameWorld.ExfilController);
-                var exfilPoints = (this.IsScav ? Memory.ReadPtr(exfilController + 0x28) : Memory.ReadPtr(exfilController + Offsets.ExfilController.ExfilList));
+                var exfilPoints = this.IsScav ? Memory.ReadPtr(exfilController + 0x28) : Memory.ReadPtr(exfilController + Offsets.ExfilController.ExfilList);
                 var count = Memory.ReadValue<int>(exfilPoints + Offsets.ExfilController.ExfilCount);
 
                 if (count < 1 || count > 24)
@@ -66,11 +62,11 @@ namespace eft_dma_radar
                         var localPlayer = Memory.ReadPtr(localGameWorld + Offsets.LocalGameWorld.MainPlayer);
                         var localPlayerProfile = Memory.ReadPtr(localPlayer + Offsets.Player.Profile);
                         var localPlayerInfo = Memory.ReadPtr(localPlayerProfile + Offsets.Profile.PlayerInfo);
-                        var localPlayerEntryPoint = Memory.ReadPtr(localPlayerInfo + 0x30); // causes low fps in raid wait
+                        var localPlayerEntryPoint = Memory.ReadPtr(localPlayerInfo + Offsets.PlayerInfo.EntryPoint); // causes low fps in raid wait
                         var localPlayerEntryPointString = Memory.ReadUnityString(localPlayerEntryPoint);
 
-                        var eligibleEntryPoints = Memory.ReadPtr(exfilAddr + 0x80);
-                        var eligibleEntryPointsCount = Memory.ReadValue<int>(eligibleEntryPoints + 0x18);
+                        var eligibleEntryPoints = Memory.ReadPtr(exfilAddr + Offsets.ExfiltrationPoint.EligibleEntryPoints);
+                        var eligibleEntryPointsCount = Memory.ReadValue<int>(eligibleEntryPoints + Offsets.UnityList.Count);
                         for (uint j = 0; j < eligibleEntryPointsCount; j++)
                         {
                             var entryPoint = Memory.ReadPtr(eligibleEntryPoints + 0x20 + (j * 0x8));

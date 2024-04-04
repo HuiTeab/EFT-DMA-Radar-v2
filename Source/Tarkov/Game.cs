@@ -21,7 +21,6 @@ namespace eft_dma_radar
         private Config _config;
         private CameraManager _cameraManager;
         private QuestManager _questManager;
-        private Chams _chams;
         private Toolbox _toolbox;
         private ulong _localGameWorld;
         private readonly ulong _unityBase;
@@ -100,10 +99,6 @@ namespace eft_dma_radar
         
             get => _questManager;
         }
-        public Chams Chams
-        {
-            get => _chams;
-        }
         #endregion
 
         /// <summary>
@@ -157,13 +152,23 @@ namespace eft_dma_radar
 
             try
             {
-                var mapNamePrt = Memory.ReadPtrChain(this._localGameWorld, new uint[] { 0x150, 0x550 });
+                var mapNamePrt = Memory.ReadPtrChain(this._localGameWorld, new uint[] { Offsets.LocalGameWorld.MainPlayer, Offsets.Player.Profile });
                 this._mapName = Memory.ReadUnityString(mapNamePrt);
             }
             catch
             {
-                var mapNamePrt = Memory.ReadPtr(this._localGameWorld + 0x48);
-                this._mapName = Memory.ReadUnityString(mapNamePrt);
+            
+                try{
+                    var mapNamePrt = Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.MapName);
+                    if (mapNamePrt != 0)
+                    {
+                        this._mapName = Memory.ReadUnityString(mapNamePrt);
+                    }
+                }catch{
+                    Program.Log("Couldn't find map name!!!");
+                    this._mapName = "bigmap";
+                }
+
             }
         }
 
@@ -325,7 +330,7 @@ namespace eft_dma_radar
                     {
                         Memory.GameStatus = Game.GameStatus.Matching;
 
-                        if (!Memory.ReadValue<bool>(this._localGameWorld + 0x220))
+                        if (!Memory.ReadValue<bool>(this._localGameWorld + Offsets.LocalGameWorld.RaidStarted))
                         {
                             Program.Log("Raid hasn't started!");
                         }
@@ -335,9 +340,9 @@ namespace eft_dma_radar
                             if (registeredPlayers.PlayerCount > 0)
                             {
                                 var localPlayer = Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.MainPlayer);
-                                var playerInfoPtr = Memory.ReadPtrChain(localPlayer, new uint[] { 0x588, 0x28 });
+                                var playerInfoPtr = Memory.ReadPtrChain(localPlayer, new uint[] { Offsets.Player.Profile, Offsets.Profile.PlayerInfo });
                                 var localPlayerSide = Memory.ReadValue<int>(playerInfoPtr + Offsets.PlayerInfo.PlayerSide);
-                                this._isScav = (localPlayerSide == 4);
+                                this._isScav = localPlayerSide == 4;
 
                                 this._rgtPlayers = registeredPlayers;
                                 Memory.GameStatus = Game.GameStatus.InGame;
@@ -450,22 +455,11 @@ namespace eft_dma_radar
                     {
                         try
                         {
-                            this._toolbox = new Toolbox(this._localGameWorld);
+                            this._toolbox = new Toolbox();
                         }
                         catch (Exception ex)
                         {
                             Program.Log($"ERROR loading Toolbox: {ex}");
-                        }
-                    }
-                    if (this._chams is null)
-                    {
-                        try
-                        {
-                            this._chams = new Chams();
-                        }
-                        catch (Exception ex)
-                        {
-                            Program.Log($"ERROR loading Chams: {ex}");
                         }
                     }
                 }
@@ -516,17 +510,17 @@ namespace eft_dma_radar
         public static void SetInteractDistance(bool on)
         {
             var hardSettings = MonoSharp.GetStaticFieldDataOfClass("Assembly-CSharp", "EFTHardSettings");
-            var currentLootRaycastDistance = Memory.ReadValue<float>(hardSettings + 0x210);
+            var currentLootRaycastDistance = Memory.ReadValue<float>(hardSettings + Offsets.EFTHardSettings.LOOT_RAYCAST_DISTANCE);
 
             if (on && currentLootRaycastDistance != 1.8f)
             {
-                Memory.WriteValue<float>(hardSettings + 0x210, 1.8f);
-                Memory.WriteValue<float>(hardSettings + 0x214, 1.8f);
+                Memory.WriteValue<float>(hardSettings + Offsets.EFTHardSettings.LOOT_RAYCAST_DISTANCE, 1.8f);
+                Memory.WriteValue<float>(hardSettings + Offsets.EFTHardSettings.DOOR_RAYCAST_DISTANCE, 1.8f);
             }
             else if (!on && currentLootRaycastDistance == 1.8f)
             {
-                Memory.WriteValue<float>(hardSettings + 0x210, 1.3f);
-                Memory.WriteValue<float>(hardSettings + 0x214, 1f);
+                Memory.WriteValue<float>(hardSettings + Offsets.EFTHardSettings.LOOT_RAYCAST_DISTANCE, 1.3f);
+                Memory.WriteValue<float>(hardSettings + Offsets.EFTHardSettings.DOOR_RAYCAST_DISTANCE, 1f);
             }
         }
         #endregion
