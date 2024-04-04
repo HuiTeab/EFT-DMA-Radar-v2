@@ -2516,6 +2516,28 @@ namespace eft_dma_radar
 
             base.OnMouseWheel(e);
         }
+
+        private void button_MapSetupApply_Click(object sender, EventArgs e)
+        {
+            if (
+                float.TryParse(txtMapSetupX.Text, out float x)
+                && float.TryParse(txtMapSetupY.Text, out float y)
+                && float.TryParse(txtMapSetupScale.Text, out float scale)
+            )
+            {
+                lock (_renderLock)
+                {
+                    _selectedMap.ConfigFile.X = x;
+                    _selectedMap.ConfigFile.Y = y;
+                    _selectedMap.ConfigFile.Scale = scale;
+                    _selectedMap.ConfigFile.Save(_selectedMap);
+                }
+            }
+            else
+            {
+                throw new Exception("INVALID float values in Map Setup.");
+            }
+        }
     }
     #endregion
 }

@@ -109,6 +109,7 @@ namespace eft_dma_radar
             txtLootFilterEditName = new TextBox();
             picLootFilterEditColor = new PictureBox();
             grpLoot = new GroupBox();
+            chkAutoLootRefresh = new CheckBox();
             chkShowSubItems = new CheckBox();
             chkShowCorpses = new CheckBox();
             grpLootValues = new GroupBox();
@@ -182,7 +183,7 @@ namespace eft_dma_radar
             tabControl = new TabControl();
             colDialog = new ColorDialog();
             toolTip = new ToolTip(components);
-            chkAutoLootRefresh = new CheckBox();
+            button_MapSetupApply = new Button();
             tabLootFilter.SuspendLayout();
             tabPlayerHistory.SuspendLayout();
             tabPlayerLoadouts.SuspendLayout();
@@ -1058,6 +1059,17 @@ namespace eft_dma_radar
             grpLoot.TabStop = false;
             grpLoot.Text = "Loot";
             // 
+            // chkAutoLootRefresh
+            // 
+            chkAutoLootRefresh.AutoSize = true;
+            chkAutoLootRefresh.Location = new Point(6, 200);
+            chkAutoLootRefresh.Name = "chkAutoLootRefresh";
+            chkAutoLootRefresh.Size = new Size(121, 19);
+            chkAutoLootRefresh.TabIndex = 35;
+            chkAutoLootRefresh.Text = "Auto Loot Refresh";
+            chkAutoLootRefresh.UseVisualStyleBackColor = true;
+            chkAutoLootRefresh.CheckedChanged += chkAutoLootRefresh_CheckedChanged;
+            // 
             // chkShowSubItems
             // 
             chkShowSubItems.AutoSize = true;
@@ -1830,6 +1842,7 @@ namespace eft_dma_radar
             // 
             // grpMapSetup
             // 
+            grpMapSetup.Controls.Add(button_MapSetupApply);
             grpMapSetup.Controls.Add(chkMapFree);
             grpMapSetup.Controls.Add(txtMapSetupScale);
             grpMapSetup.Controls.Add(lblMapScale);
@@ -1924,16 +1937,15 @@ namespace eft_dma_radar
             // 
             colDialog.FullOpen = true;
             // 
-            // chkAutoLootRefresh
+            // button_MapSetupApply
             // 
-            chkAutoLootRefresh.AutoSize = true;
-            chkAutoLootRefresh.Location = new Point(6, 200);
-            chkAutoLootRefresh.Name = "chkAutoLootRefresh";
-            chkAutoLootRefresh.Size = new Size(121, 19);
-            chkAutoLootRefresh.TabIndex = 35;
-            chkAutoLootRefresh.Text = "Auto Loot Refresh";
-            chkAutoLootRefresh.UseVisualStyleBackColor = true;
-            chkAutoLootRefresh.CheckedChanged += chkAutoLootRefresh_CheckedChanged;
+            button_MapSetupApply.Location = new Point(7, 146);
+            button_MapSetupApply.Name = "button_MapSetupApply";
+            button_MapSetupApply.Size = new Size(75, 23);
+            button_MapSetupApply.TabIndex = 18;
+            button_MapSetupApply.Text = "Apply";
+            button_MapSetupApply.UseVisualStyleBackColor = true;
+            button_MapSetupApply.Click += button_MapSetupApply_Click;
             // 
             // frmMain
             // 
@@ -2163,6 +2175,7 @@ namespace eft_dma_radar
         private TrackBar trkSubItemLootValue;
         private CheckBox chkShowSubItems;
         private CheckBox chkAutoLootRefresh;
+        private Button button_MapSetupApply;
     }
 }
 
