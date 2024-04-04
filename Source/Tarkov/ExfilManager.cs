@@ -16,6 +16,12 @@ namespace eft_dma_radar
         {
             get => Memory.IsScav;
         }
+
+        private ReadOnlyDictionary<string, Player> AllPlayers
+        {
+            get => Memory.Players;
+        }
+
         private readonly Stopwatch _sw = new();
         /// <summary>
         /// List of PMC Exfils in Local Game World and their position/status.
@@ -36,6 +42,16 @@ namespace eft_dma_radar
                 var exfilPoints = this.IsScav ? Memory.ReadPtr(exfilController + 0x28) : Memory.ReadPtr(exfilController + Offsets.ExfilController.ExfilList);
                 var count = Memory.ReadValue<int>(exfilPoints + Offsets.ExfilController.ExfilCount);
 
+                ulong localPlayer = 0;
+                ulong localPlayerInfo = 0;
+                foreach (var player in AllPlayers){
+                    if (player.Value.Type == PlayerType.LocalPlayer) {
+                        localPlayer = player.Value.Base;
+                        localPlayerInfo = player.Value.Info;
+                        continue;
+                    }
+                }
+
                 if (count < 1 || count > 24)
                 {
                     throw new ArgumentOutOfRangeException();
@@ -49,19 +65,23 @@ namespace eft_dma_radar
 
                     Exfil exfil = new Exfil(exfilAddr);
                     var exfilSettings = Memory.ReadPtr(exfilAddr + Offsets.Exfil.Settings);
-                    var exfilName = Memory.ReadPtr(exfilSettings + Offsets.Exfil.Name);
+                    var exfilName = Memory.ReadPtr(exfilSettings + Offsets.Exfil.Name); //[38] <Description>k__BackingField : String
                     var exfilUnityName = Memory.ReadUnityString(exfilName);
                     exfil.UpdateName(exfilUnityName);
 
                     if (this.IsScav)
                     {
-                        list.Add(exfil);
+                        //[C0] EligibleIds : System.Collections.Generic.List<String>
+                        var eligibleIds = Memory.ReadPtr(exfilAddr + 0xC0);
+                        var eligibleIdsCount = Memory.ReadValue<int>(eligibleIds + Offsets.UnityList.Count);
+                        if (eligibleIdsCount != 0)
+                        {
+                            list.Add(exfil);
+                            continue;
+                        }
                     }
                     else
                     {
-                        var localPlayer = Memory.ReadPtr(localGameWorld + Offsets.LocalGameWorld.MainPlayer);
-                        var localPlayerProfile = Memory.ReadPtr(localPlayer + Offsets.Player.Profile);
-                        var localPlayerInfo = Memory.ReadPtr(localPlayerProfile + Offsets.Profile.PlayerInfo);
                         var localPlayerEntryPoint = Memory.ReadPtr(localPlayerInfo + Offsets.PlayerInfo.EntryPoint); // causes low fps in raid wait
                         var localPlayerEntryPointString = Memory.ReadUnityString(localPlayerEntryPoint);
 
