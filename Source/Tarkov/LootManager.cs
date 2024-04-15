@@ -287,7 +287,8 @@ namespace eft_dma_radar
                     validScatterMap.Results[i][8].TryGetResult<ulong>(out var gameObject);
                     validScatterMap.Results[i][12].TryGetResult<ulong>(out var objectName);
                     validScatterMap.Results[i][13].TryGetResult<ulong>(out var objectClass);
-                    validScatterMap.Results[i][20].TryGetResult<string>(out var containerName);
+                    if (!validScatterMap.Results[i][20].TryGetResult<string>(out var containerName))
+                        return;
                     validScatterMap.Results[i][19].TryGetResult<string>(out var className);
                     if (!validScatterMap.Results[i][24].TryGetResult<ulong>(out var posToTransform))
                         return;
