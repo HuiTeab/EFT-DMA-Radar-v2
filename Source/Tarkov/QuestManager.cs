@@ -49,7 +49,7 @@ namespace eft_dma_radar
                     {
                         continue;
                     }
-                    var questIDPtr = Memory.ReadPtr(questTemplate + Offsets.QuestData.ID); //[10] ID : String
+                    var questIDPtr = Memory.ReadPtr(questTemplate + Offsets.QuestData.ID);
                     questID = Memory.ReadUnityString(questIDPtr);
                 }
                 catch

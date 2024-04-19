@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Numerics;
 
@@ -6,114 +7,45 @@ namespace eft_dma_radar
 {
     public class ExfilManager
     {
-
-        private bool IsAtHideout
-        {
-            get => Memory.InHideout;
-        }
-
-        private bool IsScav
-        {
-            get => Memory.IsScav;
-        }
-
-        private ReadOnlyDictionary<string, Player> AllPlayers
-        {
-            get => Memory.Players;
-        }
-
-        private readonly Stopwatch _sw = new();
+        private bool IsAtHideout { get => Memory.InHideout; }
+        private bool IsScav { get => Memory.IsScav; }
+        private readonly Stopwatch _swRefresh = new();
+        private ulong localGameWorld { get; set; }
         /// <summary>
         /// List of PMC Exfils in Local Game World and their position/status.
         /// </summary>
-        public ReadOnlyCollection<Exfil> Exfils { get; }
+        public ReadOnlyCollection<Exfil> Exfils { get; set; }
 
         public ExfilManager(ulong localGameWorld)
         {
+            this.localGameWorld = localGameWorld;
+            this.Exfils = new ReadOnlyCollection<Exfil>(new Exfil[0]);
+
             //If we are in hideout, we don't need to do anything.
             if (this.IsAtHideout)
             {
                 Debug.WriteLine("In Hideout, not loading exfils.");
                 return;
             }
-            try
-            {
-                var exfilController = Memory.ReadPtr(localGameWorld + Offsets.LocalGameWorld.ExfilController);
-                var exfilPoints = this.IsScav ? Memory.ReadPtr(exfilController + Offsets.ExfilController.ScavExfilList) : Memory.ReadPtr(exfilController + Offsets.ExfilController.PMCExfilList);
-                var count = Memory.ReadValue<int>(exfilPoints + Offsets.ExfilController.ExfilCount);
 
-                ulong localPlayer = 0;
-                ulong localPlayerInfo = 0;
-                foreach (var player in AllPlayers){
-                    if (player.Value.Type == PlayerType.LocalPlayer) {
-                        localPlayer = player.Value.Base;
-                        localPlayerInfo = player.Value.Info;
-                        continue;
-                    }
-                }
-
-                if (count < 1 || count > 24)
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-
-                var list = new List<Exfil>();
-
-                for (uint i = 0; i < count; i++)
-                {
-                    var exfilAddr = Memory.ReadPtr(exfilPoints + Offsets.UnityListBase.Start + (i * 0x08));
-
-                    Exfil exfil = new Exfil(exfilAddr);
-                    var exfilSettings = Memory.ReadPtr(exfilAddr + Offsets.Exfil.Settings);
-                    var exfilName = Memory.ReadPtr(exfilSettings + Offsets.Exfil.Name); //[38] <Description>k__BackingField : String
-                    var exfilUnityName = Memory.ReadUnityString(exfilName);
-                    exfil.UpdateName(exfilUnityName);
-
-                    if (this.IsScav)
-                    {
-                        //[C0] EligibleIds : System.Collections.Generic.List<String>
-                        var eligibleIds = Memory.ReadPtr(exfilAddr + 0xC0);
-                        var eligibleIdsCount = Memory.ReadValue<int>(eligibleIds + Offsets.UnityList.Count);
-                        if (eligibleIdsCount != 0)
-                        {
-                            list.Add(exfil);
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        var localPlayerEntryPoint = Memory.ReadPtr(localPlayerInfo + Offsets.PlayerInfo.EntryPoint); // causes low fps in raid wait
-                        var localPlayerEntryPointString = Memory.ReadUnityString(localPlayerEntryPoint);
-
-                        var eligibleEntryPoints = Memory.ReadPtr(exfilAddr + Offsets.ExfiltrationPoint.EligibleEntryPoints);
-                        var eligibleEntryPointsCount = Memory.ReadValue<int>(eligibleEntryPoints + Offsets.UnityList.Count);
-                        for (uint j = 0; j < eligibleEntryPointsCount; j++)
-                        {
-                            var entryPoint = Memory.ReadPtr(eligibleEntryPoints + 0x20 + (j * 0x8));
-                            var entryPointString = Memory.ReadUnityString(entryPoint);
-                            if (entryPointString.ToLower() == localPlayerEntryPointString.ToLower())
-                            {
-                                list.Add(exfil);
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                this.Exfils = new ReadOnlyCollection<Exfil>(list);
-                this.UpdateExfils();
-                this._sw.Start();
-            } catch {}
+            this.RefreshExfils();
+            this._swRefresh.Start();
         }
 
         /// <summary>
         /// Checks if Exfils are due for a refresh, and then refreshes them.
         /// </summary>
-        public void Refresh()
+        public void RefreshExfils()
         {
-            if (_sw.ElapsedMilliseconds < 5000) return;
-            UpdateExfils();
-            _sw.Restart();
+             if (this._swRefresh.ElapsedMilliseconds >= 5000)
+            {
+                this.UpdateExfils();
+                this._swRefresh.Restart();
+            }
+            else if (this.Exfils.Count < 1 && this._swRefresh.ElapsedMilliseconds >= 250)
+            {
+                this.GetExfils();
+            }
         }
 
         /// <summary>
@@ -121,26 +53,113 @@ namespace eft_dma_radar
         /// </summary>
         private void UpdateExfils()
         {
-            try {
-                var scatterMap = new ScatterReadMap(Exfils.Count);
-                var round1 = scatterMap.AddRound();
-                for (int i = 0; i < Exfils.Count; i++)
-                {
-                    round1.AddEntry<int>(i, 0, Exfils[i].BaseAddr + Offsets.Exfil.Status);
-                }
-                scatterMap.Execute();
-                for (int i = 0; i < Exfils.Count; i++)
-                {
-                    try {
-                        var status = scatterMap.Results[i][0].TryGetResult<int>(out var stat);
-                        Exfils[i].UpdateStatus(stat);
-                    }
-                    catch{}
+            var scatterMap = new ScatterReadMap(this.Exfils.Count);
+            var round1 = scatterMap.AddRound();
 
-                }
+            for (int i = 0; i < this.Exfils.Count; i++)
+            {
+                round1.AddEntry<int>(i, 0, this.Exfils[i].BaseAddr + Offsets.Exfil.Status);
             }
-            catch{}
+
+            scatterMap.Execute();
+
+            Parallel.For(0, this.Exfils.Count, Program.Config.ParallelOptions, i =>
+            {
+                if (!scatterMap.Results[i][0].TryGetResult<int>(out var stat))
+                    return;
             
+                this.Exfils[i].UpdateStatus(stat);
+            });       
+        }
+
+        public void GetExfils()
+        {
+            try
+            {
+                var exfilController = Memory.ReadPtr(this.localGameWorld + Offsets.LocalGameWorld.ExfilController);
+                var exfilPoints = Memory.ReadPtr(exfilController + (this.IsScav ? Offsets.ExfilController.ScavExfilList : Offsets.ExfilController.PMCExfilList));
+                var count = Memory.ReadValue<int>(exfilPoints + Offsets.ExfilController.ExfilCount);
+
+                if (count < 1 || count > 24)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+
+                var scatterReadMap = new ScatterReadMap(count);
+                var round1 = scatterReadMap.AddRound();
+                var round2 = scatterReadMap.AddRound();
+                var round3 = scatterReadMap.AddRound();
+                var round4 = scatterReadMap.AddRound();
+                var round5 = scatterReadMap.AddRound();
+                var round6 = scatterReadMap.AddRound();
+
+                for (int i = 0; i < count; i++)
+                {
+                    var exfilAddr = round1.AddEntry<ulong>(i, 0, exfilPoints, null, Offsets.UnityListBase.Start + ((uint)i * 0x08));
+                    var localPlayer = round1.AddEntry<ulong>(i, 1, this.localGameWorld, null, Offsets.LocalGameWorld.MainPlayer);
+
+                    var localPlayerProfile = round2.AddEntry<ulong>(i, 2, localPlayer, null, Offsets.Player.Profile);
+                    var eligibleIds = round2.AddEntry<ulong>(i, 3, exfilAddr, null, Offsets.ExfiltrationPoint.EligibleIds);
+                    var eligibleEntryPoints = round2.AddEntry<ulong>(i, 4, exfilAddr, null, Offsets.ExfiltrationPoint.EligibleEntryPoints);
+
+                    var localPlayerInfo = round3.AddEntry<ulong>(i, 5, localPlayerProfile, null, Offsets.Profile.PlayerInfo);
+                    var eligibleIdsCount = round3.AddEntry<int>(i, 6, eligibleIds, null, Offsets.UnityList.Count);
+                    var eligibleEntryPointsCount = round3.AddEntry<int>(i, 7, eligibleEntryPoints, null, Offsets.UnityList.Count);
+
+                    var localPlayerEntryPoint = round4.AddEntry<ulong>(i, 8, localPlayerInfo, null, Offsets.PlayerInfo.EntryPoint);
+                }
+
+                scatterReadMap.Execute();
+
+                var list = new ConcurrentBag<Exfil>();
+
+                Parallel.For(0, count, Program.Config.ParallelOptions, i => {
+                    if (!scatterReadMap.Results[i][0].TryGetResult<ulong>(out var exfilAddr))
+                        return;
+                    if (!scatterReadMap.Results[i][1].TryGetResult<ulong>(out var localPlayer))
+                        return;
+
+                    var exfil = new Exfil(exfilAddr);
+                    exfil.UpdateName();
+
+                    if (this.IsScav)
+                    {
+                        scatterReadMap.Results[i][3].TryGetResult<ulong>(out var eligibleIds);
+                        scatterReadMap.Results[i][6].TryGetResult<int>(out var eligibleIdsCount);
+
+                        if (eligibleIdsCount != 0)
+                        {
+                            list.Add(exfil);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        scatterReadMap.Results[i][2].TryGetResult<ulong>(out var localPlayerProfile);
+                        scatterReadMap.Results[i][5].TryGetResult<ulong>(out var localPlayerInfo);
+                        scatterReadMap.Results[i][8].TryGetResult<ulong>(out var localPlayerEntryPoint);
+                        scatterReadMap.Results[i][4].TryGetResult<ulong>(out var eligibleEntryPoints);
+                        scatterReadMap.Results[i][7].TryGetResult<int>(out var eligibleEntryPointsCount);
+
+                        var localPlayerEntryPointString = Memory.ReadUnityString(localPlayerEntryPoint);
+
+                        for (uint j = 0; j < eligibleEntryPointsCount; j++)
+                        {
+                            var entryPoint = Memory.ReadPtr(eligibleEntryPoints + 0x20 + (j * 0x8));
+                            var entryPointString = Memory.ReadUnityString(entryPoint);
+
+                            if (entryPointString.ToLower() == localPlayerEntryPointString.ToLower())
+                            {
+                                list.Add(exfil);
+                                break;
+                            }
+                        }
+                    }
+                });
+
+                this.Exfils = new ReadOnlyCollection<Exfil>(list.ToList());
+            }
+            catch { }
         }
     }
 
@@ -151,31 +170,6 @@ namespace eft_dma_radar
         public Vector3 Position { get; }
         public ExfilStatus Status { get; private set; } = ExfilStatus.Closed;
         public string Name { get; private set; } = "?";
-
-        private Dictionary<string, string> streetsExfilNames = new Dictionary<string, string>
-        {
-            // pmc extracts
-            ["E1"] = "Stylobate Building Elevator",
-            ["E2"] = "Sewer River",
-            ["E3"] = "Damaged House",
-            ["E4"] = "Crash Site",
-            ["E5"] = "Collapsed Crane",
-            ["E7"] = "Expo Checkpoint",
-            ["E7-car"] = "Primorsky Ave Taxi",
-            ["E8-yard"] = "Courtyard",
-            ["E9-sniper"] = "Klimov Street",
-            ["Exit-E10-coop"] = "Pinewood Basement",
-
-            //scav extracts
-            ["scav-e1"] = "Basement Descent",
-            ["scav-e2"] = "Entrance to Catacombs",
-            ["scav-e3"] = "Ventilation Shaft",
-            ["scav-e4"] = "Sewer Manhole",
-            ["scav-e5"] = "Near Kamchatskaya Arch",
-            ["scav-e7"] = "Cardinal Apartment Complex Parking",
-            ["scav-e8"] = "Klimov Shopping Mall",
-            ["Exit-E10-coop"] = "Pinewood Basement"
-        };
 
         public Exfil(ulong baseAddr)
         {
@@ -214,13 +208,20 @@ namespace eft_dma_radar
             }
         }
 
-        public void UpdateName(string name)
+        public void UpdateName()
         {
-            this.Name = name.Replace("_", "-");
+            var name = TarkovDevManager.GetMapName(Memory.MapName);
 
-            if (Memory.MapName == "TarkovStreets")
+            if (TarkovDevManager.AllMaps.TryGetValue(name, out var map))
             {
-                this.Name = streetsExfilNames[this.Name];
+                foreach (var extract in map.extracts)
+                {
+                    if (this.Position == extract.position || Vector3.Distance(extract.position, this.Position) <= 10)
+                    {
+                        this.Name = extract.name;
+                        break;
+                    }
+                }
             }
         }
     }

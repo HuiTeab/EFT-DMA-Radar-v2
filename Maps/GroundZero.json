@@ -1,5 +1,8 @@
 {
-  "mapID": ["sandbox"],
+  "mapID": [
+    "sandbox",
+    "sandbox_high"
+  ],
   "x": 1916,
   "y": 6940,
   "scale": 19,

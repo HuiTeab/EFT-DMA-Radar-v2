@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using eft_dma_radar.Source.Misc;
 using eft_dma_radar.Source.MonoSharp;
 using eft_dma_radar.Source.Tarkov;
+using Offsets;
 
 namespace eft_dma_radar
 {
@@ -152,23 +152,21 @@ namespace eft_dma_radar
 
             try
             {
-                var mapNamePrt = Memory.ReadPtrChain(this._localGameWorld, new uint[] { Offsets.LocalGameWorld.MainPlayer, Offsets.Player.Location });
-                this._mapName = Memory.ReadUnityString(mapNamePrt);
+                var mapNamePtr = Memory.ReadPtrChain(this._localGameWorld, new uint[] { Offsets.LocalGameWorld.MainPlayer, Offsets.Player.Location });
+                this._mapName = Memory.ReadUnityString(mapNamePtr);
             }
             catch
             {
-            
-                try{
-                    var mapNamePrt = Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.MapName);
-                    if (mapNamePrt != 0)
-                    {
-                        this._mapName = Memory.ReadUnityString(mapNamePrt);
-                    }
-                }catch{
+                try
+                {
+                    var mapNamePtr = Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.MapName);
+                    this._mapName = Memory.ReadUnityString(mapNamePtr);
+                }
+                catch
+                {
                     Program.Log("Couldn't find map name!!!");
                     this._mapName = "bigmap";
                 }
-
             }
         }
 
@@ -187,8 +185,9 @@ namespace eft_dma_radar
         private void HandleRaidEnded(RaidEnded e) {
             Program.Log("Raid has ended!");
 
-            this._inGame = false;
-            Memory.GameStatus = Game.GameStatus.Menu;
+            //this._inGame = false;
+            //Memory.GameStatus = Game.GameStatus.Menu;
+            Memory.Restart();
         }
 
         /// <summary>
@@ -342,7 +341,7 @@ namespace eft_dma_radar
                                 var localPlayer = Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.MainPlayer);
                                 var playerInfoPtr = Memory.ReadPtrChain(localPlayer, new uint[] { Offsets.Player.Profile, Offsets.Profile.PlayerInfo });
                                 var localPlayerSide = Memory.ReadValue<int>(playerInfoPtr + Offsets.PlayerInfo.PlayerSide);
-                                this._isScav = localPlayerSide == 4;
+                                this._isScav = (localPlayerSide == 4);
 
                                 this._rgtPlayers = registeredPlayers;
                                 Memory.GameStatus = Game.GameStatus.InGame;
@@ -375,30 +374,11 @@ namespace eft_dma_radar
 
             if (this._mapName == string.Empty)
             {
-                try
-                {
-                    this.GetMapName();
-                }
-                catch (Exception ex)
-                {
-                    Program.Log($"ERROR getting map name: {ex}");
-                }
+                this.GetMapName();
             }
             else
             {
-                if (this._config.QuestHelperEnabled && this._questManager is null)
-                {
-                    try
-                    {
-                        this._questManager = new QuestManager(this._localGameWorld);
-                    }
-                    catch (Exception ex)
-                    {
-                        Program.Log($"ERROR loading QuestManager: {ex}");
-                    }
-                }
-
-                if (this._config.LootEnabled && (this._lootManager is null || this._refreshLoot))
+                if (this._config.LootEnabled && (this._lootManager == null|| this._refreshLoot))
                 {
                     this._loadingLoot = true;
                     try
@@ -412,7 +392,6 @@ namespace eft_dma_radar
                     }
                     this._loadingLoot = false;
                 }
-
 
                 if (this._config.MasterSwitchEnabled)
                 {
@@ -451,6 +430,7 @@ namespace eft_dma_radar
                             Program.Log($"ERROR loading QuestManager: {ex}");
                         }
                     }
+
                     if (this._toolbox is null)
                     {
                         try
@@ -463,6 +443,19 @@ namespace eft_dma_radar
                         }
                     }
                 }
+
+                if (this._exfilManager is null)
+                {
+                    try
+                    {
+                        this._exfilManager = new ExfilManager(this._localGameWorld);
+                    }
+                    catch (Exception ex)
+                    {
+                        Program.Log($"ERROR loading ExfilController: {ex}");
+                    }
+                }
+                else this._exfilManager.RefreshExfils();
 
                 if (this._grenadeManager is null)
                 {
@@ -477,18 +470,17 @@ namespace eft_dma_radar
                 }
                 else this._grenadeManager.Refresh();
 
-                if (this._exfilManager is null)
+                if (this._config.QuestHelperEnabled && this._questManager is null)
                 {
                     try
                     {
-                        this._exfilManager = new ExfilManager(this._localGameWorld);
+                        this._questManager = new QuestManager(this._localGameWorld);
                     }
                     catch (Exception ex)
                     {
-                        Program.Log($"ERROR loading ExfilController: {ex}");
+                        Program.Log($"ERROR loading QuestManager: {ex}");
                     }
                 }
-                else this._exfilManager.Refresh();
             }
         }
 

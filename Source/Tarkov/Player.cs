@@ -4,7 +4,6 @@ using System.Numerics;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Text;
-using eft_dma_radar.Source.Misc;
 
 namespace eft_dma_radar
 {
@@ -117,7 +116,7 @@ namespace eft_dma_radar
         /// (PMC ONLY) Player's Gear Loadout.
         /// Key = Slot Name, Value = Item 'Long Name' in Slot
         /// </summary>
-        public Dictionary<string, GearItem> Gear
+        public ConcurrentDictionary<string, GearItem> Gear
         {
             get => this._gearManager is not null ? this._gearManager.Gear : null;
             set
@@ -128,12 +127,12 @@ namespace eft_dma_radar
         /// <summary>
         /// Gets all gear + mods/attachments of a player
         /// </summary>
-        public List<LootItem> GearItemMods
+        public ConcurrentBag<LootItem> GearItemMods
         {
             get
             {
                 GearManager gearManager = this._gearManager;
-                return ((gearManager != null) ? gearManager.GearItemMods : null) ?? new List<LootItem>();
+                return ((gearManager != null) ? gearManager.GearItemMods : null) ?? new ConcurrentBag<LootItem>();
             }
         }
         /// <summary>
@@ -285,10 +284,7 @@ namespace eft_dma_radar
         public ulong NextObservedPlayerView { get; }
         public ulong Info { get; }
         public ulong TransformInternal { get; }
-        public ulong VerticesAddr
-        {
-            get => this._transform?.VerticesAddr ?? 0x0;
-        }
+        public ulong VerticesAddr { get => this._transform?.VerticesAddr ?? 0x0; }
         public ulong IndicesAddr
         {
             get => this._transform?.IndicesAddr ?? 0x0;
@@ -361,32 +357,34 @@ namespace eft_dma_radar
                     this.InventorySlots = Memory.ReadPtr(equipment + Offsets.Equipment.Slots);
                     this.PlayerBody = Memory.ReadPtr(playerBase + Offsets.Player.PlayerBody);
 
-                    try {
+                    try
+                    {
                         var gameVersionPtr = Memory.ReadPtr(Info + Offsets.PlayerInfo.GameVersion);
                         var gameVersion = Memory.ReadUnityString(gameVersionPtr);
 
                         this.GroupID = this.GetGroupID();
-                        //try { this._gearManager = new GearManager(this.InventorySlots); } catch { }
+                        this.PlayerBody = Memory.ReadPtr(playerBase + 0xA8);
+                        try { this._gearManager = new GearManager(this.InventorySlots); } catch { }
 
                         //If empty, then it's a scav
                         if (gameVersion == "")
                         {
                             //Console.WriteLine("Scav Detected");
-                            Type = PlayerType.AIOfflineScav;
-                            IsLocalPlayer = false;
-                            IsPmc = false;
-                            Name = Helpers.TransliterateCyrillic(Name);
+                            this.Type = PlayerType.AIOfflineScav;
+                            this.IsLocalPlayer = false;
+                            this.IsPmc = false;
+                            this.Name = Helpers.TransliterateCyrillic(Name);
 
                         }
                         else
                         {
-                            Type = PlayerType.LocalPlayer;
-                            IsLocalPlayer = true;
-                            IsPmc = true;
+                            this.Type = PlayerType.LocalPlayer;
+                            this.IsLocalPlayer = true;
+                            this.IsPmc = true;
                         }
                     } catch {}
                 } else if (baseClassName == "ObservedPlayerView") {
-                    IsLocalPlayer = false;
+                    this.IsLocalPlayer = false;
                     //Debug.WriteLine("Processing PMC Player.");
                     var ObservedPlayerView = playerBase;
                     this.MovementContext = Memory.ReadPtrChain(ObservedPlayerView, Offsets.ObservedPlayerView.To_MovementContext);
@@ -400,7 +398,7 @@ namespace eft_dma_radar
 
                     this.PlayerBody = Memory.ReadPtr(ObservedPlayerView + Offsets.ObservedPlayerView.PlayerBody);
                     this.InventoryController = Memory.ReadPtrChain(ObservedPlayerView, Offsets.ObservedPlayerView.To_InventoryController);
-                    var inventory = Memory.ReadPtr(InventoryController + Offsets.InventoryController.Inventory);
+                    var inventory = Memory.ReadPtr(this.InventoryController + Offsets.InventoryController.Inventory);
                     var equipment = Memory.ReadPtr(inventory + Offsets.Inventory.Equipment);
                     this.InventorySlots = Memory.ReadPtr(equipment + Offsets.Equipment.Slots);
 
@@ -418,7 +416,8 @@ namespace eft_dma_radar
 
                     if ((playerSide == 1 || playerSide == 2) && !playerIsAI) {
                         this.IsPmc = true;
-                        this.Type = playerSide == 1 ? PlayerType.USEC : PlayerType.BEAR;
+                        this.Type = (playerSide == 1 ? PlayerType.USEC : PlayerType.BEAR);
+                        //this.KDA = KDManager.GetKD(this.AccountID).Result;
                     } else if (playerSide == 4 && !playerIsAI) {
                         this.Type = PlayerType.PScav;
                     } else if (playerSide == 4 && playerIsAI) {
@@ -570,7 +569,7 @@ namespace eft_dma_radar
                     if (!this._kdRefreshSw.IsRunning || this._kdRefreshSw.ElapsedMilliseconds >= 20000)
                     {
                         this._kdRefreshSw.Restart();
-                        //this.KDA = await KDManager.GetKD(this.AccountID).ConfigureAwait(true);
+                        //this.KDA = KDManager.GetKD(this.AccountID).ConfigureAwait(true);
                     }
                 }
             }

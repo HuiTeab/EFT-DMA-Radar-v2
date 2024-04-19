@@ -1,10 +1,9 @@
-﻿using System.Collections.Concurrent;
+﻿using eft_dma_radar.Source.Misc;
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.Intrinsics;
-using eft_dma_radar.Source.Misc;
-using eft_dma_radar.Source.Tarkov;
 
 namespace eft_dma_radar
 {
@@ -279,7 +278,7 @@ namespace eft_dma_radar
 
                 if (players.Length == 0)
                 {
-                    Console.WriteLine("No players found.");
+                    //Console.WriteLine("No players found.");
                     return;
                 }
 

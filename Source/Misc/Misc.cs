@@ -5,8 +5,8 @@ using SkiaSharp;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using eft_dma_radar.Source.Misc;
 using System.Runtime.Intrinsics;
+using eft_dma_radar.Source.Misc;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Menu;
 
 namespace eft_dma_radar
@@ -164,14 +164,8 @@ namespace eft_dma_radar
         /// <summary>
         /// Enables / disables no recoil.
         /// </summary>
-        [JsonPropertyName("noRecoilEnabled")]
-        public bool NoRecoilEnabled { get; set; }
-
-        /// <summary>
-        /// Enables / disables no sway.
-        /// </summary>
-        [JsonPropertyName("noSwayEnabled")]
-        public bool NoSwayEnabled { get; set; }
+        [JsonPropertyName("noRecoilSwayEnabled")]
+        public bool NoRecoilSwayEnabled { get; set; }
 
         /// <summary>
         /// Enables / disables max / infinite stamina.
@@ -306,71 +300,29 @@ namespace eft_dma_radar
         public List<LootFilter> Filters { get; set; }
 
         /// <summary>
+        /// Regular Thermal Vision Settings
+        /// </summary>
+        [JsonPropertyName("MainThermalSetting")]
+        public ThermalSettings MainThermalSetting { get; set; }
+
+        /// <summary>
+        /// Optical Thermal Vision Settings
+        /// </summary>
+        [JsonPropertyName("OpticThermalSetting")]
+        public ThermalSettings OpticThermalSetting { get; set; }
+
+        /// <summary>
         /// Allows storage of colors for ai scav, pscav etc.
         /// </summary>
         [JsonPropertyName("PaintColors")]
         //public List<PaintColor> PaintColors { get; set; }
         public Dictionary<string, PaintColor.Colors> PaintColors { get; set; }
 
-        /// <summary>
-        /// Enables / disables thermal vision settings
-        /// </summary>
-        [JsonPropertyName("ThermalVisionSettingsEnabled")]
-        public bool ThermalVisionSettingsEnabled { get; set; }
+        [JsonPropertyName("AutoRefreshSettings")]
+        public Dictionary<string, int> AutoRefreshSettings { get; set; }
 
-        /// <summary>
-        /// Enables / disables optic thermal vision settings
-        /// </summary>
-        [JsonPropertyName("ThermalVisionOpticSettingsEnabled")]
-        public bool ThermalVisionOpticSettingsEnabled { get; set; }
-
-        /// <summary>
-        /// Enables / disables thermal vision RampPalette change
-        /// </summary>
-        [JsonPropertyName("ThermalVisionRampPaletteEnabled")]
-        public bool ThermalVisionRampPaletteEnabled { get; set; }
-
-        /// <summary>
-        /// Thermal Vision Color Index
-        /// </summary>
-        [JsonPropertyName("ThermalVisionColorIndex")]
-        public int ThermalVisionColorIndex { get; set; }
-
-        /// <summary>
-        /// Enables / disables thermal vision mainTexColorCoef change
-        /// </summary>
-        [JsonPropertyName("ThermalVisionMainTexColorCoefEnabled")]
-        public bool ThermalVisionMainTexColorCoefEnabled { get; set; }
-
-        /// <summary>
-        /// Thermal vision mainTexColorCoef value
-        /// </summary>
-        [JsonPropertyName("ThermalVisionMainTexColorCoef")]
-        public float ThermalVisionMainTexColorCoef { get; set; }
-
-        /// <summary>
-        /// Enables / disables thermal vision minimumTemperature change
-        /// </summary>
-        [JsonPropertyName("ThermalVisionMinimumTemperatureEnabled")]
-        public bool ThermalVisionMinimumTemperatureEnabled { get; set; }
-
-        /// <summary>
-        /// Thermal vision minimumTemperature value
-        /// </summary>
-        [JsonPropertyName("ThermalVisionMinimumTemperature")]
-        public float ThermalVisionMinimumTemperature { get; set; }
-
-        /// <summary>
-        /// Enables / disables thermal vision rampShift change
-        /// </summary>
-        [JsonPropertyName("ThermalVisionRampShiftEnabled")]
-        public bool ThermalVisionRampShiftEnabled { get; set; }
-
-        /// <summary>
-        /// Thermal vision rampShift value
-        /// </summary>
-        [JsonPropertyName("ThermalVisionRampShift")]
-        public float ThermalVisionRampShift { get; set; }
+        [JsonIgnore]
+        public ParallelOptions ParallelOptions { get; set; }
 
         public Config()
         {
@@ -384,8 +336,7 @@ namespace eft_dma_radar
             HideNames = false;
             ImportantLootOnly = false;
             HideLootValue = false;
-            NoRecoilEnabled = false;
-            NoSwayEnabled = false;
+            NoRecoilSwayEnabled = false;
             MaxStaminaEnabled = false;
             LoggingEnabled = false;
             ShowHoverArmor = false;
@@ -445,16 +396,25 @@ namespace eft_dma_radar
             MinCorpseValue = 100000;
             MinSubItemValue = 15000;
             AutoLootRefreshEnabled = false;
-            ThermalVisionColorIndex = 3;
-            ThermalVisionRampPaletteEnabled = false;
-            ThermalVisionMainTexColorCoefEnabled = false;
-            ThermalVisionMinimumTemperatureEnabled = false;
-            ThermalVisionRampShiftEnabled = false;
-            ThermalVisionSettingsEnabled = false;
-            ThermalVisionOpticSettingsEnabled = false;
-            ThermalVisionMainTexColorCoef = 0.5f;
-            ThermalVisionMinimumTemperature = 0.01f;
-            ThermalVisionRampShift = -0.5f;
+
+            MainThermalSetting = new ThermalSettings(0.5f, 0.001f, -0.5f, 0);
+            OpticThermalSetting = new ThermalSettings(0.5f, 0.001f, -0.5f, 0);
+
+            AutoRefreshSettings = new Dictionary<string, int>
+            {
+                ["Customs"] = 30,
+                ["Factory"] = 30,
+                ["Ground Zero"] = 30,
+                ["Interchange"] = 30,
+                ["Lighthouse"] = 30,
+                ["Reserve"] = 30,
+                ["Shoreline"] = 30,
+                ["Streets of Tarkov"] = 30,
+                ["The Lab"] = 30,
+                ["Woods"] = 30
+            };
+
+            ParallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 1 };
         }
 
         /// <summary>
@@ -473,7 +433,7 @@ namespace eft_dma_radar
                     config = JsonSerializer.Deserialize<Config>(json);
                     return true;
                 }
-                catch
+                catch (Exception ex)
                 {
                     config = null;
                     return false;
@@ -567,16 +527,6 @@ namespace eft_dma_radar
             return path;
         }
         /// <summary>
-        /// Draws a Death Marker on this location.
-        /// </summary>
-        public void DrawDeathMarker(SKCanvas canvas, LootItem item)
-        {
-            float length = 6 * UIScale;
-            var paint = Extensions.GetDeathMarkerPaint(item);
-            canvas.DrawLine(new SKPoint(this.X - length, this.Y + length), new SKPoint(this.X + length, this.Y - length), paint);
-            canvas.DrawLine(new SKPoint(this.X - length, this.Y - length), new SKPoint(this.X + length, this.Y + length), paint);
-        }
-        /// <summary>
         /// Draws an Exfil on this location.
         /// </summary>
         public void DrawExfil(SKCanvas canvas, Exfil exfil, float localPlayerHeight)
@@ -621,30 +571,42 @@ namespace eft_dma_radar
             canvas.DrawCircle(this.GetPoint(), 5 * UIScale, SKPaints.PaintGrenades);
         }
         /// <summary>
+        /// Draws a lootable object on this location.
+        /// </summary>
+        public void DrawLootableObject(SKCanvas canvas, LootableObject item, float heightDiff) {
+            if (item is LootItem lootItem)
+            {
+                this.DrawLootItem(canvas, lootItem, heightDiff);
+            }
+            else if (item is LootContainer container)
+            {
+                this.DrawLootContainer(canvas, container, heightDiff);
+            }
+            else if (item is LootCorpse corpse)
+            {
+                this.DrawLootCorpse(canvas, corpse, heightDiff);
+            }
+        }
+        /// <summary>
         /// Draws a loot item on this location.
         /// </summary>
-        public void DrawLoot(SKCanvas canvas, LootItem item, float heightDiff) {
-            if (item.Container && item.IsCorpse)
-            {
-                this.DrawDeathMarker(canvas, item);
-                return;
-            }
-
+        public void DrawLootItem(SKCanvas canvas, LootItem item, float heightDiff)
+        {
             var paint = Extensions.GetEntityPaint(item);
             var text = Extensions.GetTextPaint(item);
-            var label = (item.Container) ? item.ContainerName : (_config.HideLootValue ? item.Item.shortName : item.GetFormattedValueShortName());
+            var label = _config.HideLootValue ? item.Item.shortName : item.GetFormattedValueShortName();
 
-            if (heightDiff > 1.45) // loot is above player
+            if (heightDiff > 1.45)
             {
                 using var path = this.GetUpArrow();
                 canvas.DrawPath(path, paint);
             }
-            else if (heightDiff < -1.45) // loot is below player
+            else if (heightDiff < -1.45)
             {
                 using var path = this.GetDownArrow();
                 canvas.DrawPath(path, paint);
             }
-            else // loot is level with player
+            else
             {
                 canvas.DrawCircle(this.GetPoint(), 5 * UIScale, paint);
             }
@@ -653,6 +615,64 @@ namespace eft_dma_radar
             if (!_config.HideTextOutline)
                 canvas.DrawText(label, coords, Extensions.GetTextOutlinePaint());
             canvas.DrawText(label, coords, text);
+        }
+        /// <summary>
+        /// Draws a loot container on this location.
+        /// </summary>
+        public void DrawLootContainer(SKCanvas canvas, LootContainer container, float heightDiff)
+        {
+            var paint = Extensions.GetEntityPaint(container);
+            var text = Extensions.GetTextPaint(container);
+            var label = container.Name;
+
+            if (heightDiff > 1.45)
+            {
+                using var path = this.GetUpArrow();
+                canvas.DrawPath(path, paint);
+            }
+            else if (heightDiff < -1.45)
+            {
+                using var path = this.GetDownArrow();
+                canvas.DrawPath(path, paint);
+            }
+            else
+            {
+                canvas.DrawCircle(this.GetPoint(), 5 * UIScale, paint);
+            }
+
+            var coords = this.GetPoint(7 * UIScale, 3 * UIScale);
+            if (!_config.HideTextOutline)
+                canvas.DrawText(label, coords, Extensions.GetTextOutlinePaint());
+            canvas.DrawText(label, coords, text);
+        }
+        /// <summary>
+        /// Draws a loot corpse on this location.
+        /// </summary>
+        public void DrawLootCorpse(SKCanvas canvas, LootCorpse corpse, float heightDiff)
+        {
+            float length = 6 * UIScale;
+            var paint = Extensions.GetDeathMarkerPaint(corpse);
+            float offsetX = -15 * UIScale;
+
+            if (heightDiff > 1.45)
+            {
+                using var path = this.GetUpArrow();
+                path.Offset(offsetX, 0);
+                canvas.DrawPath(path, paint);
+            }
+            else if (heightDiff < -1.45)
+            {
+                using var path = this.GetDownArrow();
+                path.Offset(offsetX, 0);
+                canvas.DrawPath(path, paint);
+            }
+            else
+            {
+                canvas.DrawCircle(this.X + offsetX, this.Y, 5 * UIScale, paint);
+            }
+
+            canvas.DrawLine(new SKPoint(this.X - length, this.Y + length), new SKPoint(this.X + length, this.Y - length), paint);
+            canvas.DrawLine(new SKPoint(this.X - length, this.Y - length), new SKPoint(this.X + length, this.Y + length), paint);
         }
         /// <summary>
         /// Draws a Quest Item on this location.
@@ -759,19 +779,19 @@ namespace eft_dma_radar
         /// <summary>
         /// Draws Loot information on this location
         /// </summary>
-        public void DrawContainerTooltip(SKCanvas canvas, LootItem item)
+        public void DrawLootableObjectToolTip(SKCanvas canvas, LootableObject item)
         {
             if (item is LootContainer container)
             {
-                DrawToolTip(canvas, container.Items);
+                DrawToolTip(canvas, container);
             }
             else if (item is LootCorpse corpse)
             {
                 DrawToolTip(canvas, corpse);
             }
-            else
+            else if (item is LootItem lootItem)
             {
-                DrawToolTip(canvas, new List<LootItem> { item });
+                DrawToolTip(canvas, lootItem);
             }
         }
         /// <summary>
@@ -868,13 +888,37 @@ namespace eft_dma_radar
             DrawHostileTooltip(canvas, player);
         }
         /// <summary>
-        /// Draws the tool tip for loot items/containers
+        /// Draws the tool tip for loot items
         /// </summary>
-        private void DrawToolTip(SKCanvas canvas, List<LootItem> items)
+        private void DrawToolTip(SKCanvas canvas, LootItem lootItem)
+        {
+            var width = SKPaints.TextBase.MeasureText(lootItem.GetFormattedValueName());
+
+            var textSpacing = 15 * UIScale;
+            var padding = 3 * UIScale;
+
+            var height = 1 * textSpacing;
+
+            var left = X + padding;
+            var top = Y - padding;
+            var right = left + width + padding * 2;
+            var bottom = top + height + padding * 2;
+
+            var backgroundRect = new SKRect(left, top, right, bottom);
+            canvas.DrawRect(backgroundRect, SKPaints.PaintTransparentBacker);
+
+            var y = bottom - (padding * 2.2f);
+
+            canvas.DrawText(lootItem.GetFormattedValueName(), left + padding, y, Extensions.GetTextPaint(lootItem));
+        }
+        /// <summary>
+        /// Draws the tool tip for loot containers
+        /// </summary>
+        private void DrawToolTip(SKCanvas canvas, LootContainer container)
         {
             var maxWidth = 0f;
 
-            foreach (var item in items)
+            foreach (var item in container.Items)
             {
                 var width = SKPaints.TextBase.MeasureText(item.GetFormattedValueName());
                 maxWidth = Math.Max(maxWidth, width);
@@ -883,7 +927,7 @@ namespace eft_dma_radar
             var textSpacing = 15 * UIScale;
             var padding = 3 * UIScale;
 
-            var height = items.Count * textSpacing;
+            var height = container.Items.Count * textSpacing;
 
             var left = X + padding;
             var top = Y - padding;
@@ -894,26 +938,33 @@ namespace eft_dma_radar
             canvas.DrawRect(backgroundRect, SKPaints.PaintTransparentBacker);
 
             var y = bottom - (padding * 2.2f);
-            foreach (var item in items)
+            foreach (var item in container.Items)
             {
                 canvas.DrawText(item.GetFormattedValueName(), left + padding, y, Extensions.GetTextPaint(item));
                 y -= textSpacing;
             }
         }
-
+        /// <summary>
+        /// Draws the tool tip for loot corpses
+        /// </summary>
         private void DrawToolTip(SKCanvas canvas, LootCorpse corpse)
         {
             var maxWidth = 0f;
             var items = corpse.Items;
             var height = items.Count;
+            var isEmptyCorpseName = corpse.Name.Contains("Clone");
+
+            if (!isEmptyCorpseName)
+            {
+                height += 1;
+            }
 
             foreach (var gearItem in items)
             {
                 var width = SKPaints.TextBase.MeasureText(gearItem.GetFormattedTotalValueName());
                 maxWidth = Math.Max(maxWidth, width);
 
-                //if (_config.ShowSubItemsEnabled && gearItem.Loot.Count > 0)
-                if (gearItem.Loot.Count > 0)
+                if (_config.ShowSubItemsEnabled && gearItem.Loot.Count > 0)
                 {
                     foreach (var lootItem in gearItem.Loot)
                     {
@@ -944,8 +995,7 @@ namespace eft_dma_radar
             var y = bottom - (padding * 2.2f);
             foreach (var gearItem in items)
             {
-                //if (_config.ShowSubItemsEnabled && gearItem.Loot.Count > 0)
-                if (gearItem.Loot.Count > 0)
+                if (_config.ShowSubItemsEnabled && gearItem.Loot.Count > 0)
                 {
                     foreach (var lootItem in gearItem.Loot)
                     {
@@ -958,6 +1008,12 @@ namespace eft_dma_radar
                 }
 
                 canvas.DrawText(gearItem.GetFormattedTotalValueName(), left + padding, y, Extensions.GetTextPaint(gearItem));
+                y -= textSpacing;
+            }
+
+            if (!isEmptyCorpseName)
+            {
+                canvas.DrawText(corpse.Name, left + padding, y, SKPaints.TextBase);
                 y -= textSpacing;
             }
         }
@@ -1226,426 +1282,22 @@ namespace eft_dma_radar
     }
     #endregion
 
-    #region Memory Classes
-
-    public interface IScatterEntry
-    {
-        /// <summary>
-        /// Entry Index.
-        /// </summary>
-        int Index { get; init; }
-        /// <summary>
-        /// Entry ID.
-        /// </summary>
-        int Id { get; init; }
-        /// <summary>
-        /// Can be a ulong or another ScatterReadEntry.
-        /// </summary>
-        object Addr { get; set; }
-        /// <summary>
-        /// Offset to the Base Address.
-        /// </summary>
-        uint Offset { get; init; }
-        /// <summary>
-        /// Defines the type based on <typeparamref name="T"/>
-        /// </summary>
-        Type Type { get; }
-        /// <summary>
-        /// Can be an int32 or another ScatterReadEntry.
-        /// </summary>
-        object Size { get; set; }
-        /// <summary>
-        /// True if the Scatter Read has failed.
-        /// </summary>
-        bool IsFailed { get; set; }
-
-        /// <summary>
-        /// Sets the Result for this Scatter Read.
-        /// </summary>
-        /// <param name="buffer">Raw memory buffer for this read.</param>
-        void SetResult(byte[] buffer);
-
-        /// <summary>
-        /// Parses the address to read for this Scatter Read.
-        /// Sets the Addr property for the object.
-        /// </summary>
-        /// <returns>Virtual address to read.</returns>
-        ulong ParseAddr();
-
-        /// <summary>
-        /// Parses the number of bytes to read for this Scatter Read.
-        /// Sets the Size property for the object.
-        /// </summary>
-        /// <returns>Size of read.</returns>
-        int ParseSize();
-
-        /// <summary>
-        /// Tries to return the Scatter Read Result.
-        /// </summary>
-        /// <typeparam name="TOut">Type to return.</typeparam>
-        /// <param name="result">Result to populate.</param>
-        /// <returns>True if successful, otherwise False.</returns>
-        bool TryGetResult<TOut>(out TOut result);
-    }
-    public class ScatterReadMap
-    {
-        protected List<ScatterReadRound> Rounds { get; } = new();
-        protected readonly Dictionary<int, Dictionary<int, IScatterEntry>> _results = new();
-        /// <summary>
-        /// Contains results from Scatter Read after Execute() is performed. First key is Index, Second Key ID.
-        /// </summary>
-        public IReadOnlyDictionary<int, Dictionary<int, IScatterEntry>> Results => _results;
-
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="indexCount">Number of indexes in the scatter read loop.</param>
-        public ScatterReadMap(int indexCount)
-        {
-            for (int i = 0; i < indexCount; i++)
-            {
-                _results.Add(i, new());
-            }
-        }
-
-        /// <summary>
-        /// Executes Scatter Read operation as defined per the map.
-        /// </summary>
-        public void Execute()
-        {
-            foreach (var round in Rounds)
-            {
-                round.Run();
-            }
-        }
-
-        /// <summary>
-        /// (Base)
-        /// Add scatter read rounds to the operation. Each round is a successive scatter read, you may need multiple
-        /// rounds if you have reads dependent on earlier scatter reads result(s).
-        /// </summary>
-        /// <param name="pid">Process ID to read from.</param>
-        /// <param name="useCache">Use caching for this read (recommended).</param>
-        /// <returns></returns>
-        public virtual ScatterReadRound AddRound()
-        {
-            var round = new ScatterReadRound(_results);
-            Rounds.Add(round);
-            return round;
-        }
-    }
-
-    /// <summary>
-    /// Defines a Scatter Read Round. Each round will execute a single scatter read. If you have reads that
-    /// are dependent on previous reads (chained pointers for example), you may need multiple rounds.
-    /// </summary>
-    public class ScatterReadRound
-    {
-        protected Dictionary<int, Dictionary<int, IScatterEntry>> Results { get; }
-        protected List<IScatterEntry> Entries { get; } = new();
-
-        /// <summary>
-        /// Do not use this constructor directly. Call .AddRound() from the ScatterReadMap.
-        /// </summary>
-        public ScatterReadRound( Dictionary<int, Dictionary<int, IScatterEntry>> results)
-        {
-            Results = results;
-        }
-
-        /// <summary>
-        /// (Base)
-        /// Adds a single Scatter Read 
-        /// </summary>
-        /// <param name="index">For loop index this is associated with.</param>
-        /// <param name="id">Random ID number to identify the entry's purpose.</param>
-        /// <param name="addr">Address to read from (you can pass a ScatterReadEntry from an earlier round, 
-        /// and it will use the result).</param>
-        /// <param name="size">Size of oject to read (ONLY for reference types, value types get size from
-        /// Type). You canc pass a ScatterReadEntry from an earlier round and it will use the Result.</param>
-        /// <param name="offset">Optional offset to add to address (usually in the event that you pass a
-        /// ScatterReadEntry to the Addr field).</param>
-        /// <returns>The newly created ScatterReadEntry.</returns>
-        public virtual ScatterReadEntry<T> AddEntry<T>(int index, int id, object addr, object size = null, uint offset = 0x0)
-        {
-            var entry = new ScatterReadEntry<T>()
-            {
-                Index = index,
-                Id = id,
-                Addr = addr,
-                Size = size,
-                Offset = offset
-            };
-            Results[index].Add(id, entry);
-            Entries.Add(entry);
-            return entry;
-        }
-
-        /// <summary>
-        /// ** Internal API use only do not use **
-        /// </summary>
-        internal void Run()
-        {
-            var entriesSpan = CollectionsMarshal.AsSpan(Entries);
-            Memory.ReadScatter(entriesSpan);
-        }
-    }
-
-    public class ScatterReadEntry<T> : IScatterEntry
-    {
-        #region Properties
-
-        /// <summary>
-        /// Entry Index.
-        /// </summary>
-        public int Index { get; init; }
-        /// <summary>
-        /// Entry ID.
-        /// </summary>
-        public int Id { get; init; }
-        /// <summary>
-        /// Can be a ulong or another ScatterReadEntry.
-        /// </summary>
-        public object Addr { get; set; }
-        /// <summary>
-        /// Offset to the Base Address.
-        /// </summary>
-        public uint Offset { get; init; }
-        /// <summary>
-        /// Defines the type based on <typeparamref name="T"/>
-        /// </summary>
-        public Type Type { get; } = typeof(T);
-        /// <summary>
-        /// Can be an int32 or another ScatterReadEntry.
-        /// </summary>
-        public object Size { get; set; }
-        /// <summary>
-        /// True if the Scatter Read has failed.
-        /// </summary>
-        public bool IsFailed { get; set; }
-        /// <summary>
-        /// Scatter Read Result.
-        /// </summary>
-        protected T Result { get; set; }
-        #endregion
-
-        #region Read Prep
-        /// <summary>
-        /// Parses the address to read for this Scatter Read.
-        /// Sets the Addr property for the object.
-        /// </summary>
-        /// <returns>Virtual address to read.</returns>
-        public ulong ParseAddr()
-        {
-            ulong addr = 0x0;
-            if (this.Addr is ulong p1)
-                addr = p1;
-            else if (this.Addr is MemPointer p2)
-                addr = p2;
-            else if (this.Addr is IScatterEntry ptrObj) // Check if the addr references another ScatterRead Result
-            {
-                if (ptrObj.TryGetResult<MemPointer>(out var p3))
-                    addr = p3;
-                else
-                    ptrObj.TryGetResult(out addr);
-            }
-            this.Addr = addr;
-            return addr;
-        }
-
-        /// <summary>
-        /// (Base)
-        /// Parses the number of bytes to read for this Scatter Read.
-        /// Sets the Size property for the object.
-        /// Derived classes should call upon this Base.
-        /// </summary>
-        /// <returns>Size of read.</returns>
-        public virtual int ParseSize()
-        {
-            int size = 0;
-            if (this.Type.IsValueType)
-                size = Unsafe.SizeOf<T>();
-            else if (this.Size is int sizeInt)
-                size = sizeInt;
-            else if (this.Size is IScatterEntry sizeObj) // Check if the size references another ScatterRead Result
-                sizeObj.TryGetResult(out size);
-            this.Size = size;
-            return size;
-        }
-        #endregion
-
-        #region Set Result
-        /// <summary>
-        /// Sets the Result for this Scatter Read.
-        /// </summary>
-        /// <param name="buffer">Raw memory buffer for this read.</param>
-        public void SetResult(byte[] buffer)
-        {
-            try
-            {
-                if (IsFailed)
-                    return;
-                if (Type.IsValueType) /// Value Type
-                    SetValueResult(buffer);
-                else /// Ref Type
-                    SetClassResult(buffer);
-            }
-            catch
-            {
-                IsFailed = true;
-            }
-        }
-
-        /// <summary>
-        /// Set the Result from a Value Type.
-        /// </summary>
-        /// <param name="buffer">Raw memory buffer for this read.</param>
-        private void SetValueResult(byte[] buffer)
-        {
-            if (buffer.Length != Unsafe.SizeOf<T>()) // Safety Check
-                throw new ArgumentOutOfRangeException(nameof(buffer));
-            Result = Unsafe.As<byte, T>(ref buffer[0]);
-            if (Result is MemPointer memPtrResult)
-                memPtrResult.Validate();
-        }
-
-        /// <summary>
-        /// (Base)
-        /// Set the Result from a Class Type.
-        /// Derived classes should call upon this Base.
-        /// </summary>
-        /// <param name="buffer">Raw memory buffer for this read.</param>
-        protected virtual void SetClassResult(byte[] buffer)
-        {
-            if (Type == typeof(string))
-            {
-                var value = Encoding.Default.GetString(buffer).Split('\0')[0];
-                if (value is T result) // We already know the Types match, this is to satisfy the compiler
-                    Result = result;
-            }
-            else if (Type == typeof(List<int>)) // indices
-            {
-                var spanBuf = new Span<byte>(buffer);
-                var list = new List<int>();
-                for (var index = 0; index < spanBuf.Length; index += 4)
-                {
-                    list.Add(MemoryMarshal.Read<int>(spanBuf.Slice(index, 4)));
-                }
-                Result = (T)(object)list;
-
-            }
-            else if (Type == typeof(List<Vector128<float>>)) // vertices
-            {
-                //Need to get size from current scatter read entry
-                var count = 6;
-                var list = new List<Vector128<float>>();
-                var spanBuf = new Span<byte>(buffer);
-                for (var z = 0; z < count * 16; z += 16)
-                {
-                    var result = Vector128.Create(
-                        spanBuf[z], spanBuf[z + 1], spanBuf[z + 2], spanBuf[z + 3], spanBuf[z + 4], spanBuf[z + 5],
-                        spanBuf[z + 6], spanBuf[z + 7], spanBuf[z + 8], spanBuf[z + 9], spanBuf[z + 10], spanBuf[z + 11],
-                        spanBuf[z + 12], spanBuf[z + 13], spanBuf[z + 14], spanBuf[z + 15])
-                        .AsSingle();
-
-                    list.Add(result);
-                }
-                Result = (T)(object)list;
-
-            }
-            else
-                throw new NotImplementedException(nameof(Type));
-        }
-        #endregion
-
-        #region Get Result
-        /// <summary>
-        /// Tries to return the Scatter Read Result.
-        /// </summary>
-        /// <typeparam name="TOut">Type to return.</typeparam>
-        /// <param name="result">Result to populate.</param>
-        /// <returns>True if successful, otherwise False.</returns>
-        public bool TryGetResult<TOut>(out TOut result)
-        {
-            try
-            {
-                if (!IsFailed && Result is TOut tResult)
-                {
-                    result = tResult;
-                    return true;
-                }
-                result = default;
-                return false;
-            }
-            catch
-            {
-                result = default;
-                return false;
-            }
-        }
-        #endregion
-    }
-    #endregion
-
     #region Custom EFT Classes
-    /// <summary>
-    /// Defines a piece of gear
-    /// </summary>
-    public class GearItem
+    public class ThermalSettings
     {
-        public string ID { get; set; }
-        public string Long { get; set; }
-        public string Short { get; set; }
-        public int Value { get; set; }
-        public int LootValue {  get => Loot.Sum(x => x.Value); }
-        public int TotalValue { get => this.Value + this.LootValue; }
-        public List<LootItem> Loot { get; set; }
-        public bool HasThermal { get; set; }
-        public bool Important { get; set; }
-        public LootFilter.Colors Color { get; set; }
+        public float ColorCoefficient { get; set; }
+        public float MinTemperature { get; set; }
+        public float RampShift { get; set; }
+        public int ColorScheme { get; set; }
 
-        /// <summary>
-        /// Gets the formatted the items value
-        /// </summary>
-        public string GetFormattedValue()
-        {
-            return TarkovDevManager.FormatNumber(this.Value);
-        }
+        public ThermalSettings() { }
 
-        /// <summary>
-        /// Gets the formatted the loot value of the item
-        /// </summary>
-        public string GetFormattedLootValue()
+        public ThermalSettings(float colorCoefficient, float minTemp, float rampShift, int colorScheme)
         {
-            return TarkovDevManager.FormatNumber(this.LootValue);
-        }
-
-        /// <summary>
-        /// Gets the formatted the total value of the item
-        /// </summary>
-        public string GetFormattedTotalValue()
-        {
-            return TarkovDevManager.FormatNumber(this.TotalValue);
-        }
-
-        /// <summary>
-        /// Gets the formatted item value + name
-        /// </summary>
-        public string GetFormattedValueName()
-        {
-            return this.Value > 0 ? $"[{this.GetFormattedValue()}] {this.Long}" : this.Long;
-        }
-
-        /// <summary>
-        /// Gets the formatted item value + name
-        /// </summary>
-        public string GetFormattedValueShortName()
-        {
-            return this.Value > 0 ? $"[{this.GetFormattedValue()}] {this.Short}" : this.Short;
-        }
-
-        public string GetFormattedTotalValueName()
-        {
-            return this.TotalValue > 0 ? $"[{this.GetFormattedTotalValue()}] {this.Long}" : this.Long;
+            this.ColorCoefficient = colorCoefficient;
+            this.MinTemperature = minTemp;
+            this.RampShift = rampShift;
+            this.ColorScheme = colorScheme;
         }
     }
     /// <summary>
@@ -1835,6 +1487,7 @@ namespace eft_dma_radar
             "Cliffhanger",
             "Condor",
             "Cook",
+            "Corsair",
             "Cougar",
             "Coyote",
             "Crooked",
@@ -1973,11 +1626,17 @@ namespace eft_dma_radar
             "Gladius",
             "Gromila",
             "Gus",
+            "Kant",
+            "Kaylanshchik",
             "Kapral",
+            "Karas",
             "Kartezhnik",
+            "Katorzhnik",
+            "Khetchkok",
             "Khvost",
             "Kolt",
             "Kompot",
+            "Kozyrek",
             "Kudeyar",
             "Mauzer",
             "Medoed",
@@ -1985,8 +1644,12 @@ namespace eft_dma_radar
             "Mosin",
             "Moydodyr",
             "Naperstochnik",
-            "Supermen",
+            "Poker",
+            "Polzuchiy",
             "Shtempel",
+            "Snayler",
+            "Sokhatyy",
+            "Supermen",
             "Tihiy",
             "Varan",
             "Vasiliy",
@@ -2219,85 +1882,92 @@ namespace eft_dma_radar
             "Zhgut",
             "Arsenal", // Kollontay guards
             "Basyak",
+            "Begemotik",
             "Dezhurka",
             "Furazhka",
+            "Glavdur",
             "Kozyrek Desatnik",
             "Mayor",
+            "Peps",
+            "Serzhant",
             "Slonolyub",
             "Sluzhebka",
             "Starley Desatnik",
             "Starley brat",
+            "Starley",
             "Starshiy brat",
             "Strelok brat",
             "Tatyanka Desatnik",
+            "Tatyanka",
+            "Vasya Desantnik",
             "Visyak",
-        "Baba Yaga", // Follower of Morana
-        "Buran",
-        "Domovoy",
-        "Gamayun",
-        "Gololed",
-        "Gorynych",
-        "Hladnik",
-        "Hladovit",
-        "Holodec",
-        "Holodryg",
-        "Holodun",
-        "Ineevik",
-        "Ineyko",
-        "Ineynik",
-        "Karachun",
-        "Kikimora",
-        "Koleda",
-        "Kupala",
-        "Ledorez",
-        "Ledovik",
-        "Ledyanik",
-        "Ledyanoy",
-        "Liho",
-        "Merzlotnik",
-        "Mor",
-        "Morozec",
-        "Morozina",
-        "Morozko",
-        "Moroznik",
-        "Obmoroz",
-        "Poludnik",
-        "Serebryak",
-        "Severyanin",
-        "Sirin",
-        "Skvoznyak",
-        "Snegobur",
-        "Snegoed",
-        "Snegohod",
-        "Snegovey",
-        "Snegovik",
-        "Snezhin",
-        "Sosulnik",
-        "Striga",
-        "Studen",
-        "Stuzhaylo",
-        "Stuzhevik",
-        "Sugrobnik",
-        "Sugrobus",
-        "Talasum",
-        "Tryasovica",
-        "Tuchevik",
-        "Uraganische",
-        "Vetrenik",
-        "Vetrozloy",
-        "Vihrevoy",
-        "Viy",
-        "Vodyanoy",
-        "Vyugar",
-        "Vyugovik",
-        "Zimar",
-        "Zimnik",
-        "Zimobor",
-        "Zimogor",
-        "Zimorod",
-        "Zimovey",
-        "Zlomraz",
-        "Zloveschun"
+            "Baba Yaga", // Follower of Morana
+            "Buran",
+            "Domovoy",
+            "Gamayun",
+            "Gololed",
+            "Gorynych",
+            "Hladnik",
+            "Hladovit",
+            "Holodec",
+            "Holodryg",
+            "Holodun",
+            "Ineevik",
+            "Ineyko",
+            "Ineynik",
+            "Karachun",
+            "Kikimora",
+            "Koleda",
+            "Kupala",
+            "Ledorez",
+            "Ledovik",
+            "Ledyanik",
+            "Ledyanoy",
+            "Liho",
+            "Merzlotnik",
+            "Mor",
+            "Morozec",
+            "Morozina",
+            "Morozko",
+            "Moroznik",
+            "Obmoroz",
+            "Poludnik",
+            "Serebryak",
+            "Severyanin",
+            "Sirin",
+            "Skvoznyak",
+            "Snegobur",
+            "Snegoed",
+            "Snegohod",
+            "Snegovey",
+            "Snegovik",
+            "Snezhin",
+            "Sosulnik",
+            "Striga",
+            "Studen",
+            "Stuzhaylo",
+            "Stuzhevik",
+            "Sugrobnik",
+            "Sugrobus",
+            "Talasum",
+            "Tryasovica",
+            "Tuchevik",
+            "Uraganische",
+            "Vetrenik",
+            "Vetrozloy",
+            "Vihrevoy",
+            "Viy",
+            "Vodyanoy",
+            "Vyugar",
+            "Vyugovik",
+            "Zimar",
+            "Zimnik",
+            "Zimobor",
+            "Zimogor",
+            "Zimorod",
+            "Zimovey",
+            "Zlomraz",
+            "Zloveschun"
         };
 
         public static string TransliterateCyrillic(string input)
