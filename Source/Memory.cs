@@ -92,6 +92,10 @@ namespace eft_dma_radar
         {
             get => _game?.Toolbox;
         }
+        public static Chams Chams
+        {
+            get => _game?.Chams;
+        }
 
         public static Player LocalPlayer
         {
@@ -544,6 +548,44 @@ namespace eft_dma_radar
             catch (Exception ex)
             {
                 throw new DMAException($"[DMA] ERROR writing {typeof(T)} value at 0x{addr.ToString("X")}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Performs multiple memory write operations in a single call
+        /// </summary>
+        /// <param name="entries">A collection of entries defining the memory writes.</param>
+        public static void WriteScatter(IEnumerable<IScatterWriteEntry> entries)
+        {
+            using (var scatter = vmmInstance.Scatter_Initialize(_pid, Vmm.FLAG_NOCACHE))
+            {
+                if (scatter == null)
+                    throw new InvalidOperationException("Failed to initialize scatter.");
+
+                foreach (var entry in entries)
+                {
+                    bool success = entry switch
+                    {
+                        IScatterWriteDataEntry<int> intEntry => scatter.PrepareWriteStruct(intEntry.Address, intEntry.Data),
+                        IScatterWriteDataEntry<float> floatEntry => scatter.PrepareWriteStruct(floatEntry.Address, floatEntry.Data),
+                        IScatterWriteDataEntry<ulong> ulongEntry => scatter.PrepareWriteStruct(ulongEntry.Address, ulongEntry.Data),
+                        IScatterWriteDataEntry<bool> boolEntry => scatter.PrepareWriteStruct(boolEntry.Address, boolEntry.Data),
+                        _ => throw new NotSupportedException($"Unsupported data type: {entry.GetType()}")
+                    };
+
+                    if (!success)
+                    {
+                        Program.Log($"Failed to prepare scatter write for address: {entry.Address}");
+                        continue;
+                    }
+                }
+
+                if (!scatter.Execute())
+                    throw new Exception("Scatter write execution failed.");
+
+                scatter.Dispose();
+                scatter.Close();
+
             }
         }
         #endregion

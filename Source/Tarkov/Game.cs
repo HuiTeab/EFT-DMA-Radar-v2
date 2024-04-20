@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using eft_dma_radar.Source.MonoSharp;
 using eft_dma_radar.Source.Tarkov;
+using Offsets;
 
 namespace eft_dma_radar
 {
@@ -21,6 +22,7 @@ namespace eft_dma_radar
         private CameraManager _cameraManager;
         private QuestManager _questManager;
         private Toolbox _toolbox;
+        private Chams _chams;
         private ulong _localGameWorld;
         private readonly ulong _unityBase;
         private bool _inHideout = false;
@@ -98,6 +100,10 @@ namespace eft_dma_radar
         
             get => _questManager;
         }
+        public Chams Chams
+        {
+            get => _chams;
+        }
         #endregion
 
         /// <summary>
@@ -151,13 +157,21 @@ namespace eft_dma_radar
 
             try
             {
-                var mapNamePrt = Memory.ReadPtrChain(this._localGameWorld, new uint[] { 0x148, 0x580 });
-                this._mapName = Memory.ReadUnityString(mapNamePrt);
+                var mapNamePtr = Memory.ReadPtrChain(this._localGameWorld, new uint[] { Offsets.LocalGameWorld.MainPlayer, Offsets.Player.Location });
+                this._mapName = Memory.ReadUnityString(mapNamePtr);
             }
             catch
             {
-                var mapNamePrt = Memory.ReadPtr(this._localGameWorld + 0x40);
-                this._mapName = Memory.ReadUnityString(mapNamePrt);
+                try
+                {
+                    var mapNamePtr = Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.MapName);
+                    this._mapName = Memory.ReadUnityString(mapNamePtr);
+                }
+                catch
+                {
+                    Program.Log("Couldn't find map name!!!");
+                    this._mapName = "bigmap";
+                }
             }
         }
 
@@ -176,8 +190,9 @@ namespace eft_dma_radar
         private void HandleRaidEnded(RaidEnded e) {
             Program.Log("Raid has ended!");
 
-            this._inGame = false;
-            Memory.GameStatus = Game.GameStatus.Menu;
+            //this._inGame = false;
+            //Memory.GameStatus = Game.GameStatus.Menu;
+            Memory.Restart();
         }
 
         /// <summary>
@@ -319,7 +334,7 @@ namespace eft_dma_radar
                     {
                         Memory.GameStatus = Game.GameStatus.Matching;
 
-                        if (!Memory.ReadValue<bool>(this._localGameWorld + 0x220))
+                        if (!Memory.ReadValue<bool>(this._localGameWorld + Offsets.LocalGameWorld.RaidStarted))
                         {
                             Program.Log("Raid hasn't started!");
                         }
@@ -329,7 +344,7 @@ namespace eft_dma_radar
                             if (registeredPlayers.PlayerCount > 0)
                             {
                                 var localPlayer = Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.MainPlayer);
-                                var playerInfoPtr = Memory.ReadPtrChain(localPlayer, new uint[] { 0x5B8, 0x28 });
+                                var playerInfoPtr = Memory.ReadPtrChain(localPlayer, new uint[] { Offsets.Player.Profile, Offsets.Profile.PlayerInfo });
                                 var localPlayerSide = Memory.ReadValue<int>(playerInfoPtr + Offsets.PlayerInfo.PlayerSide);
                                 this._isScav = (localPlayerSide == 4);
 
@@ -364,33 +379,15 @@ namespace eft_dma_radar
 
             if (this._mapName == string.Empty)
             {
-                try
-                {
-                    this.GetMapName();
-                }
-                catch (Exception ex)
-                {
-                    Program.Log($"ERROR getting map name: {ex}");
-                }
+                this.GetMapName();
             }
             else
             {
-                if (this._config.QuestHelperEnabled && this._questManager is null)
-                {
-                    try
-                    {
-                        this._questManager = new QuestManager(this._localGameWorld);
-                    }
-                    catch (Exception ex)
-                    {
-                        Program.Log($"ERROR loading QuestManager: {ex}");
-                    }
-                }
-                if (this._config.LootEnabled && (this._lootManager is null || this._refreshLoot))
+                if (this._config.LootEnabled && (this._lootManager == null|| this._refreshLoot))
                 {
                     this._loadingLoot = true;
                     try
-                    {   
+                    {
                         this._lootManager = new LootManager(this._localGameWorld);
                         this._refreshLoot = false;
                     }
@@ -400,7 +397,6 @@ namespace eft_dma_radar
                     }
                     this._loadingLoot = false;
                 }
-
 
                 if (this._config.MasterSwitchEnabled)
                 {
@@ -439,18 +435,47 @@ namespace eft_dma_radar
                             Program.Log($"ERROR loading QuestManager: {ex}");
                         }
                     }
+
                     if (this._toolbox is null)
                     {
                         try
                         {
-                            this._toolbox = new Toolbox(this._localGameWorld);
+                            this._toolbox = new Toolbox();
                         }
                         catch (Exception ex)
                         {
                             Program.Log($"ERROR loading Toolbox: {ex}");
                         }
                     }
+
+                    if (this._chams is null)
+                    {
+                        try
+                        {
+                            if (this._rgtPlayers != null)
+                            {
+                                this._chams = new Chams();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Program.Log($"ERROR loading Chams: {ex}");
+                        }
+                    }
                 }
+
+                if (this._exfilManager is null)
+                {
+                    try
+                    {
+                        this._exfilManager = new ExfilManager(this._localGameWorld);
+                    }
+                    catch (Exception ex)
+                    {
+                        Program.Log($"ERROR loading ExfilController: {ex}");
+                    }
+                }
+                else this._exfilManager.RefreshExfils();
 
                 if (this._grenadeManager is null)
                 {
@@ -465,18 +490,17 @@ namespace eft_dma_radar
                 }
                 else this._grenadeManager.Refresh();
 
-                if (this._exfilManager is null)
+                if (this._config.QuestHelperEnabled && this._questManager is null)
                 {
                     try
                     {
-                        this._exfilManager = new ExfilManager(this._localGameWorld);
+                        this._questManager = new QuestManager(this._localGameWorld);
                     }
                     catch (Exception ex)
                     {
-                        Program.Log($"ERROR loading ExfilController: {ex}");
+                        Program.Log($"ERROR loading QuestManager: {ex}");
                     }
                 }
-                else this._exfilManager.Refresh();
             }
         }
 
@@ -498,17 +522,17 @@ namespace eft_dma_radar
         public static void SetInteractDistance(bool on)
         {
             var hardSettings = MonoSharp.GetStaticFieldDataOfClass("Assembly-CSharp", "EFTHardSettings");
-            var currentLootRaycastDistance = Memory.ReadValue<float>(hardSettings + 0x210);
+            var currentLootRaycastDistance = Memory.ReadValue<float>(hardSettings + Offsets.EFTHardSettings.LOOT_RAYCAST_DISTANCE);
 
             if (on && currentLootRaycastDistance != 1.8f)
             {
-                Memory.WriteValue<float>(hardSettings + 0x210, 1.8f);
-                Memory.WriteValue<float>(hardSettings + 0x214, 1.8f);
+                Memory.WriteValue<float>(hardSettings + Offsets.EFTHardSettings.LOOT_RAYCAST_DISTANCE, 1.8f);
+                Memory.WriteValue<float>(hardSettings + Offsets.EFTHardSettings.DOOR_RAYCAST_DISTANCE, 1.8f);
             }
             else if (!on && currentLootRaycastDistance == 1.8f)
             {
-                Memory.WriteValue<float>(hardSettings + 0x210, 1.3f);
-                Memory.WriteValue<float>(hardSettings + 0x214, 1f);
+                Memory.WriteValue<float>(hardSettings + Offsets.EFTHardSettings.LOOT_RAYCAST_DISTANCE, 1.3f);
+                Memory.WriteValue<float>(hardSettings + Offsets.EFTHardSettings.DOOR_RAYCAST_DISTANCE, 1f);
             }
         }
         #endregion

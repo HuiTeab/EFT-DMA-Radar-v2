@@ -9,7 +9,7 @@ namespace eft_dma_radar.Source.Tarkov
 {
     public class Toolbox
     {
-        private readonly Thread _workerThread;
+        private Thread _workerThread;
         private bool nightVisionToggled = false;
         private bool thermalVisionToggled = false;
         private bool doubleSearchToggled = false;
@@ -28,137 +28,112 @@ namespace eft_dma_radar.Source.Tarkov
         {
             get => Memory.CameraManager;
         }
-
         private PlayerManager _playerManager
         {
             get => Memory.PlayerManager;
         }
-
-        public Toolbox(ulong localGameWorld)
+        private Chams _chams
         {
-            this._workerThread = new Thread((ThreadStart)delegate
+            get => Memory.Chams;
+        }
+
+        public Toolbox()
+        {
+            if (this._config.MasterSwitchEnabled)
             {
-                while (Memory.LocalPlayer is null)
-                {
-                    Thread.Sleep(100);
-                }
+                this.StartToolbox();
+            }
+        }
 
-                while (IsSafeToWriteMemory())
-                {
-                    if (this._config.MasterSwitchEnabled)
-                    {
-                        this.ToolboxWorker();
-                    }
-                    Thread.Sleep(500);
-                }
+        public void StartToolbox()
+        {
+            if (this._workerThread != null && this._workerThread.IsAlive)
+            {
+                return;
+            }
 
-                Program.Log("LocalPlayer found, initializing toolbox");
-            });
-
-            this._workerThread.Priority = ThreadPriority.BelowNormal;
-            this._workerThread.IsBackground = true;
+            this._workerThread = new Thread(this.ToolboxWorkerThread)
+            {
+                Priority = ThreadPriority.BelowNormal,
+                IsBackground = true
+            };
             this._workerThread.Start();
+        }
+
+        public void StopToolbox()
+        {
+            this._workerThread?.Join(); // Wait for the thread to finish
+            this._workerThread = null;
+        }
+
+        private void ToolboxWorkerThread()
+        {
+            while (this.IsSafeToWriteMemory())
+            {
+                if (this._config.MasterSwitchEnabled)
+                {
+                    this.ToolboxWorker();
+                }
+                Thread.Sleep(250);
+            }
         }
 
         private bool IsSafeToWriteMemory()
         {
-            return Memory.InGame && Memory.LocalPlayer is not null;
+            return Memory.InGame && Memory.LocalPlayer != null && this._playerManager != null;
         }
 
         private void ToolboxWorker()
         {
-            this._playerManager.isADS = Memory.ReadValue<bool>(this._playerManager.proceduralWeaponAnimation + 0x1BD);
+            this._playerManager.isADS = Memory.ReadValue<bool>(this._playerManager.proceduralWeaponAnimation + Offsets.ProceduralWeaponAnimation.IsAiming);
 
-            // No Recoil
-            this._playerManager.SetNoRecoil(this._config.NoRecoilEnabled);
+            // No Recoil / Sway
+            this._playerManager.SetNoRecoilSway(this._config.NoRecoilSwayEnabled);
 
             // Instant ADS
             this._playerManager.SetInstantADS(this._config.InstantADSEnabled);
 
-            // No Sway
-            if (this._config.NoSwayEnabled && !this.noSwayToggled)
-            {
-                this.noSwayToggled = true;
-                this._playerManager.SetNoSway(true);
-            }
-            else if (!this._config.NoSwayEnabled && this.noSwayToggled)
-            {
-                this.noSwayToggled = false;
-                this._playerManager.SetNoSway(false);
-            }
-
             // Double Search
-            if (this._config.DoubleSearchEnabled && !this.doubleSearchToggled)
+            if (this._config.DoubleSearchEnabled != this.doubleSearchToggled)
             {
-                this.doubleSearchToggled = true;
-                this._playerManager.SetMaxSkill(PlayerManager.Skills.SearchDouble);
-            }
-            else if (!this._config.DoubleSearchEnabled && this.doubleSearchToggled)
-            {
-                this.doubleSearchToggled = false;
-                this._playerManager.SetMaxSkill(PlayerManager.Skills.SearchDouble, true);
+                doubleSearchToggled = this._config.DoubleSearchEnabled;
+                this._playerManager.SetMaxSkill(PlayerManager.Skills.SearchDouble, !this.doubleSearchToggled);
             }
 
             // Jump Power
-            if (this._config.JumpPowerEnabled && !this.jumpPowerToggled)
+            if (this._config.JumpPowerEnabled != this.jumpPowerToggled)
             {
-                this.jumpPowerToggled = true;
-                this._playerManager.SetMaxSkill(PlayerManager.Skills.JumpStrength);
-            }
-            else if (!this._config.JumpPowerEnabled && this.jumpPowerToggled)
-            {
-                this.jumpPowerToggled = false;
-                this._playerManager.SetMaxSkill(PlayerManager.Skills.JumpStrength, true);
+                this.jumpPowerToggled = this._config.JumpPowerEnabled;
+                this._playerManager.SetMaxSkill(PlayerManager.Skills.JumpStrength, !this.jumpPowerToggled);
             }
 
             // Throw Power
-            if (this._config.ThrowPowerEnabled && !this.throwPowerToggled)
+            if (this._config.ThrowPowerEnabled != this.throwPowerToggled)
             {
-                this.throwPowerToggled = true;
-                this._playerManager.SetMaxSkill(PlayerManager.Skills.ThrowStrength);
-            }
-            else if (!_config.ThrowPowerEnabled && this.throwPowerToggled)
-            {
-                this.throwPowerToggled = false;
-                this._playerManager.SetMaxSkill(PlayerManager.Skills.ThrowStrength, true);
+                this.throwPowerToggled = this._config.ThrowPowerEnabled;
+                this._playerManager.SetMaxSkill(PlayerManager.Skills.ThrowStrength, !this.throwPowerToggled);
             }
 
             // Increase Max Weight
-            if (this._config.IncreaseMaxWeightEnabled && !this.juggernautToggled)
+            if (this._config.IncreaseMaxWeightEnabled != this.juggernautToggled)
             {
-                this.juggernautToggled = true;
-                this._playerManager.SetMaxSkill(PlayerManager.Skills.WeightStrength);
-            }
-            else if (!this._config.IncreaseMaxWeightEnabled && this.juggernautToggled)
-            {
-                this.juggernautToggled = false;
-                this._playerManager.SetMaxSkill(PlayerManager.Skills.WeightStrength, true);
+                this.juggernautToggled = this._config.IncreaseMaxWeightEnabled;
+                this._playerManager.SetMaxSkill(PlayerManager.Skills.WeightStrength, !this.juggernautToggled);
             }
 
             // Mag Drills
-            if (this._config.MagDrillsEnabled && !this.magDrillsToggled)
+            if (this._config.MagDrillsEnabled != this.magDrillsToggled)
             {
-                this.magDrillsToggled = true;
-                this._playerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsLoad);
-                this._playerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsUnload);
-            }
-            else if (!this._config.MagDrillsEnabled && this.magDrillsToggled)
-            {
-                this.magDrillsToggled = false;
-                this._playerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsLoad, true);
-                this._playerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsUnload, true);
+                this.magDrillsToggled = this._config.MagDrillsEnabled;
+                this._playerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsLoad, !this.magDrillsToggled);
+                this._playerManager.SetMaxSkill(PlayerManager.Skills.MagDrillsUnload, !this.magDrillsToggled);
             }
 
             // Extended Reach
-            if (this._config.ExtendedReachEnabled && !this.extendedReachToggled)
+            if (this._config.ExtendedReachEnabled != this.extendedReachToggled)
             {
-                this.extendedReachToggled = true;
-                Game.SetInteractDistance(true);
-            }
-            else if (!this._config.ExtendedReachEnabled && this.extendedReachToggled)
-            {
-                this.extendedReachToggled = false;
-                Game.SetInteractDistance(false);
+                this.extendedReachToggled = this._config.ExtendedReachEnabled;
+                Game.SetInteractDistance(this.extendedReachToggled);
             }
 
             // Infinite Stamina
@@ -173,6 +148,17 @@ namespace eft_dma_radar.Source.Tarkov
                 this._playerManager.SetMovementState(false);
             }
 
+            // Chams
+            if (this._config.ChamsEnabled)
+            {
+                this._chams.ChamsEnable();
+            }
+            else if (!this._config.ChamsEnabled)
+            {
+                this._chams.ChamsDisable();
+            }
+           
+
             // Camera Stuff
             if (this._cameraManager is not null)
             {
@@ -186,7 +172,15 @@ namespace eft_dma_radar.Source.Tarkov
                     this._cameraManager.VisorEffect(this._config.NoVisorEnabled);
 
                     // Smart Thermal Vision
-                    if (this._playerManager is not null && this._playerManager.isADS)
+                    if (this._playerManager is null || !this._playerManager.isADS)
+                    {
+                        if (this._config.ThermalVisionEnabled != thermalVisionToggled)
+                        {
+                            this.thermalVisionToggled = this._config.ThermalVisionEnabled;
+                            this._cameraManager.ThermalVision(this.thermalVisionToggled);
+                        }
+                    }
+                    else
                     {
                         if (this._config.OpticThermalVisionEnabled)
                         {
@@ -198,31 +192,17 @@ namespace eft_dma_radar.Source.Tarkov
 
                             this._cameraManager.OpticThermalVision(true);
                         }
-                    }
-                    else
-                    {
-                        if (this._config.ThermalVisionEnabled && !this.thermalVisionToggled)
+                        else
                         {
-                            this.thermalVisionToggled = true;
-                            this._cameraManager.ThermalVision(true);
-                        }
-                        else if (!this._config.ThermalVisionEnabled && this.thermalVisionToggled)
-                        {
-                            this.thermalVisionToggled = false;
-                            this._cameraManager.ThermalVision(false);
+                            this._cameraManager.OpticThermalVision(false);
                         }
                     }
 
                     // Night Vision
-                    if (this._config.NightVisionEnabled && !this.nightVisionToggled)
+                    if (this._config.NightVisionEnabled != this.nightVisionToggled)
                     {
-                        this.nightVisionToggled = true;
-                        this._cameraManager.NightVision(true);
-                    }
-                    else if (!this._config.NightVisionEnabled && this.nightVisionToggled)
-                    {
-                        this.nightVisionToggled = false;
-                        this._cameraManager.NightVision(false);
+                        this.nightVisionToggled = this._config.NightVisionEnabled;
+                        this._cameraManager.NightVision(this.nightVisionToggled);
                     }
                 }
             }
