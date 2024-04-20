@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using eft_dma_radar.Source.Tarkov;
@@ -24,7 +25,7 @@ namespace eft_dma_radar
         {
             get => Memory.InGame;
         }
-        
+
         public void ChamsEnable()
         {
             if (!InGame)
@@ -33,10 +34,16 @@ namespace eft_dma_radar
             }
             else
             {
-                ulong nvgMaterial = _cameraManager.NightVisionMaterial;
+                var nightVisionComponent = _cameraManager.GetComponentFromGameObject(_cameraManager.FPSCamera, "NightVision");
+                var nvgMaterial = Memory.ReadPtrChain(nightVisionComponent, new uint[] { 0x90, 0x10, 0x8 });
+                var colorValue = new Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+                Memory.WriteValue<Vector4>(nightVisionComponent + 0xD8, colorValue);
+                //var thermalMaterial = Memory.ReadPtrChain(fpsThermal, new uint[] { 0x90, 0x10, 0x8 });
+                //_thermalMaterial = thermalMaterial;
+
                 var players = this.AllPlayers
                     ?.Select(x => x.Value)
-                    .Where(x => x.Type is not PlayerType.LocalPlayer && !x.HasExfild);
+                    .Where(x => x.Type is not PlayerType.LocalPlayer);
 
                 if (players != null)
                 {
@@ -82,14 +89,14 @@ namespace eft_dma_radar
                                         var MaterialDictionaryBase = Memory.ReadPtr(pMaterialDictionary + 0x148);
                                         for (int k = 0; k < MaterialCount; k++) {
                                             try {
-                                                //Memory.WriteValue(MaterialDictionaryBase + (0x50 * (uint)k), nvgMaterial);
+                                                var pMaterial = Memory.ReadPtr(MaterialDictionaryBase + (0x50 * (uint)k));
+                                                SavePointer(MaterialDictionaryBase + (0x50 * (uint)k), pMaterial);
+                                                Memory.WriteValue(MaterialDictionaryBase + (0x50 * (uint)k), nvgMaterial);
                                             }catch { }
                                         }
                                     }
                                 }
                             }
-
-                            //gear
                             var slotViews = Memory.ReadPtr(player.PlayerBody + 0x58);
                             if (slotViews == 0) {
                                 return;
@@ -100,55 +107,56 @@ namespace eft_dma_radar
                             }
                             var slotViewsBase = Memory.ReadPtr(slotViewsList + 0x10);
                             var slotViewsListSize = Memory.ReadValue<int>(slotViewsList + 0x18);
-                            for (int i = 0; i < slotViewsListSize; i++) {
-                                var slotEntry = Memory.ReadPtr(slotViewsBase + 0x20 + (0x8 * (uint)i));
-                                if (slotEntry == 0) {
-                                    continue;
-                                }
-                                try{
-                                    var dressesArray = Memory.ReadPtr(slotEntry + 0x40);
-                                    if (dressesArray == 0) {
+                            if (slotViewsListSize > 0 && slotViewsListSize < 12) {
+                                for (int i = 0; i < slotViewsListSize; i++) {
+                                    var slotEntry = Memory.ReadPtr(slotViewsBase + 0x20 + (0x8 * (uint)i));
+                                    if (slotEntry == 0) {
                                         continue;
                                     }
-                                    var dressesArraySize = Memory.ReadValue<int>(dressesArray + 0x18);
-                                    for (int j = 0; j < dressesArraySize; j++) {
-                                        var dressesEntry = Memory.ReadPtr(dressesArray + 0x20 + (0x8 * (uint)j));
-                                        if (dressesEntry == 0) {
+                                    try{
+                                        var dressesArray = Memory.ReadPtr(slotEntry + 0x40);
+                                        if (dressesArray == 0) {
                                             continue;
                                         }
-                                        var rendererArray = Memory.ReadPtr(dressesEntry + 0x28);
-                                        if (rendererArray == 0) {
-                                            continue;
-                                        }
-                                        var rendererArraySize = Memory.ReadValue<int>(rendererArray + 0x18);
-                                        for (int k = 0; k < rendererArraySize; k++) {
-                                            var rendererEntry = Memory.ReadPtr(rendererArray + 0x20 + (0x8 * (uint)k));
-                                            if (rendererEntry == 0) {
+                                        var dressesArraySize = Memory.ReadValue<int>(dressesArray + 0x18);
+                                        for (int j = 0; j < dressesArraySize; j++) {
+                                            var dressesEntry = Memory.ReadPtr(dressesArray + 0x20 + (0x8 * (uint)j));
+                                            if (dressesEntry == 0) {
                                                 continue;
                                             }
-                                            var pMaterialDict = Memory.ReadPtr(rendererEntry + 0x10);
-                                            if (pMaterialDict == 0) {
+                                            var rendererArray = Memory.ReadPtr(dressesEntry + 0x28);
+                                            if (rendererArray == 0) {
                                                 continue;
                                             }
-                                            var gMaterialCount = Memory.ReadValue<int>(pMaterialDict + 0x158);
-                                            if (gMaterialCount > 0 && gMaterialCount < 5) {
-                                                var gMaterialDictBase = Memory.ReadPtr(pMaterialDict + 0x148);
-                                                for (int l = 0; l < gMaterialCount; l++) {
-                                                    try {
-                                                        //Memory.WriteValue(gMaterialDictBase + (0x50 * (uint)l), nvgMaterial);
-                                                    }catch { }
+                                            var rendererArraySize = Memory.ReadValue<int>(rendererArray + 0x18);
+                                            for (int k = 0; k < rendererArraySize; k++) {
+                                                var rendererEntry = Memory.ReadPtr(rendererArray + 0x20 + (0x8 * (uint)k));
+                                                if (rendererEntry == 0) {
+                                                    continue;
+                                                }
+                                                var gMaterials = Memory.ReadPtr(rendererEntry + 0x10);
+                                                var gMaterialCount = Memory.ReadValue<int>(gMaterials + 0x158);
+                                                if (gMaterialCount > 0 && gMaterialCount < 10)
+                                                {
+                                                    var gMaterialDictionaryBase = Memory.ReadPtr(gMaterials + 0x148);
+                                                    for (int l = 0; l < gMaterialCount; l++)
+                                                    {
+                                                        try
+                                                        {
+                                                            //var gMaterial = Memory.ReadPtr(gMaterialDictionaryBase + (0x50 * (uint)l));
+                                                            //SavePointer(gMaterialDictionaryBase + (0x50 * (uint)l), gMaterial);
+                                                            //Memory.WriteValue(gMaterialDictionaryBase + (0x50 * (uint)l), nvgMaterial);
+                                                        }
+                                                        catch { }
+                                                    }
                                                 }
                                             }
-                                            
-
                                         }
+                                    }catch{
+                                        continue;
                                     }
                                 }
-                                catch { }
-
                             }
-                            
-
                         }
                     }
                 }
@@ -162,9 +170,25 @@ namespace eft_dma_radar
         //this should be not be callable if material cache is empty
         public void ChamsDisable()
         {
-            
+            RestorePointers(); // works for 0 pointers but not for other materials
         }
 
+        private static List<PointerBackup> pointerBackups = new List<PointerBackup>();
+
+        private static void SavePointer(ulong address, ulong originalValue) {
+            pointerBackups.Add(new PointerBackup { Address = address, OriginalValue = originalValue });
+        }
+
+        public static void RestorePointers() {
+            foreach (var backup in pointerBackups) {
+                Memory.WriteValue<ulong>(backup.Address, backup.OriginalValue);
+            }
+            pointerBackups.Clear();
+        }
     }
 
+    public struct PointerBackup {
+        public ulong Address;
+        public ulong OriginalValue;
+    }
 }

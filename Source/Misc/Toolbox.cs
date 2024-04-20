@@ -155,7 +155,7 @@ namespace eft_dma_radar.Source.Tarkov
             }
             else if (!this._config.ChamsEnabled)
             {
-                //this._chams.ClearChams();
+                this._chams.ChamsDisable();
             }
            
 
