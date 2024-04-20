@@ -571,30 +571,7 @@ namespace eft_dma_radar
         /// </summary>
         private void chkChams_CheckedChanged(object sender, EventArgs e)
         {
-            var allPlayers = this.AllPlayers
-               ?.Select(x => x.Value)
-               .Where(x => !x.HasExfild);
-
-            ulong playerBody = 0;
-            if (allPlayers is not null)
-            {
-                foreach (var player in allPlayers)
-                {
-                    if (player.Type != PlayerType.AIOfflineScav || player.Type != PlayerType.AIScav)
-                    {
-                        continue;
-                    }
-                    if (chkChams.Checked)
-                    {
-                        //Chams.ClothingChams(playerBody);
-                    }
-                    else
-                    {
-                        //Chams.RestorePointers();
-                    }
-                }
-            }
-
+            _config.ChamsEnabled = chkChams.Checked;
         }
 
         /// <summary>

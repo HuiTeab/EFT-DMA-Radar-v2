@@ -32,6 +32,10 @@ namespace eft_dma_radar.Source.Tarkov
         {
             get => Memory.PlayerManager;
         }
+        private Chams _chams
+        {
+            get => Memory.Chams;
+        }
 
         public Toolbox()
         {
@@ -143,6 +147,17 @@ namespace eft_dma_radar.Source.Tarkov
             {
                 this._playerManager.SetMovementState(false);
             }
+
+            // Chams
+            if (this._config.ChamsEnabled)
+            {
+                this._chams.ChamsEnable();
+            }
+            else if (!this._config.ChamsEnabled)
+            {
+                //this._chams.ClearChams();
+            }
+           
 
             // Camera Stuff
             if (this._cameraManager is not null)

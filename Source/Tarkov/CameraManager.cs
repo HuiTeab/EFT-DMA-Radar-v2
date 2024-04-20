@@ -5,11 +5,29 @@
         private ulong _unityBase;
         private ulong _opticCamera;
         private ulong _fpsCamera;
+        private ulong _thermalMaterial;
+        private ulong _nightVisionMaterial;
         public bool IsReady
         {
             get
             {
                 return this._opticCamera != 0 && this._fpsCamera != 0;
+            }
+        }
+
+        public ulong NightVisionMaterial
+        {
+            get
+            {
+                return this._nightVisionMaterial;
+            }
+        }
+
+        public ulong ThermalMaterial
+        {
+            get
+            {
+                return this._thermalMaterial;
             }
         }
 
@@ -129,6 +147,8 @@
             try
             {
                 var nightVisionComponent = this.GetComponentFromGameObject(this._fpsCamera, "NightVision");
+                var nightVisionMaterial = Memory.ReadPtrChain(nightVisionComponent, new uint[] { 0x90, 0x10, 0x8 });
+                _nightVisionMaterial = nightVisionMaterial;
                 if (nightVisionComponent == 0)
                     return;
 
@@ -174,6 +194,8 @@
             try
             {
                 ulong fpsThermal = this.GetComponentFromGameObject(this._fpsCamera, "ThermalVision");
+                var thermalMaterial = Memory.ReadPtrChain(fpsThermal, new uint[] { 0x90, 0x10, 0x8 });
+                _thermalMaterial = thermalMaterial;
                 if (fpsThermal == 0)
                     return;
 

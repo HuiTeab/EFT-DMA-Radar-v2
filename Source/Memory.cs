@@ -92,6 +92,10 @@ namespace eft_dma_radar
         {
             get => _game?.Toolbox;
         }
+        public static Chams Chams
+        {
+            get => _game?.Chams;
+        }
 
         public static Player LocalPlayer
         {
@@ -578,6 +582,8 @@ namespace eft_dma_radar
 
                 if (!scatter.Execute())
                     throw new Exception("Scatter write execution failed.");
+
+                scatter.Close();
             }
         }
         #endregion

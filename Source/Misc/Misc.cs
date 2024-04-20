@@ -312,6 +312,12 @@ namespace eft_dma_radar
         public ThermalSettings OpticThermalSetting { get; set; }
 
         /// <summary>
+        /// Chams settings
+        /// </summary>
+        [JsonPropertyName("ChamsEnabled")]
+        public bool ChamsEnabled { get; set; }
+
+        /// <summary>
         /// Allows storage of colors for ai scav, pscav etc.
         /// </summary>
         [JsonPropertyName("PaintColors")]
@@ -323,6 +329,7 @@ namespace eft_dma_radar
 
         [JsonIgnore]
         public ParallelOptions ParallelOptions { get; set; }
+        
 
         public Config()
         {
@@ -396,6 +403,7 @@ namespace eft_dma_radar
             MinCorpseValue = 100000;
             MinSubItemValue = 15000;
             AutoLootRefreshEnabled = false;
+            
 
             MainThermalSetting = new ThermalSettings(0.5f, 0.001f, -0.5f, 0);
             OpticThermalSetting = new ThermalSettings(0.5f, 0.001f, -0.5f, 0);
@@ -415,6 +423,8 @@ namespace eft_dma_radar
             };
 
             ParallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 1 };
+
+            ChamsEnabled = false;
         }
 
         /// <summary>

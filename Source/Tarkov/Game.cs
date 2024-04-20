@@ -22,6 +22,7 @@ namespace eft_dma_radar
         private CameraManager _cameraManager;
         private QuestManager _questManager;
         private Toolbox _toolbox;
+        private Chams _chams;
         private ulong _localGameWorld;
         private readonly ulong _unityBase;
         private bool _inHideout = false;
@@ -98,6 +99,10 @@ namespace eft_dma_radar
         public QuestManager QuestManager {
         
             get => _questManager;
+        }
+        public Chams Chams
+        {
+            get => _chams;
         }
         #endregion
 
@@ -440,6 +445,21 @@ namespace eft_dma_radar
                         catch (Exception ex)
                         {
                             Program.Log($"ERROR loading Toolbox: {ex}");
+                        }
+                    }
+
+                    if (this._chams is null)
+                    {
+                        try
+                        {
+                            if (this._rgtPlayers != null)
+                            {
+                                this._chams = new Chams();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Program.Log($"ERROR loading Chams: {ex}");
                         }
                     }
                 }
