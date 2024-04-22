@@ -114,6 +114,11 @@ namespace eft_dma_radar
         {
             get => Memory.QuestManager;
         }
+
+        private ReadOnlyCollection<PlayerCorpse> Corpses
+        {
+            get => Memory.Corpses;
+        }
         #endregion
 
         #region Constructor
@@ -1838,6 +1843,7 @@ namespace eft_dma_radar
                         DrawExfils(canvas);
                         DrawAimview(canvas);
                         DrawToolTips(canvas);
+                        DrawCorpses(canvas);
                     }
                 }
                 else
@@ -2279,7 +2285,6 @@ namespace eft_dma_radar
                 var grenades = this.Grenades;
                 if (grenades is not null)
                 {
-                    var localPlayerMapPos = this.LocalPlayer.Position.ToMapPos(_selectedMap);
                     var mapParams = GetMapLocation();
 
                     foreach (var grenade in grenades)
@@ -2290,6 +2295,29 @@ namespace eft_dma_radar
                             .ToZoomedPos(mapParams);
 
                         grenadeZoomedPos.DrawGrenade(canvas);
+                    }
+                }
+            }
+        }
+
+        private void DrawCorpses(SKCanvas canvas)
+        {
+            var localPlayer = this.LocalPlayer;
+            if (this.InGame && localPlayer is not null)
+            {
+                var corpses = this.Corpses;
+                if (corpses is not null)
+                {
+                    var mapParams = GetMapLocation();
+
+                    foreach (var corpse in corpses)
+                    {
+                        var corpseZoomedPos = corpse
+                            .Position
+                            .ToMapPos(_selectedMap)
+                            .ToZoomedPos(mapParams);
+
+                        corpseZoomedPos.DrawDeathMarker(canvas);
                     }
                 }
             }

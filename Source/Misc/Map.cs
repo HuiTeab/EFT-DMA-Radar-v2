@@ -118,6 +118,16 @@ namespace eft_dma_radar
         {
             canvas.DrawCircle(this.GetPoint(), 5 * UIScale, SKPaints.PaintGrenades);
         }
+
+        /// <summary>
+        /// Draws a Death Marker on this location.
+        /// </summary>
+        public void DrawDeathMarker(SKCanvas canvas)
+        {
+            float length = 4 * UIScale;
+            canvas.DrawLine(new SKPoint(this.X - length, this.Y + length), new SKPoint(this.X + length, this.Y - length), SKPaints.PaintDeathMarker);
+            canvas.DrawLine(new SKPoint(this.X - length, this.Y - length), new SKPoint(this.X + length, this.Y + length), SKPaints.PaintDeathMarker);
+        }
         /// <summary>
         /// Draws a lootable object on this location.
         /// </summary>
