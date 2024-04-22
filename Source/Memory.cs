@@ -1,6 +1,4 @@
-﻿using eft_dma_radar.Source.Tarkov;
-using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -13,8 +11,6 @@ namespace eft_dma_radar
         /// <summary>
         /// Adjust this to achieve desired mem/sec performance. Higher = slower, Lower = faster.
         /// </summary>
-        /// 
-
         private static Vmm vmmInstance;
         private const int LOOP_DELAY = 100;
 
@@ -96,14 +92,6 @@ namespace eft_dma_radar
         {
             get => _game?.Chams;
         }
-        public static CorpseManager CorpseManager
-        {
-            get => _game?.CorpseManager;
-        }
-        public static ReadOnlyCollection<PlayerCorpse> Corpses
-        {
-            get => _game?.Corpses;
-        }
 
         public static Player LocalPlayer
         {
@@ -138,7 +126,7 @@ namespace eft_dma_radar
                     Program.Log("No MemMap, attempting to generate...");
                     vmmInstance = new Vmm("-printf", "-v", "-device", "fpga", "-waitinitialize");
                     GetMemMap();
-                }   
+                }
                 else
                 {
                     Program.Log("MemMap found, loading...");
@@ -239,17 +227,23 @@ namespace eft_dma_radar
         /// </summary>
         /// <returns>Module Base Address of mono-2.0-bdwgc.dll</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public static ulong GetMonoModule() {
+        public static ulong GetMonoModule()
+        {
             ulong monoBase = 0;
-            try {
+            try
+            {
                 ThrowIfDMAShutdown();
                 monoBase = vmmInstance.ProcessGetModuleBase(_pid, "mono-2.0-bdwgc.dll");
                 if (monoBase == 0) throw new DMAException("Unable to obtain Module Base Address. Game may not be running");
-                else {
+                else
+                {
                     Program.Log($"Found mono-2.0-bdwgc.dll at 0x{monoBase:x}");
                     return monoBase;
                 }
-            } catch (DMAShutdown) { throw; } catch (Exception ex) {
+            }
+            catch (DMAShutdown) { throw; }
+            catch (Exception ex)
+            {
                 Program.Log($"ERROR getting module base: {ex}");
             }
             return monoBase;
@@ -306,7 +300,7 @@ namespace eft_dma_radar
                                     break;
                                 }
                                 Memory._game.GameLoop();
-                                Thread.SpinWait(LOOP_DELAY * 1000);
+                                Thread.SpinWait(Program.Config.ThreadSpinDelay * 1000);
                             }
                         }
                         catch (GameNotRunningException) { break; }
@@ -525,7 +519,7 @@ namespace eft_dma_radar
                 if (length > PAGE_SIZE) throw new DMAException("String length outside expected bounds!");
                 ThrowIfDMAShutdown();
                 var buf = vmmInstance.MemRead(_pid, addr + Offsets.UnityString.Value, length * 2, Vmm.FLAG_NOCACHE);
-                return Encoding.Unicode.GetString(buf).TrimEnd('\0');;
+                return Encoding.Unicode.GetString(buf).TrimEnd('\0'); ;
             }
             catch (Exception ex)
             {
@@ -591,9 +585,7 @@ namespace eft_dma_radar
                 if (!scatter.Execute())
                     throw new Exception("Scatter write execution failed.");
 
-                scatter.Dispose();
                 scatter.Close();
-
             }
         }
         #endregion
@@ -719,6 +711,5 @@ namespace eft_dma_radar
         {
         }
     }
-
     #endregion
 }

@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using eft_dma_radar.Source.MonoSharp;
-using eft_dma_radar.Source.Tarkov;
-using Offsets;
+﻿using System.Collections.ObjectModel;
 
 namespace eft_dma_radar
 {
-
     /// <summary>
     /// Class containing Game (Raid) instance.
     /// </summary>
     public class Game
-    { 
+    {
         private GameObjectManager _gom;
         private LootManager _lootManager;
         private RegisteredPlayers _rgtPlayers;
@@ -86,7 +81,8 @@ namespace eft_dma_radar
         {
             get => _exfilManager?.Exfils;
         }
-        public CameraManager CameraManager {
+        public CameraManager CameraManager
+        {
             get => _cameraManager;
         }
         public PlayerManager PlayerManager
@@ -97,17 +93,14 @@ namespace eft_dma_radar
         {
             get => _toolbox;
         }
-        public QuestManager QuestManager {
-        
+        public QuestManager QuestManager
+        {
+
             get => _questManager;
         }
         public Chams Chams
         {
             get => _chams;
-        }
-        public CorpseManager CorpseManager
-        {
-            get => _corpseManager;
         }
         public ReadOnlyCollection<PlayerCorpse> Corpses
         {
@@ -118,8 +111,6 @@ namespace eft_dma_radar
         /// <summary>
         /// Game Constructor.
         /// </summary>
-        private static readonly object logLock = new();
-        private readonly StreamWriter debuglog;
         public Game(ulong unityBase)
         {
             _unityBase = unityBase;
@@ -130,7 +121,7 @@ namespace eft_dma_radar
         /// Main Game Loop executed by Memory Worker Thread.
         /// It manages the updating of player list and game environment elements like loot, grenades, and exfils.
         /// </summary>
-        public void GameLoop()
+        public async void GameLoop()
         {
             try
             {
@@ -150,7 +141,6 @@ namespace eft_dma_radar
             {
                 HandleUnexpectedException(ex);
             }
-            
         }
         #endregion
 
@@ -199,7 +189,8 @@ namespace eft_dma_radar
         /// Handles the scenario when the raid ends.
         /// </summary>
         /// <param name="e">The RaidEnded exception instance containing details about the raid end.</param>
-        private void HandleRaidEnded(RaidEnded e) {
+        private void HandleRaidEnded(RaidEnded e)
+        {
             Program.Log("Raid has ended!");
 
             //this._inGame = false;
@@ -223,14 +214,14 @@ namespace eft_dma_radar
         /// 
         public void WaitForGame()
         {
-			while (!this.GetGOM() || !this.GetLGW())
-			{
-				Thread.Sleep(1500);
-			}
-			Thread.Sleep(1000);
-			Program.Log("Match found!");
-			this._inGame = true;
-			Thread.Sleep(1500);
+            while (!this.GetGOM() || !this.GetLGW())
+            {
+                Thread.Sleep(1500);
+            }
+            Thread.Sleep(1000);
+            Program.Log("Match found!");
+            this._inGame = true;
+            Thread.Sleep(1500);
         }
 
         /// <summary>
@@ -353,12 +344,6 @@ namespace eft_dma_radar
                         else
                         {
                             RegisteredPlayers registeredPlayers = new RegisteredPlayers(Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.RegisteredPlayers));
-                            //[108] AllAlivePlayersList : System.Collections.Generic.List<Player>
-                            //var allAlivePlayersList = Memory.ReadPtr(this._localGameWorld + 0x108);
-                            //var allAlivePlayersCount = Memory.ReadValue<int>(allAlivePlayersList + Offsets.UnityList.Count);
-                            //Program.Log($"[Game] - All Alive Players: {allAlivePlayersCount}");
-                            //var count = Memory.ReadValue<int>(Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.RegisteredPlayers) + Offsets.UnityList.Count);
-                            //Program.Log($"[Game] - Registered Players: {count}");
                             if (registeredPlayers.PlayerCount > 0)
                             {
                                 var localPlayer = Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.MainPlayer);
@@ -394,14 +379,14 @@ namespace eft_dma_radar
         private void UpdateMisc()
         {
             this._config = Program.Config;
+
             if (this._mapName == string.Empty)
             {
                 this.GetMapName();
             }
-            
             else
             {
-                if (this._config.LootEnabled && (this._lootManager == null|| this._refreshLoot))
+                if (this._config.LootEnabled && (this._lootManager is null || this._refreshLoot))
                 {
                     this._loadingLoot = true;
                     try
@@ -416,7 +401,7 @@ namespace eft_dma_radar
                     this._loadingLoot = false;
                 }
 
-                if (this._config.MasterSwitchEnabled)
+                if (this._config.MasterSwitchEnabled && Memory.GameStatus == Game.GameStatus.InGame)
                 {
                     if (this._cameraManager is null)
                     {
@@ -442,18 +427,6 @@ namespace eft_dma_radar
                         }
                     }
 
-                    if (this._questManager is null)
-                    {
-                        try
-                        {
-                            this._questManager = new QuestManager(this._localGameWorld);
-                        }
-                        catch (Exception ex)
-                        {
-                            Program.Log($"ERROR loading QuestManager: {ex}");
-                        }
-                    }
-
                     if (this._toolbox is null)
                     {
                         try
@@ -470,7 +443,7 @@ namespace eft_dma_radar
                     {
                         try
                         {
-                            if (this._rgtPlayers != null)
+                            if (this._rgtPlayers is not null)
                             {
                                 this._chams = new Chams();
                             }
@@ -493,7 +466,8 @@ namespace eft_dma_radar
                         Program.Log($"ERROR loading ExfilController: {ex}");
                     }
                 }
-                else this._exfilManager.RefreshExfils();
+                else
+                    this._exfilManager.RefreshExfils();
 
                 if (this._grenadeManager is null)
                 {
@@ -506,7 +480,8 @@ namespace eft_dma_radar
                         Program.Log($"ERROR loading GrenadeManager: {ex}");
                     }
                 }
-                else this._grenadeManager.Refresh();
+                else
+                    this._grenadeManager.Refresh();
 
                 if (this._corpseManager is null)
                 {
@@ -519,7 +494,8 @@ namespace eft_dma_radar
                         Program.Log($"ERROR loading CorpseManager: {ex}");
                     }
                 }
-                else this._corpseManager.Refresh();
+                else 
+                    this._corpseManager.Refresh();
 
                 if (this._config.QuestHelperEnabled && this._questManager is null)
                 {
@@ -543,27 +519,6 @@ namespace eft_dma_radar
             if (this._inGame)
             {
                 this._refreshLoot = true;
-            }
-        }
-
-        /// <summary>
-        /// Sets the maximum loot/door interaction distance
-        /// </summary>
-        /// <param name="enabled"></param>
-        public static void SetInteractDistance(bool on)
-        {
-            var hardSettings = MonoSharp.GetStaticFieldDataOfClass("Assembly-CSharp", "EFTHardSettings");
-            var currentLootRaycastDistance = Memory.ReadValue<float>(hardSettings + Offsets.EFTHardSettings.LOOT_RAYCAST_DISTANCE);
-
-            if (on && currentLootRaycastDistance != 1.8f)
-            {
-                Memory.WriteValue<float>(hardSettings + Offsets.EFTHardSettings.LOOT_RAYCAST_DISTANCE, 1.8f);
-                Memory.WriteValue<float>(hardSettings + Offsets.EFTHardSettings.DOOR_RAYCAST_DISTANCE, 1.8f);
-            }
-            else if (!on && currentLootRaycastDistance == 1.8f)
-            {
-                Memory.WriteValue<float>(hardSettings + Offsets.EFTHardSettings.LOOT_RAYCAST_DISTANCE, 1.3f);
-                Memory.WriteValue<float>(hardSettings + Offsets.EFTHardSettings.DOOR_RAYCAST_DISTANCE, 1f);
             }
         }
         #endregion

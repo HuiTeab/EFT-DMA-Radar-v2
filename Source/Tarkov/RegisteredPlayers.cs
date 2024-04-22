@@ -1,4 +1,4 @@
-﻿using eft_dma_radar.Source.Misc;
+﻿using Offsets;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -14,6 +14,7 @@ namespace eft_dma_radar
         private readonly Stopwatch _regSw = new();
         private readonly Stopwatch _healthSw = new();
         private readonly Stopwatch _posSw = new();
+
         private readonly ConcurrentDictionary<string, Player> _players = new(StringComparer.OrdinalIgnoreCase);
 
         private int _localPlayerGroup = -100;
@@ -36,12 +37,13 @@ namespace eft_dma_radar
                     try
                     {
                         var count = Memory.ReadValue<int>(this._base + Offsets.UnityList.Count);
-                        //Program.Log($"[RegisteredPlayers] [PlayerCount] - Registered Players: {count}");
+
                         if (count < 1 || count > 1024)
                         {
                             this._players.Clear();
                             return -1;
                         }
+
                         return count;
                     }
                     catch (DMAShutdown)
@@ -50,7 +52,7 @@ namespace eft_dma_radar
                     }
                     catch (Exception ex) when (attempt < maxAttempts - 1)
                     {
-                        Program.Log($"ERROR - GetPlayerCountAsync attempt {attempt + 1} failed: {ex}");
+                        Program.Log($"ERROR - PlayerCount attempt {attempt + 1} failed: {ex}");
                         Thread.Sleep(1000);
                     }
                 }
@@ -64,25 +66,27 @@ namespace eft_dma_radar
         /// </summary>
         public RegisteredPlayers(ulong baseAddr)
         {
-            _base = baseAddr;
-            Players = new(_players); // update readonly ref
-            _listBase = Memory.ReadPtr(_base + 0x0010);
-            _regSw.Start();
-            _healthSw.Start();
-            _posSw.Start();
+            this._base = baseAddr;
+            this.Players = new(this._players);
+            this._listBase = Memory.ReadPtr(this._base + 0x0010);
+            this._regSw.Start();
+            this._healthSw.Start();
+            this._posSw.Start();
         }
 
-        #region UpdateList
-
+        #region Update List/Player Functions
         /// <summary>
         /// Updates the ConcurrentDictionary of 'Players'
         /// </summary>
         public void UpdateList()
         {
-            if (_regSw.ElapsedMilliseconds < 500) return; // Update every 500ms
+            if (this._regSw.ElapsedMilliseconds < 500)
+                return;
+
             try
             {
-                var count = PlayerCount;
+                var count = this.PlayerCount;
+
                 if (count < 1 || count > 1024)
                     throw new RaidEnded();
 
@@ -94,74 +98,132 @@ namespace eft_dma_radar
                 var round3 = scatterMap.AddRound();
                 var round4 = scatterMap.AddRound();
                 var round5 = scatterMap.AddRound();
-                var round6 = scatterMap.AddRound();
+
                 for (int i = 0; i < count; i++)
                 {
-                    var r1 = round1.AddEntry<ulong>(i, 0, _listBase + Offsets.UnityListBase.Start + (uint)(i * 0x8));
-                    var r2 = round2.AddEntry<ulong>(i, 1, r1, null, 0x0);
-                    var r3 = round3.AddEntry<ulong>(i, 2, r2, null, 0x0);
-                    var r4 = round4.AddEntry<ulong>(i, 3, r3, null, 0x48);
-                    var r5 = round5.AddEntry<string>(i, 4, r4, 64);
-                    var r6 = round2.AddEntry<ulong>(i, 5, r1, null, Offsets.Player.Profile);
-                    var r7 = round3.AddEntry<ulong>(i, 6, r6, null, Offsets.Profile.Id);
-                    var r8 = round4.AddEntry<ulong>(i, 7, r1, null, Offsets.ObservedPlayerView.ID);
-                    //var r9 = round3.AddEntry<ulong>(i, 8, r1, null, Offsets.Player.Corpse);
+                    var p1 = round1.AddEntry<ulong>(i, 0, _listBase + UnityListBase.Start + (uint)(i * 0x8));
+                    var p2 = round2.AddEntry<ulong>(i, 1, p1, null, 0x0);
+                    var p3 = round3.AddEntry<ulong>(i, 2, p2, null, 0x0);
+                    var p4 = round4.AddEntry<ulong>(i, 3, p3, null, 0x48);
+                    var p5 = round5.AddEntry<string>(i, 4, p4, 64);
 
+                    var p6 = round2.AddEntry<ulong>(i, 5, p1, null, Offsets.Player.Profile);
+                    var p7 = round3.AddEntry<ulong>(i, 6, p6, null, Profile.Id);
                 }
+
                 scatterMap.Execute();
 
+                var scatterMap2 = new ScatterReadMap(count);
+                var round6 = scatterMap2.AddRound();
+                var round7 = scatterMap2.AddRound();
+                var round8 = scatterMap2.AddRound();
 
                 for (int i = 0; i < count; i++)
                 {
-                    var playerProfilePtr = 0UL;
-                    var profileIDPtr = 0UL;
-                    scatterMap.Results[i][0].TryGetResult<ulong>(out var playerBase);
-                    if (playerBase == 0) continue;
-                    scatterMap.Results[i][4].TryGetResult<string>(out var className);
-                    if (className == "ObservedPlayerView")
+                    if (!scatterMap.Results[i][0].TryGetResult<ulong>(out var playerBase))
+                        continue;
+                    if (!scatterMap.Results[i][4].TryGetResult<string>(out var className))
+                        continue;
+                    
+                    ScatterReadEntry<ulong> p2;
+
+                    if (className == "ClientPlayer" || className == "LocalPlayer" || className == "HideoutPlayer")
                     {
-                        scatterMap.Results[i][7].TryGetResult<ulong>(out profileIDPtr);
+                        p2 = round7.AddEntry<ulong>(i, 1, playerBase, null, Offsets.Player.Profile);
                     }
-                    else {
-                        scatterMap.Results[i][5].TryGetResult<ulong>(out playerProfilePtr);
-                        scatterMap.Results[i][6].TryGetResult<ulong>(out profileIDPtr);
-                    }
-                    //not working online...
-                    //if (scatterMap.Results[i][8].TryGetResult<ulong>(out var corpsePtr))
-                    //{
-                    //    if (corpsePtr != 0)
-                    //    {
-                    //        var PlayerProfileID = Memory.ReadUnityString(Memory.ReadPtr(corpsePtr + 0x140));
-                    //        if (_players.TryGetValue(PlayerProfileID, out var players))
-                    //        {
-                    //            players.LastUpdate = true;
-                    //        }
-                    //    }
-                    //}
-                    if (profileIDPtr == 0)
+                    else
                     {
-                        Program.Log($"ERROR - ProfileIDPtr is NULL for Player '{className}'");
+                        var p1 = round6.AddEntry<ulong>(i, 0, playerBase, null, Offsets.ObservedPlayerView.ObservedPlayerController);
+                        p2 = round7.AddEntry<ulong>(i, 1, p1, null, Offsets.ObservedPlayerView.ObservedPlayerControllerProfile);
+                    }
+
+                    var playerID = round8.AddEntry<ulong>(i, 2, p2, null, Offsets.Profile.Id);
+                }
+
+                scatterMap2.Execute();
+
+                for (int i = 0; i < count; i++)
+                {
+                    if (!scatterMap.Results[i][0].TryGetResult<ulong>(out var playerBase))
+                        continue;
+                    if (!scatterMap.Results[i][4].TryGetResult<string>(out var className))
+                        continue;
+                    if (!scatterMap2.Results[i][1].TryGetResult<ulong>(out var profilePtr))
+                        continue;
+                    if (!scatterMap2.Results[i][2].TryGetResult<ulong>(out var profileIDPtr))
+                        continue;
+
+                    var profileID = Memory.ReadUnityString(profileIDPtr);
+
+                    if (string.IsNullOrEmpty(profileID) || profileID.Length != 24 && profileID.Length != 36 || className.Length < 0)
+                    {
+                        Program.Log($"Invalid ProfileID: {profileID} - {className}");
                         continue;
                     }
-                    var profileID = Memory.ReadUnityString(profileIDPtr);
+
                     registered.Add(profileID);
 
-                    if (!_players.TryGetValue(profileID, out var player))
+                    if (this._players.TryGetValue(profileID, out var player))
                     {
-                        player = new Player(playerBase, playerProfilePtr, null, className);
-                        _players[profileID] = player;
-                        Program.Log($"Player '{player.Name}' Registered successfully.");
+                        if (player.ErrorCount > 50)
+                        {
+                            Program.Log($"Existing player '{player.Name}' being reallocated due to excessive errors...");
+                            this.reallocatePlayer(profileID, playerBase, profileIDPtr);
+                        }
+                        else if (player.Base != playerBase)
+                        {
+                            Program.Log($"Existing player '{player.Name}' being reallocated due to new base address...");
+                            this.reallocatePlayer(profileID, playerBase, profileIDPtr);
+                        }
+                        else
+                        {
+                            player.IsActive = true;
+
+                            if (player.MarkedDeadCount < 2)
+                                player.IsAlive = true;
+                        }
                     }
-                    else if (player.Base != playerBase)
+                    else
                     {
-                        ReallocPlayer(profileID, playerBase, profileIDPtr);
+                        try
+                        {
+                            var newPlayer = new Player(playerBase, profilePtr, null, className);
+
+                            if (string.IsNullOrEmpty(newPlayer.Name))
+                                throw new Exception($"Error setting name for profile '{newPlayer.Profile}' ({newPlayer.Name})");
+
+                            if (newPlayer.Type == PlayerType.LocalPlayer)
+                                if (this._players.Values.Any(x => x.Type == PlayerType.LocalPlayer))
+                                    continue; // Don't allocate more than one LocalPlayer on accident
+
+                            if (this._players.TryAdd(profileID, newPlayer))
+                                Program.Log($"Player '{newPlayer.Name}' allocated.");
+                        }
+                        catch
+                        {
+                            Program.Log($"ERROR - Failed to read player data for '{profileID}'");
+                        }
                     }
                 }
 
-                var inactivePlayers = _players.Where(x => !registered.Contains(x.Key) && x.Value.IsActive);
-                foreach (var player in inactivePlayers)
+                foreach (var player in this._players)
                 {
-                    player.Value.LastUpdate = true;
+                    if (!registered.Contains(player.Key))
+                    {
+                        if (player.Value.IsActive)
+                        {
+                            player.Value.LastUpdate = true;
+                        }
+                        else
+                        {
+                            var dupeCount = registered.Count(x => x == player.Key);
+
+                            if (dupeCount > 1)
+                                Program.Log($"WARNING - Player '{player.Value.Name} {player.Key}' registered {count} times.");
+
+                            player.Value.IsActive = false;
+                        }
+                    }
                 }
             }
             catch (DMAShutdown)
@@ -174,41 +236,22 @@ namespace eft_dma_radar
             }
             catch (Exception ex)
             {
-                Program.Log($"ERROR - UpdateList failed: {ex}");
+                Program.Log($"CRITICAL ERROR - RegisteredPlayers Loop FAILED: {ex}");
             }
             finally
             {
-                _regSw.Restart();
-            }
-            void ReallocPlayer(string id, ulong newPlayerBase, ulong newPlayerProfile)
-            {
-                try
-                {
-                    var player = new Player(newPlayerBase, newPlayerProfile, _players[id].Position); // alloc
-                    _players[id] = player; // update ref to new object
-                    Program.Log($"Player '{player.Name}' Re-Allocated successfully.");
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception($"ERROR re-allocating player '{_players[id].Name}': ", ex);
-                }
+                this._regSw.Restart();
             }
         }
-
-        #endregion UpdateList
-
-        #region UpdateAllPlayers
 
         /// <summary>
         /// Updates all 'Player' values (Position,health,direction,etc.)
         /// </summary>
         public void UpdateAllPlayers()
         {
-
-            if (IsAtHideout)
-            {
+            if (this.IsAtHideout)
                 return;
-            }
+
             try
             {
                 var players = this._players
@@ -217,56 +260,50 @@ namespace eft_dma_radar
                     .ToArray();
 
                 if (players.Length == 0)
-                {
-                    //Console.WriteLine("No players found.");
                     return;
-                }
-                //Program.Log($"[RegisteredPlayers] [UpdateAllPlayers] - Registered Players: {players.Length}");
-                if (this._localPlayerGroup == -100) // Check if current player group is set
+
+                if (this._localPlayerGroup == -100)
                 {
-                    var localPlayer = this._players
-                        .FirstOrDefault(x => x.Value.Type is PlayerType.LocalPlayer)
-                        .Value;
+                    var localPlayer = this._players.FirstOrDefault(x => x.Value.Type is PlayerType.LocalPlayer).Value;
+
                     if (localPlayer is not null)
                     {
                         this._localPlayerGroup = localPlayer.GroupID;
                     }
                 }
-                bool checkHealth = this._healthSw.ElapsedMilliseconds > 500; // every 250 ms
-                bool checkPos = this._posSw.ElapsedMilliseconds > 10000 && players.Any(x => x.IsHumanActive); // every 10 sec & at least 1 active human player
+
+                bool checkHealth = this._healthSw.ElapsedMilliseconds > 500;
+                bool checkPos = this._posSw.ElapsedMilliseconds > 10000 && players.Any(x => x.IsHumanActive);
+
                 var scatterMap = new ScatterReadMap(players.Length);
                 var round1 = scatterMap.AddRound();
-                ScatterReadRound round2 = null;
-                if (checkPos) // allocate and add extra rounds to map
-                {
-                    round2 = scatterMap.AddRound();
-                    
-                }
+                var round2 = scatterMap.AddRound();
 
                 for (int i = 0; i < players.Length; i++)
                 {
                     var player = players[i];
-                    if (player.LastUpdate) // player may be dead/exfil'd
-                    {
-                        var corpse = round1.AddEntry<MemPointer>(i, 6, player.CorpsePtr);
-                    } 
-                    else {
-                        var rotation = round1.AddEntry<Vector2>(i, 0,
-                            (player.Type == PlayerType.LocalPlayer || player.Type == PlayerType.AIOfflineScav) ?
-                                player.MovementContext + Offsets.MovementContext.Rotation :
-                                player.MovementContext + Offsets.ObserverdPlayerMovementContext.Rotation);
 
+                    if (player.LastUpdate)
+                    {
+                        var corpse = round1.AddEntry<ulong>(i, 6, player.CorpsePtr);
+                    }
+                    else
+                    {
+                        var rotation = round1.AddEntry<Vector2>(i, 0, (player.isOfflinePlayer) ? player.MovementContext + Offsets.MovementContext.Rotation : player.MovementContext + Offsets.ObserverdPlayerMovementContext.Rotation);
                         var posAddr = player.TransformScatterReadParameters;
                         var indices = round1.AddEntry<List<int>>(i, 1, posAddr.Item1, posAddr.Item2 * 4);
                         var vertices = round1.AddEntry<List<Vector128<float>>>(i, 2, posAddr.Item3, posAddr.Item4 * 16);
 
-                        if (checkPos) {
-                            var hierarchy = round1.AddEntry<MemPointer>(i, 3, player.TransformInternal, null, Offsets.TransformInternal.Hierarchy);
-                            var indicesAddr = round2?.AddEntry<MemPointer>(i, 4, hierarchy, null, Offsets.TransformHierarchy.Indices);
-                            var verticesAddr = round2?.AddEntry<MemPointer>(i, 5, hierarchy, null, Offsets.TransformHierarchy.Vertices);
+                        if (checkPos)
+                        {
+                            var hierarchy = round1.AddEntry<ulong>(i, 3, player.TransformInternal, null, Offsets.TransformInternal.Hierarchy);
+                            var indicesAddr = round2.AddEntry<ulong>(i, 4, hierarchy, null, Offsets.TransformHierarchy.Indices);
+                            var verticesAddr = round2.AddEntry<ulong>(i, 5, hierarchy, null, Offsets.TransformHierarchy.Vertices);
                         }
-                        if (checkHealth && player.IsHostileActive) {
-                            var health = round1.AddEntry<int>(i, 7, player.HealthController + 0xD8);
+
+                        if (checkHealth && player.IsHostileActive)
+                        {
+                            var health = round1.AddEntry<int>(i, 7, player.HealthController, null, 0xD8);
                         }
                     }
                 }
@@ -277,34 +314,41 @@ namespace eft_dma_radar
                 {
                     var player = players[i];
 
-                    if (this._localPlayerGroup != -100 && player.GroupID != -1 && player.IsHumanHostile && player.GroupID == this._localPlayerGroup) { // Teammate check
-                            player.Type = PlayerType.Teammate;
-                    }
+                    if (player.Type is PlayerType.Default)
+                        continue;
+
+                    if (this._localPlayerGroup != -100 && player.GroupID != -1 && player.IsHumanHostile && player.GroupID == this._localPlayerGroup)
+                        player.Type = PlayerType.Teammate;
 
                     if (player.LastUpdate) // player may be dead/exfil'd
                     {
-                        if (scatterMap.Results[i][6].TryGetResult<MemPointer>(out var corpsePtr))
+                        scatterMap.Results[i][6].TryGetResult<ulong>(out var corpsePtr);
+
+                        if (corpsePtr > 0)
                         {
-                            if (corpsePtr != null)
-                            {
-                                Console.WriteLine($"{player.Name} => {corpsePtr}");
-                                player.IsAlive = false;
-                            }
+                            Program.Log($"{player.Name} died => {corpsePtr}");
+                            player.IsAlive = false;
                         }
+
                         player.IsActive = false;
                         player.LastUpdate = false;
                     }
                     else
                     {
                         bool posOK = true;
+
                         if (checkPos && player.IsHumanActive)
                         {
-                            scatterMap.Results[i][2].TryGetResult<MemPointer>(out var i4);
-                            scatterMap.Results[i][3].TryGetResult<MemPointer>(out var i5);
-                            if (i4 != 0x0 && i5 != 0x0)
+                            if (!scatterMap.Results[i][2].TryGetResult<ulong>(out var i4))
+                                continue;
+                            if (!scatterMap.Results[i][3].TryGetResult<ulong>(out var i5))
+                                continue;
+
+                            if (i4 != 0 && i5 != 0)
                             {
                                 var indicesAddr = i4;
                                 var verticesAddr = i5;
+
                                 if (player.IndicesAddr != indicesAddr || player.VerticesAddr != verticesAddr)
                                 {
                                     Program.Log($"WARNING - Transform has changed for Player '{player.Name}'");
@@ -314,70 +358,35 @@ namespace eft_dma_radar
                             }
                         }
 
-                        bool p1 = true;
-                        if (player.Type is PlayerType.Default)
+                        var rotation = scatterMap.Results[i][0].TryGetResult<Vector2>(out var rot);
+                        bool p2 = player.SetRotation(rot);
+
+                        var indices = scatterMap.Results[i][1].TryGetResult<List<int>>(out var ind);
+                        var vertices = scatterMap.Results[i][2].TryGetResult<List<Vector128<float>>>(out var vert);
+
+                        var posBufs = new object[2]
                         {
-                            continue;
-                        }
+                            ind,
+                            vert
+                        };
 
-                        if (player.IsLocalPlayer)
+                        bool p3 = true;
+
+                        if (posOK)
+                            p3 = player.SetPosition(posBufs);
+
+                        if (checkHealth && !player.IsLocalPlayer && player.Type != PlayerType.Teammate)
                         {
-                            var rotation = scatterMap.Results[i][0].TryGetResult<Vector2>(out var rot);
-                            bool p2 = player.SetRotation(rot);
-                            var indices = scatterMap.Results[i][1].TryGetResult<List<int>>(out var ind);
-                            var vertices = scatterMap.Results[i][2].TryGetResult<List<Vector128<float>>>(out var vert);
-                            var posBufs = new object[2]
-                            {
-                                ind,
-                                vert
-                            };
-                             
-                            bool p3 = true;
-                            if (posOK)
-                            {
-                                p3 = player.SetPosition(posBufs);
-                            }
-
-                            if (p1 && p2 && p3)
-                                player.ErrorCount = 0;
-                            else
-                                player.ErrorCount++;
-                        }
-                        else
-                        {
-                            var rotation = scatterMap.Results[i][0].TryGetResult<Vector2>(out var rot);
-                            bool p2 = player.SetRotation(rot);
-
-                            var indices = scatterMap.Results[i][1].TryGetResult<List<int>>(out var ind);
-                            var vertices = scatterMap.Results[i][2].TryGetResult<List<Vector128<float>>>(out var vert);
-
-                            if (checkHealth && player.Type != PlayerType.Teammate)
-                            {
-                                var health = scatterMap.Results[i][7].TryGetResult<int>(out var hp);
+                            if (scatterMap.Results[i][7].TryGetResult<int>(out var hp))
                                 player.SetHealth(hp);
-                            }
-
-                            var posBufs = new object[2]
-                            {
-                                ind,
-                                vert
-                            };
-
-                            bool p3 = true;
-                            if (posOK)
-                            {
-                                p3 = player.SetPosition(posBufs);
-                            }
-
-                            player.SetKDAsync();
-
-                            if (p1 && p2 && p3)
-                                player.ErrorCount = 0;
-                            else
-                                player.ErrorCount++;
                         }
+
+                        if (p2 && p3)
+                            player.ErrorCount = 0;
+                        else
+                            player.ErrorCount++;
                     }
-                }
+                };
 
                 if (checkHealth)
                     this._healthSw.Restart();
@@ -385,10 +394,23 @@ namespace eft_dma_radar
                 if (checkPos)
                     this._posSw.Restart();
             }
-            
+
             catch (Exception ex)
             {
                 Program.Log($"CRITICAL ERROR - UpdateAllPlayers Loop FAILED: {ex}");
+            }
+        }
+
+        private void reallocatePlayer(string id, ulong playerBase, ulong profileID)
+        {
+            try
+            {
+                this._players[id] = new Player(playerBase, profileID, this._players[id].Position);
+                Program.Log($"Player '{this._players[id].Name}' Re-Allocated successfully.");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"ERROR re-allocating player: ", ex);
             }
         }
         #endregion

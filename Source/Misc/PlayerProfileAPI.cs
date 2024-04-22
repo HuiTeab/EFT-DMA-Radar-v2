@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using System.Text.Json;
-using Microsoft.VisualBasic.Devices;
-using Offsets;
 
-namespace eft_dma_radar.Source.Misc
+namespace eft_dma_radar
 {
 
     public class PlayerProfileAPI
@@ -19,7 +12,7 @@ namespace eft_dma_radar.Source.Misc
             {
                 RequestProfile profile = await SearchProfile(name);
 
-                if (profile == null)
+                if (profile is null)
                     return null;
 
                 PlayerProfile playerProfile = await GetProfileData(profile.aid);

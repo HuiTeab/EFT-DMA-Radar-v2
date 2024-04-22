@@ -5,15 +5,14 @@
         public const uint Base = 0x10; // to UnityListBase
         public const uint Count = 0x18; // int32
     }
-
+    public struct UnityListBase
+    {
+        public const uint Start = 0x20; // start of list +(i * 0x8)
+    }
     public struct UnityDictionary
     {
         public const uint Base = 0x18; // to Base
         public const uint Count = 0x40; // int32
-    }
-    public struct UnityListBase
-    {
-        public const uint Start = 0x20; // start of list +(i * 0x8)
     }
     public struct UnityString
     {
@@ -86,6 +85,7 @@
         public const uint AccountID = 0x50; // to UnityString
         public const uint PlayerBody = 0x60; //[60] playerBody_0x60 : EFT.PlayerBody
         public const uint ObservedPlayerController = 0x80; // to PlayerController
+        public const uint ObservedPlayerControllerProfile = 0xE8; // profile
         public static readonly uint[] To_MovementContext = new uint[] { ObservedPlayerController, 0xC8, 0x10 }; // to MovementContext
         public static readonly uint[] To_TransformInternal = new uint[] { PlayerBody, 0x28, 0x28, 0x10, 0x20, 0x10 }; // to TransformInternal
         public static readonly uint[] To_InventoryController = new uint[] { ObservedPlayerController, 0x118 }; // to InventoryController
@@ -247,6 +247,7 @@
         public const uint GameVersion = 0x38; //[38] GameVersion : String
         public const uint Settings = 0x50; //[50] Settings : -.GClass
         public const uint PlayerSide = 0x70; //[70] Side : System.Int32
+        public const uint RegistrationDate = 0x74; //[74] RegistrationDate : Int32
         public const uint MemberCategory = 0x8C; //[8C] MemberCategory : System.Int32
     }
     public struct ExfiltrationPoint

@@ -1,13 +1,11 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Text;
-using eft_dma_radar.Source.Misc;
 
 namespace eft_dma_radar
 {
     #region ReadScatter
-
     public interface IScatterEntry
     {
         /// <summary>
@@ -127,7 +125,7 @@ namespace eft_dma_radar
         /// <summary>
         /// Do not use this constructor directly. Call .AddRound() from the ScatterReadMap.
         /// </summary>
-        public ScatterReadRound( Dictionary<int, Dictionary<int, IScatterEntry>> results)
+        public ScatterReadRound(Dictionary<int, Dictionary<int, IScatterEntry>> results)
         {
             Results = results;
         }

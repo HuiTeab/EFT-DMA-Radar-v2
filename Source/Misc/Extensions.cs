@@ -1,5 +1,5 @@
-﻿using Offsets;
-using SkiaSharp;
+﻿using SkiaSharp;
+using System.Numerics;
 
 namespace eft_dma_radar
 {
@@ -95,11 +95,11 @@ namespace eft_dma_radar
                 PlayerType.Teammate => SKColorFromPaintColor("Teammate"),
                 PlayerType.BEAR => SKColorFromPaintColor("BEAR"),
                 PlayerType.USEC => SKColorFromPaintColor("USEC"),
+                PlayerType.SpecialPlayer => SKColorFromPaintColor("Special"),
                 PlayerType.AIScav => SKColorFromPaintColor("AIScav"),
                 PlayerType.AIBoss => SKColorFromPaintColor("Boss"),
                 PlayerType.AIOfflineScav => SKColorFromPaintColor("AIScav"),
                 PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRogue or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
-                PlayerType.AISniperScav => SKColorFromPaintColor(""),
                 PlayerType.PScav => SKColorFromPaintColor("PScav"),
 
                 // default to white
@@ -107,6 +107,36 @@ namespace eft_dma_radar
             };
 
             return basePaint;
+        }
+
+        /// <summary>
+        /// Ghetto helper method to get the Color from a PaintColor object by Key & return a new Vector4 object based on it
+        /// </summary>
+        public static Vector4 Vector4FromPlayerPaintColor(Player player)
+        {
+            var key = player.Type switch
+            {
+                PlayerType.LocalPlayer => "LocalPlayer",
+                PlayerType.Teammate => "Teammate",
+                PlayerType.BEAR => "BEAR",
+                PlayerType.USEC => "USEC",
+                PlayerType.SpecialPlayer => "Special",
+                PlayerType.AIScav => "AIScav",
+                PlayerType.AIBoss => "Boss",
+                PlayerType.AIOfflineScav => "AIScav",
+                PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRogue or PlayerType.AIBossFollower => "AIRaider",
+                PlayerType.PScav => "PScav",
+
+                // default to ai scav
+                _ => "AIScav",
+            };
+
+            var col = Program.Config.PaintColors[key];
+            var r = (float)col.R / 255f;
+            var g = (float)col.G / 255f;
+            var b = (float)col.B / 255f;
+            var a = (float)col.A / 255f;
+            return new Vector4(r,g,b,a);
         }
 
         /// <summary>
@@ -208,11 +238,11 @@ namespace eft_dma_radar
                 PlayerType.Teammate => SKColorFromPaintColor("Teammate"),
                 PlayerType.BEAR => SKColorFromPaintColor("BEAR"),
                 PlayerType.USEC => SKColorFromPaintColor("USEC"),
+                PlayerType.SpecialPlayer => SKColorFromPaintColor("Special"),
                 PlayerType.AIScav => SKColorFromPaintColor("AIScav"),
                 PlayerType.AIBoss => SKColorFromPaintColor("Boss"),
                 PlayerType.AIOfflineScav => SKColorFromPaintColor("AIScav"),
                 PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRogue or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
-                PlayerType.AISniperScav => SKColorFromPaintColor(""),
                 PlayerType.PScav => SKColorFromPaintColor("PScav"),
 
                 // default to white
@@ -330,11 +360,11 @@ namespace eft_dma_radar
                 PlayerType.Teammate => SKColorFromPaintColor("Teammate"),
                 PlayerType.BEAR => SKColorFromPaintColor("BEAR"),
                 PlayerType.USEC => SKColorFromPaintColor("USEC"),
+                PlayerType.SpecialPlayer => SKColorFromPaintColor("Special"),
                 PlayerType.AIScav => SKColorFromPaintColor("AIScav"),
                 PlayerType.AIBoss => SKColorFromPaintColor("Boss"),
                 PlayerType.AIOfflineScav => SKColorFromPaintColor("AIScav"),
                 PlayerType.AIRaider or PlayerType.AIBossGuard or PlayerType.AIRogue or PlayerType.AIBossFollower => SKColorFromPaintColor("AIRaider"),
-                PlayerType.AISniperScav => SKColorFromPaintColor(""),
                 PlayerType.PScav => SKColorFromPaintColor("PScav"),
 
                 // default to white
