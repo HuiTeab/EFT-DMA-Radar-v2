@@ -96,6 +96,14 @@ namespace eft_dma_radar
         {
             get => _game?.Chams;
         }
+        public static CorpseManager CorpseManager
+        {
+            get => _game?.CorpseManager;
+        }
+        public static ReadOnlyCollection<PlayerCorpse> Corpses
+        {
+            get => _game?.Corpses;
+        }
 
         public static Player LocalPlayer
         {

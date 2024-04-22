@@ -9,8 +9,6 @@ using eft_dma_radar.Source.Tarkov;
 
 namespace eft_dma_radar
 {
-
-
     public class Chams
     {
         private CameraManager _cameraManager
@@ -153,9 +151,9 @@ namespace eft_dma_radar
                                                     {
                                                         try
                                                         {
-                                                            var gMaterial = Memory.ReadPtr(gMaterialDictionaryBase + (0x50 * (uint)l));
-                                                            SavePointer(gMaterialDictionaryBase + (0x50 * (uint)l), gMaterial);
-                                                            Memory.WriteValue(gMaterialDictionaryBase + (0x50 * (uint)l), nvgMaterial);
+                                                            //var gMaterial = Memory.ReadPtr(gMaterialDictionaryBase + (0x50 * (uint)l));
+                                                            //SavePointer(gMaterialDictionaryBase + (0x50 * (uint)l), gMaterial);
+                                                            //Memory.WriteValue(gMaterialDictionaryBase + (0x50 * (uint)l), nvgMaterial);
                                                             continue;
                                                         }
                                                         catch { 

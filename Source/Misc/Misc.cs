@@ -684,6 +684,13 @@ namespace eft_dma_radar
             canvas.DrawLine(new SKPoint(this.X - length, this.Y + length), new SKPoint(this.X + length, this.Y - length), paint);
             canvas.DrawLine(new SKPoint(this.X - length, this.Y - length), new SKPoint(this.X + length, this.Y + length), paint);
         }
+
+        public void DrawDeathMarker(SKCanvas canvas)
+        {
+            float length = 6 * UIScale;
+            canvas.DrawLine(new SKPoint(this.X - length, this.Y + length), new SKPoint(this.X + length, this.Y - length), SKPaints.PaintDeathMarker);
+            canvas.DrawLine(new SKPoint(this.X - length, this.Y - length), new SKPoint(this.X + length, this.Y + length), SKPaints.PaintDeathMarker);
+        }
         /// <summary>
         /// Draws a Quest Item on this location.
         /// </summary>

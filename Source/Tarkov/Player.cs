@@ -44,6 +44,7 @@ namespace eft_dma_radar
         /// Account UUID for Human Controlled Players.
         /// </summary>
         public string AccountID { get; }
+        public string ProfileID { get; }
         /// <summary>
         /// Player name.
         /// </summary>
@@ -403,6 +404,7 @@ namespace eft_dma_radar
                     this.InventorySlots = Memory.ReadPtr(equipment + Offsets.Equipment.Slots);
 
                     this.AccountID = Memory.ReadUnityString(Memory.ReadPtr(ObservedPlayerView + Offsets.ObservedPlayerView.AccountID));
+                    this.ProfileID = Memory.ReadUnityString(Memory.ReadPtr(ObservedPlayerView + Offsets.ObservedPlayerView.ID));
 
 
                     if (Helpers.NameTranslations.ContainsKey(this.Name)) {

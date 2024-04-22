@@ -23,6 +23,7 @@ namespace eft_dma_radar
         private QuestManager _questManager;
         private Toolbox _toolbox;
         private Chams _chams;
+        private CorpseManager _corpseManager;
         private ulong _localGameWorld;
         private readonly ulong _unityBase;
         private bool _inHideout = false;
@@ -104,11 +105,21 @@ namespace eft_dma_radar
         {
             get => _chams;
         }
+        public CorpseManager CorpseManager
+        {
+            get => _corpseManager;
+        }
+        public ReadOnlyCollection<PlayerCorpse> Corpses
+        {
+            get => _corpseManager.Corpses;
+        }
         #endregion
 
         /// <summary>
         /// Game Constructor.
         /// </summary>
+        private static readonly object logLock = new();
+        private readonly StreamWriter debuglog;
         public Game(ulong unityBase)
         {
             _unityBase = unityBase;
@@ -139,6 +150,7 @@ namespace eft_dma_radar
             {
                 HandleUnexpectedException(ex);
             }
+            
         }
         #endregion
 
@@ -341,6 +353,8 @@ namespace eft_dma_radar
                         else
                         {
                             RegisteredPlayers registeredPlayers = new RegisteredPlayers(Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.RegisteredPlayers));
+                            //var count = Memory.ReadValue<int>(Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.RegisteredPlayers) + Offsets.UnityList.Count);
+                            //Program.Log($"[Game] - Registered Players: {count}");
                             if (registeredPlayers.PlayerCount > 0)
                             {
                                 var localPlayer = Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.MainPlayer);
@@ -376,7 +390,6 @@ namespace eft_dma_radar
         private void UpdateMisc()
         {
             this._config = Program.Config;
-
             if (this._mapName == string.Empty)
             {
                 this.GetMapName();
@@ -489,6 +502,19 @@ namespace eft_dma_radar
                     }
                 }
                 else this._grenadeManager.Refresh();
+
+                if (this._corpseManager is null)
+                {
+                    try
+                    {
+                        this._corpseManager = new CorpseManager(this._localGameWorld);
+                    }
+                    catch (Exception ex)
+                    {
+                        Program.Log($"ERROR loading CorpseManager: {ex}");
+                    }
+                }
+                else this._corpseManager.Refresh();
 
                 if (this._config.QuestHelperEnabled && this._questManager is null)
                 {

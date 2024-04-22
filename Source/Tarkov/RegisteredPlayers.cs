@@ -36,6 +36,7 @@ namespace eft_dma_radar
                     try
                     {
                         var count = Memory.ReadValue<int>(this._base + Offsets.UnityList.Count);
+                        //Program.Log($"[RegisteredPlayers] [PlayerCount] - Registered Players: {count}");
                         if (count < 1 || count > 1024)
                         {
                             this._players.Clear();
@@ -63,183 +64,88 @@ namespace eft_dma_radar
         /// </summary>
         public RegisteredPlayers(ulong baseAddr)
         {
-            this._base = baseAddr;
-            this.Players = new(this._players); // update readonly ref
-            this._listBase = Memory.ReadPtr(this._base + 0x0010);
-            this._regSw.Start();
-            this._healthSw.Start();
-            this._posSw.Start();
-        }
-        
-        /// <summary>
-        /// Get player ID from player base
-        /// </summary>
-        private (string, string) GetPlayerIdFromBase(ulong playerBase)
-        {
-            var classNamePtr = Memory.ReadPtrChain(playerBase, Offsets.UnityClass.Name);
-            var className = Memory.ReadString(classNamePtr, 64).Replace("\0", string.Empty);
-            string id = null;
-
-            if (className == "ClientPlayer" || className == "LocalPlayer" || className == "HideoutPlayer")
-            {
-                ulong localPlayerProfile = Memory.ReadPtr(playerBase + Offsets.Player.Profile);
-                ulong localPlayerID = Memory.ReadPtr(localPlayerProfile + Offsets.Profile.Id);
-                id = Memory.ReadUnityString(localPlayerID);
-            }
-            else if (className == "ObservedPlayerView")
-            {
-                ulong profileIDPtr = Memory.ReadPtr(playerBase + Offsets.ObservedPlayerView.ID);
-                id = Memory.ReadUnityString(profileIDPtr);
-            }
-
-            return (id, className);
+            _base = baseAddr;
+            Players = new(_players); // update readonly ref
+            _listBase = Memory.ReadPtr(_base + 0x0010);
+            _regSw.Start();
+            _healthSw.Start();
+            _posSw.Start();
         }
 
-        private ulong GetPlayerProfile(string className, ulong playerBase)
-        {
-            switch (className)
-            {
-                case "ClientPlayer":
-                case "LocalPlayer":
-                case "HideoutPlayer":
-                    return Memory.ReadPtr(playerBase + Offsets.Player.Profile);
-                case "ObservedPlayerView":
-                    return Memory.ReadPtr(playerBase);
-                default:
-                    return 0;
-            }
-        }
+        #region UpdateList
 
-        private void ProcessPlayer(int index, ScatterReadMap scatterMap, HashSet<string> registered)
-        {
-           try
-            {
-                if (!scatterMap.Results[index][0].TryGetResult<MemPointer>(out var playerBase))
-                    return;
-
-                var playerProfile = 0ul;
-                (string playerId, string className) = this.GetPlayerIdFromBase(playerBase);
-
-                if (playerId.Length != 24 && playerId.Length != 36 || className.Length < 0)
-                    throw new ArgumentOutOfRangeException("id"); // Ensure valid ID length
-
-                //Existing player
-                if (this._players.TryGetValue(playerId, out var player))
-                {
-                    playerProfile = this.GetPlayerProfile(className, playerBase);
-                    if (player.ErrorCount > 100) // Erroring out a lot? Re-Alloc
-                    {
-                        Program.Log($"WARNING - Existing player '{player.Name}' being re-allocated due to excessive errors...");
-                        this.ReallocPlayer(playerId, playerBase, playerProfile);
-                    }
-                    else if (player.Base != playerBase) // Base address changed? Re-Alloc
-                    {
-                        Program.Log($"WARNING - Existing player '{player.Name}' being re-allocated due to new base address...");
-                        this.ReallocPlayer(playerId, playerBase, playerProfile);
-                    }
-                    else // Mark active & alive
-                    {
-                        player.IsActive = true;
-                        player.IsAlive = true;
-                    }
-                }
-                else // New player
-                {
-                    playerProfile = this.GetPlayerProfile(className, playerBase);
-                    var newplayer = new Player(playerBase, playerProfile, null, className); // allocate new player object
-                    if (newplayer.Type is PlayerType.LocalPlayer && this._players.Any(x => x.Value.Type is PlayerType.LocalPlayer))
-                    {
-                        // Don't allocate more than one LocalPlayer on accident
-                    }
-                    else
-                    {
-                        if (this._players.TryAdd(playerId, newplayer))
-                            Program.Log($"Player '{newplayer.Name}' allocated.");
-                    }
-                }
-
-                registered.Add(playerId); // Mark player as registered
-
-            }
-            catch (Exception ex)
-            {
-                Program.Log($"ERROR processing player at index {index}: {ex}");
-            }
-        }
-
-        private void ReallocPlayer(string id, ulong newPlayerBase, ulong newPlayerProfile)
-        {
-            try
-            {
-                var player = new Player(newPlayerBase, newPlayerProfile, this._players[id].Position); // alloc
-                this._players[id] = player; // update ref to new object
-                Program.Log($"Player '{player.Name}' Re-Allocated successfully.");
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"ERROR re-allocating player '{this._players[id].Name}': ", ex);
-            }
-        }
-
-        private void MarkInactivePlayers(HashSet<string> registered)
-        {
-            foreach (var player in this._players)
-            {
-                if (!registered.Contains(player.Key) && player.Value.IsActive)
-                {
-                    player.Value.LastUpdate = true;
-                }
-                else if (!registered.Contains(player.Key))
-                {
-                    var count = registered.Count(x => x == player.Key);
-                    if (count > 1)
-                    {
-                        Program.Log($"WARNING - Player '{player.Value.Name} {player.Key}' registered {count} times.");
-                    }
-                    player.Value.IsActive = false;
-                }
-
-            }
-        }
-
-        private ScatterReadMap InitializeScatterRead(int count)
-        {
-            var scatterMap = new ScatterReadMap(count);
-            var round1 = scatterMap.AddRound();
-            for (int i = 0; i < count; i++) {
-                round1.AddEntry<MemPointer>(i, 0, this._listBase + Offsets.UnityListBase.Start + (uint)(i * 0x8));
-            }
-            scatterMap.Execute();
-
-            return scatterMap;
-        }
-
-        #region Update List/Player Functions
         /// <summary>
         /// Updates the ConcurrentDictionary of 'Players'
         /// </summary>
-        /// 
         public void UpdateList()
         {
-            if (this._regSw.ElapsedMilliseconds < 500)
-                return;
+            if (_regSw.ElapsedMilliseconds < 500) return; // Update every 500ms
             try
             {
-                int count = this.PlayerCount;
+                var count = PlayerCount;
                 if (count < 1 || count > 1024)
-                {
                     throw new RaidEnded();
-                }
 
                 var registered = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                var scatterMap = this.InitializeScatterRead(count);
+
+                var scatterMap = new ScatterReadMap(count);
+                var round1 = scatterMap.AddRound();
+                var round2 = scatterMap.AddRound();
+                var round3 = scatterMap.AddRound();
+                var round4 = scatterMap.AddRound();
+                var round5 = scatterMap.AddRound();
+                var round6 = scatterMap.AddRound();
+                for (int i = 0; i < count; i++)
+                {
+                    var r1 = round1.AddEntry<ulong>(i, 0, _listBase + Offsets.UnityListBase.Start + (uint)(i * 0x8));
+                    var r2 = round2.AddEntry<ulong>(i, 1, r1, null, 0x0);
+                    var r3 = round3.AddEntry<ulong>(i, 2, r2, null, 0x0);
+                    var r4 = round4.AddEntry<ulong>(i, 3, r3, null, 0x48);
+                    var r5 = round5.AddEntry<string>(i, 4, r4, 64);
+                    var r6 = round2.AddEntry<ulong>(i, 5, r1, null, Offsets.Player.Profile);
+                    var r7 = round3.AddEntry<ulong>(i, 6, r6, null, Offsets.Profile.Id);
+                    var r8 = round4.AddEntry<ulong>(i, 7, r1, null, Offsets.ObservedPlayerView.ID);
+
+                }
+                scatterMap.Execute();
+
 
                 for (int i = 0; i < count; i++)
                 {
-                    this.ProcessPlayer(i, scatterMap, registered);
+                    var playerProfilePtr = 0UL;
+                    var profileIDPtr = 0UL;
+                    scatterMap.Results[i][0].TryGetResult<ulong>(out var playerBase);
+                    if (playerBase == 0) continue;
+                    scatterMap.Results[i][4].TryGetResult<string>(out var className);
+                    if (className == "ObservedPlayerView")
+                    {
+                        scatterMap.Results[i][7].TryGetResult<ulong>(out profileIDPtr);
+                    }
+                    else {
+                        scatterMap.Results[i][5].TryGetResult<ulong>(out playerProfilePtr);
+                        scatterMap.Results[i][6].TryGetResult<ulong>(out profileIDPtr);
+                    }
+                    if (profileIDPtr == 0)
+                    {
+                        Program.Log($"ERROR - ProfileIDPtr is NULL for Player '{className}'");
+                    }
+                    var profileID = Memory.ReadUnityString(profileIDPtr);
+                    registered.Add(profileID);
+
+                    if (!_players.TryGetValue(profileID, out var player))
+                    {
+                        player = new Player(playerBase, playerProfilePtr, null, className);
+                        _players[profileID] = player;
+                        Program.Log($"Player '{player.Name}' Registered successfully.");
+                    }
+                    else if (player.Base != playerBase)
+                    {
+                        ReallocPlayer(profileID, playerBase, profileIDPtr);
+                    }
+
                 }
 
-                this.MarkInactivePlayers(registered);
+
             }
             catch (DMAShutdown)
             {
@@ -251,13 +157,30 @@ namespace eft_dma_radar
             }
             catch (Exception ex)
             {
-                Program.Log($"CRITICAL ERROR - RegisteredPlayers Loop FAILED: {ex}");
+                Program.Log($"ERROR - UpdateList failed: {ex}");
             }
             finally
             {
-                this._regSw.Restart();
+                _regSw.Restart();
+            }
+            void ReallocPlayer(string id, ulong newPlayerBase, ulong newPlayerProfile)
+            {
+                try
+                {
+                    var player = new Player(newPlayerBase, newPlayerProfile, _players[id].Position); // alloc
+                    _players[id] = player; // update ref to new object
+                    Program.Log($"Player '{player.Name}' Re-Allocated successfully.");
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"ERROR re-allocating player '{_players[id].Name}': ", ex);
+                }
             }
         }
+
+        #endregion UpdateList
+
+        #region UpdateAllPlayers
 
         /// <summary>
         /// Updates all 'Player' values (Position,health,direction,etc.)
@@ -281,7 +204,7 @@ namespace eft_dma_radar
                     //Console.WriteLine("No players found.");
                     return;
                 }
-
+                //Program.Log($"[RegisteredPlayers] [UpdateAllPlayers] - Registered Players: {players.Length}");
                 if (this._localPlayerGroup == -100) // Check if current player group is set
                 {
                     var localPlayer = this._players

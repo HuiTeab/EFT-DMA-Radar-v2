@@ -19,6 +19,7 @@ namespace eft_dma_radar.Source.Tarkov
         private bool magDrillsToggled = false;
         private bool extendedReachToggled = false;
         private bool noSwayToggled = false;
+        private bool chamsToggled = false;
 
         private Config _config
         {
@@ -133,7 +134,8 @@ namespace eft_dma_radar.Source.Tarkov
             if (this._config.ExtendedReachEnabled != this.extendedReachToggled)
             {
                 this.extendedReachToggled = this._config.ExtendedReachEnabled;
-                Game.SetInteractDistance(this.extendedReachToggled);
+                this._playerManager.SetMaxAllSkills(this.extendedReachToggled);
+                //Game.SetInteractDistance(this.extendedReachToggled);
             }
 
             // Infinite Stamina
@@ -149,13 +151,17 @@ namespace eft_dma_radar.Source.Tarkov
             }
 
             // Chams
-            if (this._config.ChamsEnabled)
+            if (this._config.ChamsEnabled != this.chamsToggled)
             {
-                this._chams.ChamsEnable();
-            }
-            else if (!this._config.ChamsEnabled)
-            {
-                this._chams.ChamsDisable();
+                this.chamsToggled = this._config.ChamsEnabled;
+                if (this._config.ChamsEnabled)
+                {
+                    this._chams.ChamsEnable();
+                }
+                else
+                {
+                    this._chams.ChamsDisable();
+                }
             }
            
 
