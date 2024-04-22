@@ -111,7 +111,7 @@ namespace eft_dma_radar
         }
         public ReadOnlyCollection<PlayerCorpse> Corpses
         {
-            get => _corpseManager.Corpses;
+            get => _corpseManager?.Corpses;
         }
         #endregion
 
@@ -353,6 +353,10 @@ namespace eft_dma_radar
                         else
                         {
                             RegisteredPlayers registeredPlayers = new RegisteredPlayers(Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.RegisteredPlayers));
+                            //[108] AllAlivePlayersList : System.Collections.Generic.List<Player>
+                            //var allAlivePlayersList = Memory.ReadPtr(this._localGameWorld + 0x108);
+                            //var allAlivePlayersCount = Memory.ReadValue<int>(allAlivePlayersList + Offsets.UnityList.Count);
+                            //Program.Log($"[Game] - All Alive Players: {allAlivePlayersCount}");
                             //var count = Memory.ReadValue<int>(Memory.ReadPtr(this._localGameWorld + Offsets.LocalGameWorld.RegisteredPlayers) + Offsets.UnityList.Count);
                             //Program.Log($"[Game] - Registered Players: {count}");
                             if (registeredPlayers.PlayerCount > 0)
@@ -394,6 +398,7 @@ namespace eft_dma_radar
             {
                 this.GetMapName();
             }
+            
             else
             {
                 if (this._config.LootEnabled && (this._lootManager == null|| this._refreshLoot))
