@@ -105,7 +105,7 @@ namespace eft_dma_radar
                     var r6 = round2.AddEntry<ulong>(i, 5, r1, null, Offsets.Player.Profile);
                     var r7 = round3.AddEntry<ulong>(i, 6, r6, null, Offsets.Profile.Id);
                     var r8 = round4.AddEntry<ulong>(i, 7, r1, null, Offsets.ObservedPlayerView.ID);
-                    var r9 = round3.AddEntry<ulong>(i, 8, r1, null, Offsets.Player.Corpse);
+                    //var r9 = round3.AddEntry<ulong>(i, 8, r1, null, Offsets.Player.Corpse);
 
                 }
                 scatterMap.Execute();
@@ -126,17 +126,18 @@ namespace eft_dma_radar
                         scatterMap.Results[i][5].TryGetResult<ulong>(out playerProfilePtr);
                         scatterMap.Results[i][6].TryGetResult<ulong>(out profileIDPtr);
                     }
-                    if (scatterMap.Results[i][8].TryGetResult<ulong>(out var corpsePtr))
-                    {
-                        if (corpsePtr != 0)
-                        {
-                            var PlayerProfileID = Memory.ReadUnityString(Memory.ReadPtr(corpsePtr + 0x140));
-                            if (_players.TryGetValue(PlayerProfileID, out var players))
-                            {
-                                players.LastUpdate = true;
-                            }
-                        }
-                    }
+                    //not working online...
+                    //if (scatterMap.Results[i][8].TryGetResult<ulong>(out var corpsePtr))
+                    //{
+                    //    if (corpsePtr != 0)
+                    //    {
+                    //        var PlayerProfileID = Memory.ReadUnityString(Memory.ReadPtr(corpsePtr + 0x140));
+                    //        if (_players.TryGetValue(PlayerProfileID, out var players))
+                    //        {
+                    //            players.LastUpdate = true;
+                    //        }
+                    //    }
+                    //}
                     if (profileIDPtr == 0)
                     {
                         Program.Log($"ERROR - ProfileIDPtr is NULL for Player '{className}'");
