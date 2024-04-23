@@ -1,5 +1,7 @@
 # EFT-DMA-Radar-v2
 
+## Project discontinued! Use https://github.com/xx0m/EFT-DMA-Radar-v2
+
 ## Description
 EFT DMA Radar is a radar tool designed for Escape from Tarkov that provides real-time tracking of players and items on a 2D map.
 ![image](https://github.com/HuiTeab/EFT-DMA-Radar-v2/assets/63579245/fefdd5de-0d7a-453e-9f0c-1ab650557723)
